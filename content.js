@@ -1,5 +1,15 @@
+var meta_list = document.getElementById("watch7-content").getElementsByTagName("meta");
+var video_id = "";
+
+for (var i = 0; i < meta_list.length; i++) { 
+    if (meta_list[i].getAttribute("itemprop") == "videoId") { 
+        video_id = meta_list[i].getAttribute("content");
+        break; 
+    }
+} 
+
 var node = document.createElement("embed");
-node.src = "https://www.youtube.com/v/uLPGC3gFFso?autoplay=1";
+node.src = "https://www.youtube.com/v/" + video_id + "?autoplay=1&t=2000";
 node.width = "320";
 node.height = "240";
 
@@ -14,9 +24,8 @@ $(window).on('scroll', function(){
         video_appended = true; 
     }
 
-    // When user scrolls up
-    // The condition below ensures that there exists a video node 
-    // when we call removeChild
+    // When user scrolls up, the condition below 
+    // ensures that there exists a video node when we call removeChild
     if (($(window).scrollTop() < threshold) && video_appended) {
         document.getElementsByClassName("yt-masthead-logo-container").
         item(0).removeChild(node);
