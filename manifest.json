@@ -7,15 +7,20 @@
   "icons": {
     "64": "Youtube.png"
   },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
   "content_scripts":
   [
     {
       "matches": ["https://www.youtube.com/watch?v=*"],
-      "js": ["jquery-3.1.1.min.js", "content.js"],
+      "js": ["content.js"],
       "css": ["videonail.css"]
     }
   ],
   "permissions": [
-    "https://ajax.googleapis.com/"
+    "tabs",
+    "https://www.youtube.com/"
   ]
 }
