@@ -5,7 +5,6 @@ if (!document.getElementById("iframe-setup")) {
     tag.src = "https://www.youtube.com/iframe_api";
     var firstScriptTag = document.getElementsByTagName("script")[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    console.log("Youtube API setup");
 }
 
 
@@ -21,75 +20,75 @@ var iframe_script = document.createElement('script');
 iframe_script.type = "text/javascript";
 iframe_script.innerHTML = 
 `
-// Append placeholder for player
-var video_div = document.createElement('div');
-video_div.id = "videoNail"
-document.getElementsByClassName("yt-masthead-logo-container").item(0).appendChild(video_div);
+// Check if "videoNail" div exists, if it doesn't exist, create it
+// as a place holder for iframe output
+if (!document.getElementById("videoNail")) {
+    var videoPlaceholder = document.createElement('div');
+    videoPlaceholder.id = "videoNail"
+    document.getElementsByClassName("yt-masthead-logo-container").item(0).appendChild(videoPlaceholder);
+}
+
+
+// Check if iframe_api has already loaded
+if (typeof apiLoaded == undefined) {
+    var apiLoaded = false;
+}
+
 
 var scrollDistance = 450;
 var playerIsVisible = false;
-var video_id = "";
-var curr_time = 0;
-
-video_id = window.location.search.substring(3);
-console.log(video_id);
-
-if (typeof loaded == undefined) {
-    var loaded = false;
-}
-
-// Set up player definition
-// Hooking up to placeholder above
-var main_player = document.getElementById('movie_player');
+var videoId = window.location.search.substring(3);
+var currTime = 0;
+var mainPlayer = document.getElementById('movie_player');
 var player; 
+
+
 function onYouTubeIframeAPIReady() {  
     player = new YT.Player('videoNail', { 
         height: '0', 
         width: '0', 
-        videoId: video_id
+        videoId: videoId
     }); 
-    loaded = true;
-    console.log("My player with this id: " + video_id);
+    apiLoaded = true;    
 }
 
-if (loaded) {
+
+if (apiLoaded) {
     onYouTubeIframeAPIReady();
 }
 
+
 window.onscroll = function(e) {
-    if (!loaded) {
-        return;
-    }
     // When user scrolls down
     if(window.pageYOffset > scrollDistance && !playerIsVisible){
         // TODO: don't start videoNail when video already ended
-        curr_time = main_player.getCurrentTime();
+        currTime = mainPlayer.getCurrentTime();
         player.setSize(320, 180);
-        //player.seekTo(curr_time, true);
-        player.setVolume(main_player.getVolume());
-        if (main_player.getPlayerState() == YT.PlayerState.PAUSED) {
+        player.seekTo(currTime, true);
+        player.setVolume(mainPlayer.getVolume());
+        if (mainPlayer.getPlayerState() == YT.PlayerState.PAUSED) {
             player.pauseVideo();
         } else {
             player.playVideo();
         }
-        main_player.mute();
+        mainPlayer.mute();
         player.unMute();
         playerIsVisible = true;
     }
 
     // When user scrolls up
     if (window.pageYOffset < scrollDistance && playerIsVisible) {
-        curr_time = player.getCurrentTime();
+        currTime = player.getCurrentTime();
         player.setSize(0, 0);
-        //main_player.seekTo(curr_time, true);
-        main_player.setVolume(player.getVolume());
+        mainPlayer.seekTo(currTime, true);
+        mainPlayer.setVolume(player.getVolume());
         if (player.getPlayerState() == YT.PlayerState.PAUSED) {
-            main_player.pauseVideo();
+            mainPlayer.pauseVideo();
         } else {
-            main_player.playVideo();
+            mainPlayer.playVideo();
         }
         player.mute();
-        main_player.unMute();
+        mainPlayer.unMute();
         playerIsVisible = false;
     }
 };`
