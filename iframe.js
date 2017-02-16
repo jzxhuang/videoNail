@@ -43,7 +43,7 @@ window.onscroll = function(e) {
     if(window.pageYOffset > scrollDistance && !playerIsVisible){
         // TODO: don't start videoNail when video already ended
         if (mainPlayer.getPlayerState() == YT.PlayerState.ENDED) {
-            break;
+            return;
         }
         currTime = mainPlayer.getCurrentTime();
         player.setSize(320, 180);
