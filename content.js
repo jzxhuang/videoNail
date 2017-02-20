@@ -17,7 +17,16 @@ if (!document.getElementById("script-container")) {
 }
 
 
+// Remove "mini-iframe-player" if exists
+if (document.getElementById("mini-iframe-player")) {
+    var miniPlayer = document.getElementById("mini-iframe-player");
+    miniPlayer.parentNode.removeChild(miniPlayer);
+}
+
+
 var iframe_script = document.createElement('script');
 iframe_script.type = "text/javascript";
+iframe_script.id = "mini-iframe-player";
 iframe_script.src = chrome.extension.getURL("iframe.js"); 
 document.getElementById("script-container").appendChild(iframe_script);
+
