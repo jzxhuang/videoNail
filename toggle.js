@@ -1,10 +1,10 @@
 var players;
 var player;
 players = document.getElementsByTagName("iframe");
-var scrollDistance = 450;
+var scrollDistance = 430;
 
 for (i = 0; i < players.length; i++) {
-    if (players[i].id == "videoNail") {
+    if (players[i].id == "video-nail") {
         player = players[i];
     }
 }

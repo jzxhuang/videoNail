@@ -3,7 +3,7 @@
 
   "name": "videoNail",
   "description": "This extension keeps YouTube video on screen when scrolling down to the comment section",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "icons": {
     "64": "Youtube.png"
   },
@@ -17,13 +17,15 @@
   "content_scripts":
   [
     {
-      "matches": ["https://www.youtube.com/*"],
+      "matches": ["https://www.youtube.com/watch?v=*"],
       "js": ["content.js"],
       "css": ["videonail.css"]
     }
   ],
   "permissions": [
-    "activeTab"
+    // need this in order to use chrome.tabs.onUpdated
+    "tabs",
+    "https://www.youtube.com/"
   ],
-  "web_accessible_resources": ["iframe.js", "toggle.js"]
+  "web_accessible_resources": ["iframe.js", "toggle.js", "removeVideoNail.js"]
 }
