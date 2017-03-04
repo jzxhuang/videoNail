@@ -2,9 +2,18 @@ var loaded = false;
 var scrollDistance = 430;
 var playerIsVisible = false;
 var currTime = 0;
-var videoId = window.location.search.substring(3, 14);
+var videoId;
+if (window.location.search.search("v=") == -1) {
+    videoId = null;
+} else {
+    var firstIndex = window.location.search.search("v=") + 2;
+    var lastIndex = firstIndex + 11;
+    videoId = window.location.search.substring(firstIndex, lastIndex);
+}
+console.log(videoId);
 var mainPlayer;
 var player;
+var firstTime = true;
 
 
 // This is a mandatory function. Don't refactor.
@@ -19,45 +28,53 @@ function onYouTubeIframeAPIReady() {
     loaded = true;
 }
 
-
-window.onscroll = function(e) {
-    if (!loaded) {
-        onYouTubeIframeAPIReady();
-        return;
-    }
-    // When user scrolls down, shows player
-    if(window.pageYOffset > scrollDistance && !playerIsVisible) {
-        // If mainPlayer has already stopped, don't show player
-        if (mainPlayer.getPlayerState() == YT.PlayerState.ENDED) {
+if (!videoId) {
+    window.onscroll = (e) => { console.log("videoId is null"); }
+} else {
+    window.onscroll = (e) => {
+        if (!loaded) {
+            onYouTubeIframeAPIReady();
             return;
         }
-        currTime = mainPlayer.getCurrentTime();
-        player.setSize(320, 180);
-        player.seekTo(currTime, true);
-        player.setVolume(mainPlayer.getVolume());
-        if (mainPlayer.getPlayerState() == YT.PlayerState.PAUSED) {
-            player.pauseVideo();
-        } else {
-            player.playVideo();
+        // When user scrolls down, shows player
+        if(window.pageYOffset > scrollDistance && !playerIsVisible) {
+            currTime = mainPlayer.getCurrentTime();
+            player.setSize(320, 180);
+            
+            if (mainPlayer.getPlayerState() == YT.PlayerState.ENDED) {
+                return;
+            } else if (mainPlayer.getPlayerState() == YT.PlayerState.PAUSED) {
+                player.pauseVideo();
+            } else {
+                player.seekTo(currTime, true);
+                player.playVideo();
+            }
+            
+            mainPlayer.mute();
+            player.unMute();
+            player.setVolume(mainPlayer.getVolume());
+            playerIsVisible = true;
         }
-        mainPlayer.mute();
-        player.unMute();
-        playerIsVisible = true;
-    }
 
-    // When user scrolls up, hides player
-    if (window.pageYOffset < scrollDistance && playerIsVisible) {
-        currTime = player.getCurrentTime();
-        player.setSize(0, 0);
-        mainPlayer.seekTo(currTime, true);
-        mainPlayer.setVolume(player.getVolume());
-        if (player.getPlayerState() == YT.PlayerState.PAUSED) {
-            mainPlayer.pauseVideo();
-        } else {
-            mainPlayer.playVideo();
+        // When user scrolls up, hides player
+        if (window.pageYOffset < scrollDistance && playerIsVisible) {
+            currTime = player.getCurrentTime();
+            player.setSize(0, 0);
+            
+            if (player.getPlayerState() == YT.PlayerState.ENDED) {
+                return;
+            } else if (player.getPlayerState() == YT.PlayerState.PAUSED) {
+                mainPlayer.pauseVideo();                
+            } else {
+                mainPlayer.seekTo(currTime, true);
+                mainPlayer.playVideo();
+            }
+
+            player.mute();
+            mainPlayer.unMute();
+            mainPlayer.setVolume(player.getVolume());
+            playerIsVisible = false;
         }
-        player.mute();
-        mainPlayer.unMute();
-        playerIsVisible = false;
-    }
-};
+    };
+}
+

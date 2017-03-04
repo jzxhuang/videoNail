@@ -55,6 +55,6 @@ if (document.getElementById("iframe-script")) {
 var iframeScript = document.createElement('script');
 iframeScript.type = "text/javascript";
 iframeScript.id = "iframe-script";
-iframeScript.src = chrome.extension.getURL("iframe.js"); 
+iframeScript.src = chrome.extension.getURL("iframe.js");
 document.getElementById("script-container").appendChild(iframeScript);
 
