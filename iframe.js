@@ -10,7 +10,6 @@ if (window.location.search.search("v=") == -1) {
     var lastIndex = firstIndex + 11;
     videoId = window.location.search.substring(firstIndex, lastIndex);
 }
-console.log(videoId);
 var mainPlayer;
 var player;
 var firstTime = true;
@@ -19,9 +18,9 @@ var firstTime = true;
 // This is a mandatory function. Don't refactor.
 // After loading "iframe-setup", it will call this function
 function onYouTubeIframeAPIReady() {
-    player = new YT.Player('video-nail', { 
-        height: '0', 
-        width: '0', 
+    player = new YT.Player('video-nail', {
+        height: '0',
+        width: '0',
         videoId: videoId
     });
     mainPlayer = document.getElementById('movie_player');
@@ -37,43 +36,59 @@ if (!videoId) {
             return;
         }
         // When user scrolls down, shows player
-        if(window.pageYOffset > scrollDistance && !playerIsVisible) {
+        if (window.pageYOffset > scrollDistance && !playerIsVisible) {
+            playerIsVisible = true;
             currTime = mainPlayer.getCurrentTime();
             player.setSize(320, 180);
-            
+
             if (mainPlayer.getPlayerState() == YT.PlayerState.ENDED) {
                 return;
-            } else if (mainPlayer.getPlayerState() == YT.PlayerState.PAUSED) {
-                player.pauseVideo();
-            } else {
-                player.seekTo(currTime, true);
-                player.playVideo();
             }
-            
+
+            if (mainPlayer.getPlayerState() == YT.PlayerState.PAUSED) {
+                player.pauseVideo();
+                return;
+            }
+
+            player.seekTo(currTime, true);
+            player.playVideo();
+
+            if (mainPlayer.isMuted()) {
+                player.mute();
+            } else {
+                player.unMute();
+                player.setVolume(mainPlayer.getVolume());
+            }
+
             mainPlayer.mute();
-            player.unMute();
-            player.setVolume(mainPlayer.getVolume());
-            playerIsVisible = true;
         }
 
         // When user scrolls up, hides player
         if (window.pageYOffset < scrollDistance && playerIsVisible) {
+            playerIsVisible = false;
             currTime = player.getCurrentTime();
             player.setSize(0, 0);
-            
+
             if (player.getPlayerState() == YT.PlayerState.ENDED) {
                 return;
-            } else if (player.getPlayerState() == YT.PlayerState.PAUSED) {
-                mainPlayer.pauseVideo();                
+            }
+
+            if (player.getPlayerState() == YT.PlayerState.PAUSED) {
+                mainPlayer.pauseVideo();
+                return;
+            }
+
+            mainPlayer.seekTo(currTime, true);
+            mainPlayer.playVideo();
+
+            if (player.isMuted()) {
+                mainPlayer.mute();
             } else {
-                mainPlayer.seekTo(currTime, true);
-                mainPlayer.playVideo();
+                mainPlayer.unMute();
+                mainPlayer.setVolume(player.getVolume());
             }
 
             player.mute();
-            mainPlayer.unMute();
-            mainPlayer.setVolume(player.getVolume());
-            playerIsVisible = false;
         }
     };
 }
