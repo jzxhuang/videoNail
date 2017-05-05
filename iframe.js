@@ -2,6 +2,7 @@ var loaded = false;
 var scrollDistance = 430;
 var playerIsVisible = false;
 var currTime = 0;
+var currSpeed = 0;
 var videoId;
 if (window.location.search.search("v=") == -1) {
     videoId = null;
@@ -39,6 +40,7 @@ if (!videoId) {
         if (window.pageYOffset > scrollDistance && !playerIsVisible) {
             playerIsVisible = true;
             currTime = mainPlayer.getCurrentTime();
+            currSpeed = mainPlayer.getPlaybackRate();
             player.setSize(320, 180);
 
             if (mainPlayer.getPlayerState() == YT.PlayerState.ENDED) {
@@ -51,6 +53,7 @@ if (!videoId) {
             }
 
             player.seekTo(currTime, true);
+            player.setPlaybackRate(currSpeed);
             player.playVideo();
 
             if (mainPlayer.isMuted()) {
@@ -67,6 +70,7 @@ if (!videoId) {
         if (window.pageYOffset < scrollDistance && playerIsVisible) {
             playerIsVisible = false;
             currTime = player.getCurrentTime();
+            currSpeed = player.getPlaybackRate();
             player.setSize(0, 0);
 
             if (player.getPlayerState() == YT.PlayerState.ENDED) {
@@ -79,6 +83,7 @@ if (!videoId) {
             }
 
             mainPlayer.seekTo(currTime, true);
+            mainPlayer.setPlaybackRate(currSpeed);
             mainPlayer.playVideo();
 
             if (player.isMuted()) {
