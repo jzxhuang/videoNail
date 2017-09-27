@@ -1,5 +1,6 @@
-// TODO: come up with potential ways to reduce running time
-
+// TODO: come up with potential ways to optimize loading time
+console.log("loading content.js")
+var loaded = false;
 // If "script-container" does exist, remove it, then re-add 
 // the new "script-container"
 if (document.getElementById("script-container")) {
@@ -27,27 +28,32 @@ var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(iframeSetup, firstScriptTag);
 
 
-// If "video-nail" does exist, remove it, then re-add 
-// the new "video-nail"
+
+// This forces the videoPlaceholder to update with new video
+// on the current tab instead of previous video
 if (document.getElementById("video-nail")) {
-    var videoPlaceholder = document.getElementById("video-nail");
-    videoPlaceholder.parentNode.removeChild(videoPlaceholder);
+    let oldPlaceholder = document.getElementById("video-nail");
+    oldPlaceholder.parentNode.removeChild(oldPlaceholder);
 }
 
 var videoPlaceholder = document.createElement('div');
 videoPlaceholder.id = "video-nail";
-document.getElementsByClassName("yt-masthead-logo-container").item(0).appendChild(videoPlaceholder);
 
-
-// If "iframe-script" does exist, remove it, then re-add 
-// the new "iframe-script"
-if (document.getElementById("iframe-script")) {
-    var iframeScript = document.getElementById("iframe-script");
-    iframeScript.parentNode.removeChild(iframeScript);
+window.onscroll = (e) => {
+    if (loaded) return;
+    loaded = true;
+    console.log("haha");
+    document.getElementById("content").appendChild(videoPlaceholder);
+    
+    // If "iframe-script" does exist, remove it, then re-add 
+    // the new "iframe-script"
+    if (document.getElementById("iframe-script")) {
+        var iframeScript = document.getElementById("iframe-script");
+        iframeScript.parentNode.removeChild(iframeScript);
+    }
+    var iframeScript = document.createElement('script');
+    iframeScript.type = "text/javascript";
+    iframeScript.id = "iframe-script";
+    iframeScript.src = chrome.extension.getURL("iframe.js");
+    document.getElementById("script-container").appendChild(iframeScript);
 }
-
-var iframeScript = document.createElement('script');
-iframeScript.type = "text/javascript";
-iframeScript.id = "iframe-script";
-iframeScript.src = chrome.extension.getURL("iframe.js");
-document.getElementById("script-container").appendChild(iframeScript);

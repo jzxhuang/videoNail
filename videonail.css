@@ -1,4 +1,5 @@
 #video-nail {
-    margin-top: 20px;
-    margin-left: 20px;
+    margin: 50px 300px;
+    top: 0;
+    position: fixed;
 }
