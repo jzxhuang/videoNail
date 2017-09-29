@@ -27,8 +27,6 @@ iframeSetup.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName("script")[0];
 firstScriptTag.parentNode.insertBefore(iframeSetup, firstScriptTag);
 
-
-
 // This forces the videoPlaceholder to update with new video
 // on the current tab instead of previous video
 if (document.getElementById("video-nail")) {
@@ -39,14 +37,21 @@ if (document.getElementById("video-nail")) {
 var videoPlaceholder = document.createElement('div');
 videoPlaceholder.id = "video-nail";
 
+try {
+    setTimeout(setupMiniPlayer, 2000);
+} catch (e) {
+    console.log("Error: " + e);
+} 
+
 window.onscroll = (e) => {
     if (loaded) return;
+    console.log("User starts scrolling.");
+    setupMiniPlayer();
+}
+
+function setupMiniPlayer() {
     loaded = true;
-    console.log("haha");
     document.getElementById("content").appendChild(videoPlaceholder);
-    
-    // If "iframe-script" does exist, remove it, then re-add 
-    // the new "iframe-script"
     if (document.getElementById("iframe-script")) {
         var iframeScript = document.getElementById("iframe-script");
         iframeScript.parentNode.removeChild(iframeScript);

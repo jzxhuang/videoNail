@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "videoNail",
   "description": "This extension keeps YouTube video on screen when scrolling down to the comment section",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "icons": {
     "32": "YouTube.png",
     "64": "YouTube.png"

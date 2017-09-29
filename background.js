@@ -3,8 +3,12 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     // on other pages (trending page, channel page, home page, etc.)
     if (changeInfo.url) {
         if (changeInfo.url.includes("youtube.com")) {
-            chrome.tabs.query({active: true, lastFocusedWindow: true}, function(tabs) {
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 var tab = tabs[0];
+                if (changeInfo.url != tab.url) {
+                    console.log("User opens a video in another tab.");
+                    return;
+                }
                 if (tab.url.includes("youtube.com/watch?v=")) {
                     chrome.tabs.executeScript(null, {file: "content.js"});
                     chrome.tabs.insertCSS(null, {file: "videonail.css"});
