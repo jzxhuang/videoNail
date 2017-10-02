@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "Zip all necessary files"
+zip videoNail.zip *.js manifest.json *.css *.png
