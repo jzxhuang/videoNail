@@ -37,12 +37,6 @@ if (document.getElementById("video-nail")) {
 var videoPlaceholder = document.createElement('div');
 videoPlaceholder.id = "video-nail";
 
-try {
-    setTimeout(setupMiniPlayer, 2000);
-} catch (e) {
-    console.log("Error: " + e);
-} 
-
 window.onscroll = (e) => {
     if (loaded) return;
     console.log("User starts scrolling.");
