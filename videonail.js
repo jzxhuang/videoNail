@@ -19,7 +19,7 @@ const elRefs = {
 };
 
 const SCROLL_THRESHOLD = 0.5;
-const MIN_WIDTH = 330;
+const MIN_WIDTH = 400;
 var lastSavedStyle = null;
 
 // ========================================================================= //
@@ -34,9 +34,7 @@ function injectPIP() {
   // Get element references
   if (state.isPolymer) {
     elRefs.playerSection = document.querySelector("#top #player");
-    elRefs.playerContainer = document.querySelector(
-      "#top #player #player-container"
-    );
+    elRefs.playerContainer = document.querySelector("#top #player #player-container");
     elRefs.player = document.querySelector("#player-container #movie_player");
   } else {
     elRefs.playerSection = document.querySelector("#player-api");

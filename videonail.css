@@ -76,10 +76,10 @@
   width: 100% !important;
 }
 
-/* Force proper width for controls at bottom */
+/* Force proper width for controls at bottom
 .yt-pip .ytp-chrome-bottom {
   width: calc(100% - 24px) !important;
-}
+} */
 
 /* PIP window header */
 
