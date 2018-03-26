@@ -72,6 +72,7 @@
 /* Force video to take up available space */
 .yt-pip .html5-video-container,
 .yt-pip video {
+  cursor: default;
   height: 100% !important;
   width: 100% !important;
 }
