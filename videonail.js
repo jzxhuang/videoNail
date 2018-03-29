@@ -157,10 +157,10 @@ function removePlayerMsg() {
 
 function resizePIP() {
   requestAnimationFrame(() => {
+    var vid = document.querySelector(".html5-main-video");
+    vid.style.left = "0px";
+    vid.style.top = "0px";
     if (lastSavedStyle) {
-      var vid = document.querySelector(".html5-main-video");
-      vid.style.left = "0px";
-      vid.style.top = "0px";
       return;
     }
 
