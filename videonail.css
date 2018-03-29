@@ -8,8 +8,9 @@
 
 :root {
   --yt-pip-toggle-size: 36px;
-  --yt-pip-header-height: 24px;
-  --yt-pip-dark-bg: red;
+  --yt-pip-header-height: 36px;
+  --yt-pip-red-bg: red;
+  --transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
 }
 
 /* == Toggle button at top left of video  == */
@@ -24,7 +25,7 @@
   padding: 6px;
   position: absolute;
   top: 0;
-  transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
+  transition: var(--transition);
   width: var(--yt-pip-toggle-size);
   z-index: 99;
 }
@@ -65,30 +66,34 @@
   min-height: 100px;
   min-width: 100px;
   position: fixed !important;
-  top: 60px;
   z-index: 99;
 }
 
 /* Force video to take up available space */
 .yt-pip .html5-video-container,
 .yt-pip video {
-  cursor: default;
   height: 100% !important;
   width: 100% !important;
 }
 
-/* Force proper width for controls at bottom
+/* Force proper width for controls at bottom */
 .yt-pip .ytp-chrome-bottom {
   width: calc(100% - 24px) !important;
-} */
+}
 
 /* PIP window header */
 
 .yt-pip-header {
-  background: var(--yt-pip-dark-bg);
+  background: var(--yt-pip-red-bg);
   cursor: move;
   display: none;
   height: var(--yt-pip-header-height);
+  opacity: 0.5;
+  transition: var(--transition);
+}
+
+.yt-pip-header:hover {
+  opacity: 1;
 }
 
 .yt-pip .yt-pip-header {

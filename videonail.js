@@ -20,7 +20,21 @@ const elRefs = {
 
 const SCROLL_THRESHOLD = 0.5;
 const MIN_WIDTH = 400;
+const MIN_HEIGHT = MIN_WIDTH / 16 * 9;
+const EDGE_MARGIN = 4;
+
+var miniPlayer = null;
 var lastSavedStyle = null;
+
+// End of what's configurable.
+var clicked = null;
+var onRightEdge, onBottomEdge, onLeftEdge, onTopEdge;
+
+var rightScreenEdge, bottomScreenEdge;
+var b, x, y;
+var redraw = false;
+var e;
+
 
 // ========================================================================= //
 // PIP LOGIC                                                                 //
@@ -96,11 +110,15 @@ function attachPIPHeader() {
 function togglePIP() {
   state.inPipMode = !state.inPipMode;
   elRefs.playerSection.classList.toggle("yt-pip", state.inPipMode);
-
+  var theaterButton = document.querySelector("[title='Theater mode']");
+  if (theaterButton) {
+    theaterButton.click();
+  }
   // When users scroll down
   if (state.inPipMode) {
-    setPlayerPostion();
+    setPlayerPosition();
     window.addEventListener("resize", resizePIP);
+    makePIPDraggable();
     addPlayerMsg();
   } else {
     // When users scroll up
@@ -114,13 +132,13 @@ function togglePIP() {
   window.dispatchEvent(new Event("resize"));
 }
 
-function setPlayerPostion() {
+function setPlayerPosition() {
   if (lastSavedStyle) {
     elRefs.playerContainer.style = lastSavedStyle;
     return;
   }
-  elRefs.playerContainer.style.left = "50%";
-  elRefs.playerContainer.style.transform = "translateX(-50%)";
+  elRefs.playerContainer.style.right = "16px";
+  elRefs.playerContainer.style.bottom = "32px";
 }
 
 function addPlayerMsg() {
@@ -160,15 +178,36 @@ function resizePIP() {
 }
 
 function makePIPDraggable() {
-  interact(elRefs.playerContainer).draggable({
-    restrict: {
-      endOnly: true,
-      elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-    },
+  elRefs.playerContainer.style.margin = "0px 0px 0px 0px";
+  miniPlayer = elRefs.playerContainer;
+  // Mouse events
+  miniPlayer.addEventListener('mousedown', onMouseDown);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+  animate();
+}
 
-    // call this function on every dragmove event
-    onmove: dragMoveListener
-  });
+function setBounds(element, x, y, w, h) {
+  element.style.left = x + 'px';
+  element.style.top = y + 'px';
+  element.style.width = w + 'px';
+  element.style.height = h + 'px';
+}
+
+function onMouseDown(e) {
+  onDown(e);
+  e.preventDefault();
+}
+
+function onMove(ee) {
+  calc(ee);
+  e = ee;
+  redraw = true;
+}
+
+function onUp(e) {
+  calc(e);
+  clicked = null;
 }
 
 function dragMoveListener(event) {
@@ -178,8 +217,7 @@ function dragMoveListener(event) {
     y = (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
 
   // translate the element
-  target.style.webkitTransform = target.style.transform =
-    "translate(" + x + "px, " + y + "px)";
+  target.style.transform = "translate(" + x + "px, " + y + "px)";
 
   // update the posiion attributes
   target.setAttribute("data-x", x);
@@ -187,8 +225,113 @@ function dragMoveListener(event) {
 }
 
 function saveAndResetPlayerStyle() {
+  // TODO: save mini player size when scrolling up
   lastSavedStyle = elRefs.playerContainer.style.cssText;
   elRefs.playerContainer.style = null;
+  elRefs.playerSection.style = null;
+  elRefs.playerContainer.removeEventListener('mousedown', onMouseDown);
+  document.removeEventListener('mousemove', onMove);
+  document.removeEventListener('mouseup', onUp);
+  clicked = null;
+}
+
+function onDown(e) {
+  calc(e);
+
+  var isResizing = onRightEdge || onBottomEdge || onTopEdge || onLeftEdge;
+
+  clicked = {
+    x: x,
+    y: y,
+    cx: e.clientX,
+    cy: e.clientY,
+    w: b.width,
+    h: b.height,
+    isResizing: isResizing,
+    isMoving: !isResizing && canMove(),
+    onTopEdge: onTopEdge,
+    onLeftEdge: onLeftEdge,
+    onRightEdge: onRightEdge,
+    onBottomEdge: onBottomEdge
+  };
+}
+
+function canMove() {
+  return x > 0 && x < b.width && y > 0 && y < b.height
+    && y < 30;
+}
+
+function calc(e) {
+  b = miniPlayer.getBoundingClientRect();
+  x = e.clientX - b.left;
+  y = e.clientY - b.top;
+
+  onTopEdge = y < EDGE_MARGIN;
+  onLeftEdge = x < EDGE_MARGIN;
+  onRightEdge = x >= b.width - EDGE_MARGIN;
+  onBottomEdge = y >= b.height - EDGE_MARGIN;
+
+  rightScreenEdge = window.innerWidth - EDGE_MARGIN;
+  bottomScreenEdge = window.innerHeight - EDGE_MARGIN;
+}
+
+function animate() {
+
+  requestAnimationFrame(animate);
+
+  if (!redraw) return;
+
+  redraw = false;
+
+  if (clicked && clicked.isResizing) {
+
+    if (clicked.onRightEdge) miniPlayer.style.width = Math.max(x, MIN_WIDTH) + 'px';
+    if (clicked.onBottomEdge) miniPlayer.style.height = Math.max(y, MIN_HEIGHT) + 'px';
+
+    if (clicked.onLeftEdge) {
+      var currentWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
+      if (currentWidth > MIN_WIDTH) {
+        miniPlayer.style.width = currentWidth + 'px';
+        miniPlayer.style.left = e.clientX + 'px';
+      }
+    }
+
+    if (clicked.onTopEdge) {
+      var currentHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
+      if (currentHeight > MIN_HEIGHT) {
+        miniPlayer.style.height = currentHeight + 'px';
+        miniPlayer.style.top = e.clientY + 'px';
+      }
+    }
+
+
+
+    return;
+  }
+
+  if (clicked && clicked.isMoving) {
+    // moving
+    miniPlayer.style.top = (e.clientY - clicked.y) + 'px';
+    miniPlayer.style.left = (e.clientX - clicked.x) + 'px';
+
+    return;
+  }
+
+  // This code executes when mouse moves without clicking
+  // style cursor
+  if (onRightEdge && onBottomEdge || onLeftEdge && onTopEdge) {
+    miniPlayer.style.cursor = 'nwse-resize';
+  } else if (onRightEdge && onTopEdge || onBottomEdge && onLeftEdge) {
+    miniPlayer.style.cursor = 'nesw-resize';
+  } else if (onRightEdge || onLeftEdge) {
+    miniPlayer.style.cursor = 'ew-resize';
+  } else if (onBottomEdge || onTopEdge) {
+    miniPlayer.style.cursor = 'ns-resize';
+  } else if (canMove()) {
+    miniPlayer.style.cursor = 'move';
+  } else {
+    miniPlayer.style.cursor = 'default';
+  }
 }
 
 // ========================================================================= //
