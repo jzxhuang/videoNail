@@ -67,6 +67,7 @@
   min-width: 100px;
   position: fixed !important;
   z-index: 99;
+  border: 2px solid white;
 }
 
 /* Force video to take up available space */
@@ -83,7 +84,7 @@
 
 /* PIP window header */
 
-.yt-pip-header {
+.yt-pip .yt-pip-header {
   background: var(--yt-pip-red-bg);
   cursor: move;
   display: none;

@@ -56,11 +56,11 @@ function injectPIP() {
     elRefs.player = document.querySelector("#movie_player");
   }
 
-  // Add toggle button to corner of player
-  attachToggleButton();
-
   // Add header for PIP mode
   attachPIPHeader();
+
+  // Add toggle button to corner of player
+  attachToggleButton();
 
   // Auto-PIP on scroll (if not manually done)
   const observer = new IntersectionObserver(
@@ -157,6 +157,13 @@ function removePlayerMsg() {
 
 function resizePIP() {
   requestAnimationFrame(() => {
+    if (lastSavedStyle) {
+      var vid = document.querySelector(".html5-main-video");
+      vid.style.left = "0px";
+      vid.style.top = "0px";
+      return;
+    }
+
     let newWidth = window.innerWidth / 2.5;
     if (newWidth < MIN_WIDTH) {
       newWidth = MIN_WIDTH;
@@ -208,20 +215,6 @@ function onMove(ee) {
 function onUp(e) {
   calc(e);
   clicked = null;
-}
-
-function dragMoveListener(event) {
-  var target = event.target,
-    // keep the dragged position in the data-x/data-y attributes
-    x = (parseFloat(target.getAttribute("data-x")) || 0) + event.dx,
-    y = (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
-
-  // translate the element
-  target.style.transform = "translate(" + x + "px, " + y + "px)";
-
-  // update the posiion attributes
-  target.setAttribute("data-x", x);
-  target.setAttribute("data-y", y);
 }
 
 function saveAndResetPlayerStyle() {
