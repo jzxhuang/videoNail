@@ -7,42 +7,40 @@
 } */
 
 :root {
-  --yt-pip-toggle-size: 36px;
-  --yt-pip-header-height: 36px;
-  --yt-pip-red-bg: red;
+  --videonail-pip-toggle-size: 36px;
+  --videonail-header-height: 24px;
+  --videonail-pip-red-bg: red;
   --transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
 }
 
 /* == Toggle button at top left of video  == */
-
-#yt-pip-toggle {
+#videonail-pip-toggle {
   background: transparent;
   border: 0;
   cursor: pointer;
-  height: var(--yt-pip-toggle-size);
+  height: var(--videonail-pip-toggle-size);
+  top: 0;
   left: 0;
   opacity: 0.75;
   padding: 6px;
   position: absolute;
-  top: 0;
   transition: var(--transition);
-  width: var(--yt-pip-toggle-size);
+  width: var(--videonail-pip-toggle-size);
   z-index: 99;
 }
 
 /* Hide with other controls */
-.ytp-autohide #yt-pip-toggle {
+.ytp-autohide #videonail-pip-toggle {
   opacity: 0;
 }
 
 /* Hide when in PIP or fullscreen */
-.ytp-fullscreen #yt-pip-toggle {
+.ytp-fullscreen #videonail-pip-toggle {
   display: none;
 }
 
 /* == Toggle message in place of player == */
-
-.yt-pip-player-msg {
+.videonail-original-player-msg {
   align-items: center;
   color: #777;
   cursor: pointer;
@@ -53,14 +51,16 @@
 }
 
 /* Dark Polymer design */
-[dark] .yt-pip-player-msg {
+[dark] .videonail-original-player-msg {
   color: #ccc;
 }
 
-/* == PIP window  == */
-
-.yt-pip #player-container, /* Polymer */
-  body#body .yt-pip #movie_player /* Old */ {
+/* == Main VideoNail PIP Pane  == */
+.videonail-pip #player-container,
+/* Polymer */
+body#body .videonail-pip #movie_player
+/* Old */
+{
   display: flex;
   flex-flow: column;
   max-height: 100vh;
@@ -69,36 +69,49 @@
   min-width: 100px;
   position: fixed !important;
   z-index: 99;
-  border: 4px solid white;
+  border: 5px solid transparent;
+  background: transparent !important;
+}
+
+.videonail-pip #player-container:hover,
+/* Polymer */
+body#body .videonail-pip #movie_player:hover
+/* Old */ {
+  border-color: red;
+  transition: 0.25s all;
 }
 
 /* Force video to take up available space */
-.yt-pip .html5-video-container,
-.yt-pip video {
+
+.videonail-pip .html5-video-container,
+.videonail-pip video {
   height: 100% !important;
+  flex: 1 1 auto !important;
   width: 100% !important;
 }
 
 /* Force proper width for controls at bottom */
-.yt-pip .ytp-chrome-bottom {
+.videonail-pip .ytp-chrome-bottom {
   width: calc(100% - 24px) !important;
 }
 
 /* PIP window header */
-
-.yt-pip .yt-pip-header {
-  background: var(--yt-pip-red-bg);
+.videonail-pip .videonail-header {
+/*  background: var(--videonail-pip-red-bg);*/
+  background: red;
   cursor: move;
-  display: none;
-  height: var(--yt-pip-header-height);
-  opacity: 0.5;
+  flex: 0 1 var(--videonail-header-height);
+  opacity: 0;
   transition: var(--transition);
+  margin: 0;
+  padding: 0;
 }
 
-.yt-pip-header:hover {
-  opacity: 1;
+.videonail-header:hover {
+  opacity: 0.75 !important;
 }
 
-.yt-pip .yt-pip-header {
-  display: block;
+#ytd-player {
+  display: inherit !important;
+  flex: 1 1 auto;
 }
