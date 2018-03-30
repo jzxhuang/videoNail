@@ -73,7 +73,7 @@ body#body .videonail-pip #movie_player
   min-width: 100px;
   position: fixed !important;
   z-index: 99;
-  border: 5px solid transparent;
+/*  border: 5px solid transparent;*/
   background: transparent !important;
 }
 
@@ -102,7 +102,7 @@ body#body .videonail-pip #movie_player:hover
 /* PIP window header */
 .videonail-pip .videonail-header {
 /*  background: var(--videonail-pip-red-bg);*/
-  background: var(--videonail-color);
+  background: rgba(208, 10, 10);
   cursor: move;
   flex: 0 1 var(--videonail-header-height);
   opacity: 0;

@@ -55,7 +55,9 @@ function injectPIP() {
     elRefs.videoNailContainer = document.querySelector("#movie_player");
     elRefs.player = document.querySelector("#movie_player");
   }
-  elRefs.relatedVideoDiv = document.querySelector('#related');
+  elRefs.ytPlayer = document.getElementById("ytd-player");
+  console.log(elRefs.ytPlayer);
+  elRefs.relatedVideoDiv = document.getElementById('related');
 
   // Add header for PIP mode
   attachPIPHeader();
@@ -66,7 +68,6 @@ function injectPIP() {
   // Add ghostpane
   elRefs.videoNailContainer.insertAdjacentHTML('afterend', '<div id="ghostpane"></div>');
   elRefs.ghostpane = document.querySelector('#ghostpane');
-  console.log(elRefs.ghostpane);
 
   // Auto-PIP on scroll (if not manually done)
   const observer = new IntersectionObserver(
@@ -120,6 +121,8 @@ function togglePIP() {
     makePIPDraggable();
     addPlayerMsg();
     elRefs.pipHeader.style.display = "flex";
+    elRefs.ytPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)";
+    elRefs.ytPlayer.style.width = "initial";
   } else {
     // When users scroll up
     state.manualPip = false;
@@ -127,6 +130,8 @@ function togglePIP() {
     window.removeEventListener("resize", resizePIP);
     removePlayerMsg();
     elRefs.pipHeader.style.display = "none";
+    elRefs.ytPlayer.style.border = "none";
+    elRefs.ytPlayer.style.width = "100%";
   }
   if (theaterButton) {
     theaterButton.click();
@@ -147,8 +152,8 @@ function setPlayerPosition() {
     elRefs.videoNailContainer.style = lastSavedStyle;
     return;
   }
-  elRefs.videoNailContainer.style.right = "-5px";
-  elRefs.videoNailContainer.style.bottom = "-5px";
+  elRefs.videoNailContainer.style.right = "0px";
+  elRefs.videoNailContainer.style.bottom = "0px";
 }
 
 // Adds message to original video container
@@ -262,11 +267,15 @@ function saveAndResetPlayerStyle() {
 }
 
 function onMouseHover() {
-  elRefs.pipHeader.style.opacity = 0.4;
+  elRefs.pipHeader.style.opacity = 0.5;
+  elRefs.ytPlayer.style.borderTop = "none";
+  //  elRefs.videoNailContainer.style.border = "5px solid blue";
 }
 
 function onMouseOut() {
   elRefs.pipHeader.style.opacity = 0;
+  //  elRefs.videoNailContainer.style.border = "none";
+  elRefs.ytPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)"
 }
 
 function onDown(e) {
@@ -326,14 +335,14 @@ function getSnapBounds() {
   let bh = b.height;
 
   // BR, BL, TL, TR, R, L, B, T
-  if (b.right > rightScreenEdge && b.bottom > bottomScreenEdge) bounds = [wiw - bw, wih - bh, bw, bh];
-  else if (b.left < EDGE_MARGIN && b.bottom > bottomScreenEdge) bounds = [-5, wih - bh, bw, bh];
-  else if (b.left < EDGE_MARGIN && b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [-5, -5 + NAVBAR_HEIGHT, bw, bh];
-  else if (b.right > rightScreenEdge && b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [wiw - bw - 5, -5 + NAVBAR_HEIGHT, bw, bh];
-  else if (b.right > rightScreenEdge) bounds = [wiw - bw - 5, b.top, bw, bh];
-  else if (b.left < EDGE_MARGIN) bounds = [-5, b.top, bw, bh];
+  if (b.right > rightScreenEdge && b.bottom > bottomScreenEdge) bounds = [wiw - bw - 17, wih - bh, bw, bh];
+  else if (b.left < EDGE_MARGIN && b.bottom > bottomScreenEdge) bounds = [0, wih - bh, bw, bh];
+  else if (b.left < EDGE_MARGIN && b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [0, NAVBAR_HEIGHT, bw, bh];
+  else if (b.right > rightScreenEdge && b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [wiw - bw - 17, NAVBAR_HEIGHT, bw, bh];
+  else if (b.right > rightScreenEdge) bounds = [wiw - bw - 17, b.top, bw, bh];
+  else if (b.left < EDGE_MARGIN) bounds = [0, b.top, bw, bh];
   else if (b.bottom > bottomScreenEdge) bounds = [b.left, wih - bh, bw, bh];
-  else if (b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [b.left, -5 + NAVBAR_HEIGHT, bw, bh];
+  else if (b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [b.left, NAVBAR_HEIGHT, bw, bh];
   else {
     return null
   };
@@ -371,29 +380,6 @@ function animate() {
 
   // Moving or Snapping
   if (clicked && clicked.isMoving) {
-    //        if (b.top < FULLSCREEN_MARGINS || b.left < FULLSCREEN_MARGINS || b.right > window.innerWidth - FULLSCREEN_MARGINS || b.bottom > window.innerHeight - FULLSCREEN_MARGINS) {
-    //            // hintFull();
-    //            setBounds(elRefs.ghostpane, 0, 0, window.innerWidth, window.innerHeight);
-    //            elRefs.ghostpane.style.opacity = 0.2;
-    //        } else if (b.top < MARGINS) {
-    //            // hintTop();
-    //            setBounds(elRefs.ghostpane, 0, 0, window.innerWidth, window.innerHeight / 2);
-    //            elRefs.ghostpane.style.opacity = 0.2;
-    //        } else if (b.left < MARGINS) {
-    //            // hintLeft();
-    //            setBounds(elRefs.ghostpane, 0, 0, window.innerWidth / 2, window.innerHeight);
-    //            elRefs.ghostpane.style.opacity = 0.2;
-    //        } else if (b.right > rightScreenEdge) {
-    //            // hintRight();
-    //            setBounds(elRefs.ghostpane, window.innerWidth / 2, 0, window.innerWidth / 2, window.innerHeight);
-    //            elRefs.ghostpane.style.opacity = 0.2;
-    //        } else if (b.bottom > bottomScreenEdge) {
-    //            // hintBottom();
-    //            setBounds(elRefs.ghostpane, 0, window.innerHeight / 2, window.innerWidth, window.innerWidth / 2);
-    //            elRefs.ghostpane.style.opacity = 0.2;
-    //        } else {
-    //            hintHide();
-    //        }
     let bounds = getSnapBounds();
     if (bounds) {
       setBounds(elRefs.ghostpane, ...bounds);
@@ -402,18 +388,6 @@ function animate() {
     } else {
       hintHide();
     }
-    //    if (b.right > rightScreenEdge && b.bottom > bottomScreenEdge) {
-    //      //            // hintRight();
-    //      //            setBounds(elRefs.ghostpane, 3*window.innerWidth / 4, 3*window.innerHeight/4, window.innerWidth / 4, window.innerHeight/4);
-    //      console.log(elRefs.ghostpane);
-    //      setBounds(elRefs.ghostpane, window.innerWidth - b.width, window.innerHeight - b.height, b.width, b.height);
-    //      elRefs.ghostpane.style.opacity = 0.3;
-    //    } else if (b.right > rightScreenEdge) {
-    //      setBounds(elRefs.ghostpane, window.innerWidth - b.width - 5, b.top, b.width, b.height);
-    //      elRefs.ghostpane.style.opacity = 0.2;
-    //    } else {
-    //      hintHide();
-    //    }
     if (preSnapped) {
       setBounds(elRefs.videoNailContainer,
         e.clientX - preSnapped.width / 2,
