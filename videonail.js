@@ -17,7 +17,7 @@ const elRefs = {
   pipHeader: null
 };
 
-const SCROLL_THRESHOLD = 0.5;
+const SCROLL_THRESHOLD = 0.4;
 const MIN_WIDTH = 400;
 const MIN_HEIGHT = MIN_WIDTH / 16 * 9;
 const EDGE_MARGIN = 5;
@@ -52,6 +52,7 @@ function injectPIP() {
     elRefs.videoNailContainer = document.querySelector("#movie_player");
     elRefs.player = document.querySelector("#movie_player");
   }
+  elRefs.relatedVideoDiv = document.querySelector('#related');
 
   // Add header for PIP mode
   attachPIPHeader();
@@ -104,9 +105,7 @@ function togglePIP() {
   state.inPipMode = !state.inPipMode;
   elRefs.originalPlayerSection.classList.toggle("videonail-pip", state.inPipMode);
   let theaterButton = document.querySelector("[title='Theater mode']");
-  if (theaterButton) {
-    theaterButton.click();
-  }
+  
   // When users scroll down
   if (state.inPipMode) {
     setPlayerPosition();
@@ -119,6 +118,9 @@ function togglePIP() {
     saveAndResetPlayerStyle();
     window.removeEventListener("resize", resizePIP);
     removePlayerMsg();
+  }
+  if (theaterButton) {
+    theaterButton.click();
   }
 
   state.manualResize = false;
@@ -136,8 +138,8 @@ function setPlayerPosition() {
     elRefs.videoNailContainer.style = lastSavedStyle;
     return;
   }
-  elRefs.videoNailContainer.style.right = "16px";
-  elRefs.videoNailContainer.style.bottom = "32px";
+  elRefs.videoNailContainer.style.right = "-5px";
+  elRefs.videoNailContainer.style.bottom = "-5px";
 }
 
 // Adds message to original video container
@@ -164,7 +166,9 @@ function resizePIP() {
       return;
     }
 
-    let newWidth = window.innerWidth / 2.5;
+//    let newWidth = window.innerWidth / 3.75;
+    let newWidth = elRefs.relatedVideoDiv.offsetWidth + 24;
+    console.log(elRefs.relatedVideoDiv.offsetWidth);
     if (newWidth < MIN_WIDTH) {
       newWidth = MIN_WIDTH;
     }
@@ -189,8 +193,8 @@ function makePIPDraggable() {
   videoNailContainer = elRefs.videoNailContainer;
   // Mouse events
   videoNailContainer.addEventListener('mousedown', onMouseDown);
-  videoNailContainer.addEventListener('mouseover', onMouseHover);
-  elRefs.videoNailContainer.addEventListener('mouseout', onMouseOut);
+  videoNailContainer.addEventListener('mouseenter', onMouseHover);
+  elRefs.videoNailContainer.addEventListener('mouseleave', onMouseOut);
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
   animate();
@@ -225,8 +229,8 @@ function saveAndResetPlayerStyle() {
   elRefs.videoNailContainer.style = null;
   elRefs.originalPlayerSection.style = null;
   elRefs.videoNailContainer.removeEventListener('mousedown', onMouseDown);
-  elRefs.videoNailContainer.removeEventListener('mouseover', onMouseHover);
-  elRefs.videoNailContainer.removeEventListener('mouseout', onMouseOut);
+  elRefs.videoNailContainer.removeEventListener('mouseenter', onMouseHover);
+  elRefs.videoNailContainer.removeEventListener('mouseleave', onMouseOut);
   document.removeEventListener('mousemove', onMove);
   document.removeEventListener('mouseup', onUp);
   clicked = null;

@@ -9,7 +9,7 @@
 :root {
   --videonail-pip-toggle-size: 36px;
   --videonail-header-height: 24px;
-  --videonail-pip-red-bg: red;
+  --videonail-color: rgba(208, 10, 10, 0.5);
   --transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
 }
 
@@ -81,7 +81,7 @@ body#body .videonail-pip #movie_player
 /* Polymer */
 body#body .videonail-pip #movie_player:hover
 /* Old */ {
-  border-color: red;
+  border-color: var(--videonail-color);
   transition: opacity 0.25s;
 }
 
@@ -102,7 +102,7 @@ body#body .videonail-pip #movie_player:hover
 /* PIP window header */
 .videonail-pip .videonail-header {
 /*  background: var(--videonail-pip-red-bg);*/
-  background: red;
+  background: var(--videonail-color);
   cursor: move;
   flex: 0 1 var(--videonail-header-height);
   opacity: 0;
