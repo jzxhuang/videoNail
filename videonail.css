@@ -112,7 +112,7 @@ body#body .videonail-pip #movie_player:hover
 }
 
 .videonail-header:hover {
-  opacity: 0.75 !important;
+/*  opacity: 0.75 !important;*/
 }
 
 #ytd-player {

@@ -186,8 +186,7 @@ function resizePIP() {
     if (newWidth < MIN_WIDTH) {
       newWidth = MIN_WIDTH;
     }
-
-    let newHeight = newWidth / 16 * 9 + 24;
+    let newHeight = (newWidth - 10) / 16 * 9 + 34;
 
     elRefs.videoNailContainer.style.width = `${newWidth}px`;
     elRefs.videoNailContainer.style.height = `${newHeight}px`;
@@ -235,21 +234,21 @@ function onMove(ee) {
 function onUp(e) {
   calc(e);
   // Snapping
-  if (clicked && clicked.isMoving) {
-    // Snap
-    var snapped = {
-      width: b.width,
-      height: b.height
-    };
-    let bounds = getSnapBounds();
-    if (bounds) {
-      setBounds(elRefs.videoNailContainer, ...bounds);
-      preSnapped = snapped;
-    } else {
-      preSnapped = null;
-    }
-    hintHide();
-  }
+//  if (clicked && clicked.isMoving) {
+//    // Snap
+//    var snapped = {
+//      width: b.width,
+//      height: b.height
+//    };
+//    let bounds = getSnapBounds();
+//    if (bounds) {
+//      setBounds(elRefs.videoNailContainer, ...bounds);
+//      preSnapped = snapped;
+//    } else {
+//      preSnapped = null;
+//    }
+//    hintHide();
+//  }
   clicked = null;
 }
 
@@ -268,8 +267,7 @@ function saveAndResetPlayerStyle() {
 
 function onMouseHover() {
   elRefs.pipHeader.style.opacity = 0.5;
-  elRefs.ytPlayer.style.borderTop = "none";
-  //  elRefs.videoNailContainer.style.border = "5px solid blue";
+//  elRefs.ytPlayer.style.borderTop = "none";
 }
 
 function onMouseOut() {
@@ -380,27 +378,31 @@ function animate() {
 
   // Moving or Snapping
   if (clicked && clicked.isMoving) {
-    let bounds = getSnapBounds();
-    if (bounds) {
-      setBounds(elRefs.ghostpane, ...bounds);
-      elRefs.ghostpane.style.opacity = 0.3;
-      elRefs.ghostpane.style.display = 'block';
-    } else {
-      hintHide();
-    }
-    if (preSnapped) {
-      setBounds(elRefs.videoNailContainer,
-        e.clientX - preSnapped.width / 2,
-        e.clientY - Math.min(clicked.y, preSnapped.height),
-        preSnapped.width,
-        preSnapped.height
-      );
-      return;
-    }
+    // Snapping
+//    let bounds = getSnapBounds();
+//    if (bounds) {
+//      setBounds(elRefs.ghostpane, ...bounds);
+//      elRefs.ghostpane.style.opacity = 0.3;
+//      elRefs.ghostpane.style.display = 'block';
+//    } else {
+//      hintHide();
+//    }
+//    if (preSnapped) {
+//      setBounds(elRefs.videoNailContainer,
+//        e.clientX - preSnapped.width / 2,
+//        e.clientY - Math.min(clicked.y, preSnapped.height),
+//        preSnapped.width,
+//        preSnapped.height
+//      );
+//      return;
+//    }
 
     // Moving
-    videoNailContainer.style.top = (e.clientY - clicked.y) + 'px';
-    videoNailContainer.style.left = (e.clientX - clicked.x) + 'px';
+    var container = videoNailContainer.getBoundingClientRect();
+    videoNailContainer.style.top = Math.max(56, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
+    videoNailContainer.style.left = Math.max(0, Math.min(window.innerWidth- container.width, (e.clientX - clicked.x))) + 'px';
+//    videoNailContainer.style.top = (e.clientY - clicked.y) + 'px';
+//    videoNailContainer.style.left = (e.clientX - clicked.x) + 'px';
     return;
   }
 
