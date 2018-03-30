@@ -400,7 +400,7 @@ function animate() {
     // Moving
     var container = videoNailContainer.getBoundingClientRect();
     videoNailContainer.style.top = Math.max(56, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
-    videoNailContainer.style.left = Math.max(0, Math.min(window.innerWidth- container.width - 17, (e.clientX - clicked.x))) + 'px';
+    videoNailContainer.style.left = Math.max(0, Math.min(document.body.clientWidth - container.width, (e.clientX - clicked.x))) + 'px';
 //    videoNailContainer.style.top = (e.clientY - clicked.y) + 'px';
 //    videoNailContainer.style.left = (e.clientX - clicked.x) + 'px';
     return;
