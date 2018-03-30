@@ -82,7 +82,7 @@ body#body .videonail-pip #movie_player
 body#body .videonail-pip #movie_player:hover
 /* Old */ {
   border-color: red;
-  transition: 0.25s all;
+  transition: opacity 0.25s;
 }
 
 /* Force video to take up available space */
