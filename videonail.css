@@ -119,3 +119,19 @@ body#body .videonail-pip #movie_player:hover
   display: inherit !important;
   flex: 1 1 auto;
 }
+#ghostpane {
+	background: #999;
+	opacity: 0;
+
+	width: 45%;
+	height: 45%;
+	top: 20%;
+	left: 20%;
+	display: none;
+	position: fixed;
+	margin: 0;
+	padding: 0;
+	z-index: 98;
+
+	transition: opacity 0.25s ease-in-out;
+}

@@ -14,7 +14,8 @@ const elRefs = {
   originalPlayerSection: null,
   videoNailContainer: null,
   msg: null,
-  pipHeader: null
+  pipHeader: null,
+  ghostpane: null
 };
 
 const SCROLL_THRESHOLD = 0.4;
@@ -30,8 +31,10 @@ let clicked = null;
 let onRightEdge, onBottomEdge, onLeftEdge, onTopEdge;
 
 let rightScreenEdge, bottomScreenEdge;
-let e, b, x, y;
+let e, b, x, y, preSnapped;
 let redraw = false;
+
+const NAVBAR_HEIGHT = 56;
 
 
 // ========================================================================= //
@@ -60,6 +63,11 @@ function injectPIP() {
   // Add toggle button to corner of player
   attachToggleButton();
 
+  // Add ghostpane
+  elRefs.videoNailContainer.insertAdjacentHTML('afterend', '<div id="ghostpane"></div>');
+  elRefs.ghostpane = document.querySelector('#ghostpane');
+  console.log(elRefs.ghostpane);
+
   // Auto-PIP on scroll (if not manually done)
   const observer = new IntersectionObserver(
     (entries, observer) => {
@@ -73,8 +81,7 @@ function injectPIP() {
           togglePIP();
         }
       });
-    },
-    {
+    }, {
       threshold: SCROLL_THRESHOLD
     }
   );
@@ -97,7 +104,7 @@ function attachToggleButton() {
 }
 
 function attachPIPHeader() {
-  elRefs.videoNailContainer.insertAdjacentHTML('afterbegin', '<div class="videonail-header" id="videonailHeader"></div>');
+  elRefs.videoNailContainer.insertAdjacentHTML('afterbegin', '<div class="videonail-header" style="display:none" id="videonailHeader"></div>');
   elRefs.pipHeader = document.getElementById("videonailHeader");
 }
 
@@ -105,19 +112,21 @@ function togglePIP() {
   state.inPipMode = !state.inPipMode;
   elRefs.originalPlayerSection.classList.toggle("videonail-pip", state.inPipMode);
   let theaterButton = document.querySelector("[title='Theater mode']");
-  
+
   // When users scroll down
   if (state.inPipMode) {
     setPlayerPosition();
     window.addEventListener("resize", resizePIP);
     makePIPDraggable();
     addPlayerMsg();
+    elRefs.pipHeader.style.display = "flex";
   } else {
     // When users scroll up
     state.manualPip = false;
     saveAndResetPlayerStyle();
     window.removeEventListener("resize", resizePIP);
     removePlayerMsg();
+    elRefs.pipHeader.style.display = "none";
   }
   if (theaterButton) {
     theaterButton.click();
@@ -130,7 +139,7 @@ function togglePIP() {
 // Sets the pane position on transition
 function setPlayerPosition() {
   var adContainer = document.querySelector(".ad-container");
-  if(adContainer) {
+  if (adContainer) {
     adContainer.style.top = '0px';
     adContainer.style.left = '0px';
   }
@@ -166,7 +175,7 @@ function resizePIP() {
       return;
     }
 
-//    let newWidth = window.innerWidth / 3.75;
+    //    let newWidth = window.innerWidth / 3.75;
     let newWidth = elRefs.relatedVideoDiv.offsetWidth + 24;
     console.log(elRefs.relatedVideoDiv.offsetWidth);
     if (newWidth < MIN_WIDTH) {
@@ -220,6 +229,22 @@ function onMove(ee) {
 
 function onUp(e) {
   calc(e);
+  // Snapping
+  if (clicked && clicked.isMoving) {
+    // Snap
+    var snapped = {
+      width: b.width,
+      height: b.height
+    };
+    let bounds = getSnapBounds();
+    if (bounds) {
+      setBounds(elRefs.videoNailContainer, ...bounds);
+      preSnapped = snapped;
+    } else {
+      preSnapped = null;
+    }
+    hintHide();
+  }
   clicked = null;
 }
 
@@ -266,8 +291,15 @@ function onDown(e) {
 
 // Checks if you can move the pane
 function canMove() {
-  return x > 0 && x < b.width && y > 0 && y < b.height
-    && y < 30;
+  return x > 0 && x < b.width && y > 0 && y < b.height &&
+    y < 30;
+}
+
+// Hides the ghost pane 
+function hintHide() {
+  setBounds(elRefs.ghostpane, b.left, b.top, b.width, b.height);
+  elRefs.ghostpane.style.opacity = 0;
+  elRefs.ghostpane.style.display = 'none';
 }
 
 // Calculates size of pane and location of cursor relative to pane after a click. Checks if cursor is on an edge for resizing. Defines right and bottom edges
@@ -285,6 +317,28 @@ function calc(e) {
   bottomScreenEdge = window.innerHeight - EDGE_MARGIN;
 }
 
+// Calculate snap coords
+function getSnapBounds() {
+  let bounds = []; // x, y, width, height
+  let wiw = window.innerWidth;
+  let wih = window.innerHeight;
+  let bw = b.width;
+  let bh = b.height;
+
+  // BR, BL, TL, TR, R, L, B, T
+  if (b.right > rightScreenEdge && b.bottom > bottomScreenEdge) bounds = [wiw - bw, wih - bh, bw, bh];
+  else if (b.left < EDGE_MARGIN && b.bottom > bottomScreenEdge) bounds = [-5, wih - bh, bw, bh];
+  else if (b.left < EDGE_MARGIN && b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [-5, -5 + NAVBAR_HEIGHT, bw, bh];
+  else if (b.right > rightScreenEdge && b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [wiw - bw - 5, -5 + NAVBAR_HEIGHT, bw, bh];
+  else if (b.right > rightScreenEdge) bounds = [wiw - bw - 5, b.top, bw, bh];
+  else if (b.left < EDGE_MARGIN) bounds = [-5, b.top, bw, bh];
+  else if (b.bottom > bottomScreenEdge) bounds = [b.left, wih - bh, bw, bh];
+  else if (b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [b.left, -5 + NAVBAR_HEIGHT, bw, bh];
+  else {
+    return null
+  };
+  return bounds;
+}
 
 function animate() {
   // requestAnimationFrame with this fct as the callback
@@ -317,7 +371,60 @@ function animate() {
 
   // Moving or Snapping
   if (clicked && clicked.isMoving) {
-    // moving
+    //        if (b.top < FULLSCREEN_MARGINS || b.left < FULLSCREEN_MARGINS || b.right > window.innerWidth - FULLSCREEN_MARGINS || b.bottom > window.innerHeight - FULLSCREEN_MARGINS) {
+    //            // hintFull();
+    //            setBounds(elRefs.ghostpane, 0, 0, window.innerWidth, window.innerHeight);
+    //            elRefs.ghostpane.style.opacity = 0.2;
+    //        } else if (b.top < MARGINS) {
+    //            // hintTop();
+    //            setBounds(elRefs.ghostpane, 0, 0, window.innerWidth, window.innerHeight / 2);
+    //            elRefs.ghostpane.style.opacity = 0.2;
+    //        } else if (b.left < MARGINS) {
+    //            // hintLeft();
+    //            setBounds(elRefs.ghostpane, 0, 0, window.innerWidth / 2, window.innerHeight);
+    //            elRefs.ghostpane.style.opacity = 0.2;
+    //        } else if (b.right > rightScreenEdge) {
+    //            // hintRight();
+    //            setBounds(elRefs.ghostpane, window.innerWidth / 2, 0, window.innerWidth / 2, window.innerHeight);
+    //            elRefs.ghostpane.style.opacity = 0.2;
+    //        } else if (b.bottom > bottomScreenEdge) {
+    //            // hintBottom();
+    //            setBounds(elRefs.ghostpane, 0, window.innerHeight / 2, window.innerWidth, window.innerWidth / 2);
+    //            elRefs.ghostpane.style.opacity = 0.2;
+    //        } else {
+    //            hintHide();
+    //        }
+    let bounds = getSnapBounds();
+    if (bounds) {
+      setBounds(elRefs.ghostpane, ...bounds);
+      elRefs.ghostpane.style.opacity = 0.3;
+      elRefs.ghostpane.style.display = 'block';
+    } else {
+      hintHide();
+    }
+    //    if (b.right > rightScreenEdge && b.bottom > bottomScreenEdge) {
+    //      //            // hintRight();
+    //      //            setBounds(elRefs.ghostpane, 3*window.innerWidth / 4, 3*window.innerHeight/4, window.innerWidth / 4, window.innerHeight/4);
+    //      console.log(elRefs.ghostpane);
+    //      setBounds(elRefs.ghostpane, window.innerWidth - b.width, window.innerHeight - b.height, b.width, b.height);
+    //      elRefs.ghostpane.style.opacity = 0.3;
+    //    } else if (b.right > rightScreenEdge) {
+    //      setBounds(elRefs.ghostpane, window.innerWidth - b.width - 5, b.top, b.width, b.height);
+    //      elRefs.ghostpane.style.opacity = 0.2;
+    //    } else {
+    //      hintHide();
+    //    }
+    if (preSnapped) {
+      setBounds(elRefs.videoNailContainer,
+        e.clientX - preSnapped.width / 2,
+        e.clientY - Math.min(clicked.y, preSnapped.height),
+        preSnapped.width,
+        preSnapped.height
+      );
+      return;
+    }
+
+    // Moving
     videoNailContainer.style.top = (e.clientY - clicked.y) + 'px';
     videoNailContainer.style.left = (e.clientX - clicked.x) + 'px';
     return;
