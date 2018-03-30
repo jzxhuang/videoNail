@@ -127,6 +127,11 @@ function togglePIP() {
 
 // Sets the pane position on transition
 function setPlayerPosition() {
+  var adContainer = document.querySelector(".ad-container");
+  if(adContainer) {
+    adContainer.style.top = '0px';
+    adContainer.style.left = '0px';
+  }
   if (lastSavedStyle) {
     elRefs.videoNailContainer.style = lastSavedStyle;
     return;
