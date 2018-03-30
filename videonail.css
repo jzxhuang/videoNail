@@ -39,6 +39,10 @@
   display: none;
 }
 
+#videonail-pip-toggle:hover {
+  opacity: 1;
+}
+
 /* == Toggle message in place of player == */
 .videonail-original-player-msg {
   align-items: center;
