@@ -103,7 +103,6 @@ body#body .videonail-pip #movie_player:hover
 .videonail-pip .videonail-header {
 /*  background: var(--videonail-pip-red-bg);*/
   background: rgba(208, 10, 10);
-  cursor: move;
   flex: 0 1 var(--videonail-header-height);
   opacity: 0;
   transition: var(--transition);
