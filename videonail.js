@@ -26,6 +26,7 @@ const EDGE_MARGIN = 5;
 
 let videoNailContainer = null;
 let lastSavedStyle = null;
+let savedBox = null;
 
 // End of what's configurable.
 let clicked = null;
@@ -272,18 +273,21 @@ function minimizeClick() {
   let substring = "fa-window-minimize";
   let min = elRefs.minimize;
   let minSVG = min.children[0];
+
+  // if maximized
   if (minSVG.className.baseVal.includes(substring)) {
-    console.log(elRefs.videoNailContainer.getBoundingClientRect().top);
+    savedBox = elRefs.videoNailContainer.getBoundingClientRect();
     minPrevHeight = elRefs.ytPlayer.offsetHeight;
-    console.log(minPrevHeight);
-    elRefs.videoNailContainer.style.top = elRefs.videoNailContainer.getBoundingClientRect().top + minPrevHeight + 'px';
-    elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight - minPrevHeight + 'px';
+    elRefs.videoNailContainer.style.top = window.innerHeight - elRefs.pipHeader.offsetHeight + 'px';
+    elRefs.videoNailContainer.style.left = document.body.clientWidth - savedBox.width + 'px';
+    elRefs.videoNailContainer.style.height = savedBox.height - minPrevHeight + 'px';
     elRefs.ytPlayer.style.display = "none";
     state.isMinimized = true;
     elRefs.pipHeader.style.opacity = 0.5;
   } else {
     elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight + minPrevHeight + 'px';
-    elRefs.videoNailContainer.style.top = elRefs.videoNailContainer.getBoundingClientRect().top - minPrevHeight + 'px';
+    elRefs.videoNailContainer.style.top = savedBox.top + 'px';
+    elRefs.videoNailContainer.style.left = savedBox.left + 'px';
     elRefs.ytPlayer.style.display = "inherit";
     state.isMinimized = false;
   }
@@ -296,7 +300,7 @@ function onMouseHover() {
 }
 
 function onMouseOut() {
-  if(!state.isMinimized) elRefs.pipHeader.style.opacity = 0;
+  if (!state.isMinimized) elRefs.pipHeader.style.opacity = 0;
   elRefs.ytPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)"
 }
 
@@ -380,24 +384,26 @@ function animate() {
   redraw = false;
 
   // Resizing
-  if (clicked && clicked.isResizing) {
-    if (clicked.onRightEdge) videoNailContainer.style.width = Math.max(x, MIN_WIDTH) + 'px';
-    if (clicked.onBottomEdge) videoNailContainer.style.height = Math.max(y, MIN_HEIGHT) + 'px';
-    if (clicked.onLeftEdge) {
-      let currentWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
-      if (currentWidth > MIN_WIDTH) {
-        videoNailContainer.style.width = currentWidth + 'px';
-        videoNailContainer.style.left = e.clientX + 'px';
+  if (!state.isMinimized) {
+    if (clicked && clicked.isResizing) {
+      if (clicked.onRightEdge) videoNailContainer.style.width = Math.max(x, MIN_WIDTH) + 'px';
+      if (clicked.onBottomEdge) videoNailContainer.style.height = Math.max(y, MIN_HEIGHT) + 'px';
+      if (clicked.onLeftEdge) {
+        let currentWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
+        if (currentWidth > MIN_WIDTH) {
+          videoNailContainer.style.width = currentWidth + 'px';
+          videoNailContainer.style.left = e.clientX + 'px';
+        }
       }
-    }
-    if (clicked.onTopEdge) {
-      let currentHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
-      if (currentHeight > MIN_HEIGHT) {
-        videoNailContainer.style.height = currentHeight + 'px';
-        videoNailContainer.style.top = e.clientY + 'px';
+      if (clicked.onTopEdge) {
+        let currentHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
+        if (currentHeight > MIN_HEIGHT) {
+          videoNailContainer.style.height = currentHeight + 'px';
+          videoNailContainer.style.top = e.clientY + 'px';
+        }
       }
+      return;
     }
-    return;
   }
 
   // Moving or Snapping
@@ -423,27 +429,29 @@ function animate() {
 
     // Moving
     var container = videoNailContainer.getBoundingClientRect();
-    videoNailContainer.style.top = Math.max(56, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
+    if (!state.isMinimized) videoNailContainer.style.top = Math.max(56, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
     videoNailContainer.style.left = Math.max(0, Math.min(document.body.clientWidth - container.width, (e.clientX - clicked.x))) + 'px';
-    //    videoNailContainer.style.top = (e.clientY - clicked.y) + 'px';
-    //    videoNailContainer.style.left = (e.clientX - clicked.x) + 'px';
     return;
   }
 
   // This code executes when mouse moves without clicking
   // style cursor
-  if (onRightEdge && onBottomEdge || onLeftEdge && onTopEdge) {
-    videoNailContainer.style.cursor = 'nwse-resize';
-  } else if (onRightEdge && onTopEdge || onBottomEdge && onLeftEdge) {
-    videoNailContainer.style.cursor = 'nesw-resize';
-  } else if (onRightEdge || onLeftEdge) {
-    videoNailContainer.style.cursor = 'ew-resize';
-  } else if (onBottomEdge || onTopEdge) {
-    videoNailContainer.style.cursor = 'ns-resize';
-  } else if (canMove()) {
-    videoNailContainer.style.cursor = 'move';
+  if (!state.isMinimized) {
+    if (onRightEdge && onBottomEdge || onLeftEdge && onTopEdge) {
+      videoNailContainer.style.cursor = 'nwse-resize';
+    } else if (onRightEdge && onTopEdge || onBottomEdge && onLeftEdge) {
+      videoNailContainer.style.cursor = 'nesw-resize';
+    } else if (onRightEdge || onLeftEdge) {
+      videoNailContainer.style.cursor = 'ew-resize';
+    } else if (onBottomEdge || onTopEdge) {
+      videoNailContainer.style.cursor = 'ns-resize';
+    } else if (canMove()) {
+      videoNailContainer.style.cursor = 'move';
+    } else {
+      videoNailContainer.style.cursor = 'default';
+    }
   } else {
-    videoNailContainer.style.cursor = 'default';
+    videoNailContainer.style.cursor = 'move' ? canMove() : videoNailContainer.style.cursor = 'default';
   }
 }
 
