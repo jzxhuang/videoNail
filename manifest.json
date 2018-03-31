@@ -9,7 +9,7 @@
     {
       "matches": ["*://www.youtube.com/*"],
       "css": ["videonail.css"],
-      "js": ["interact.min.js", "videonail.js"],
+      "js": ["fontawesome-all.min.js", "videonail.js"],
       "run_at": "document_end"
     }
   ],

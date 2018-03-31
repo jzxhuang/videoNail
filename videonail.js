@@ -8,7 +8,8 @@ const state = {
   isPolymer: false,
   inPipMode: false,
   manualPip: false,
-  manualResize: false
+  manualResize: false,
+  isMinimized: false
 };
 const elRefs = {
   originalPlayerSection: null,
@@ -31,7 +32,7 @@ let clicked = null;
 let onRightEdge, onBottomEdge, onLeftEdge, onTopEdge;
 
 let rightScreenEdge, bottomScreenEdge;
-let e, b, x, y, preSnapped;
+let e, b, x, y, preSnapped, minPrevHeight;
 let redraw = false;
 
 const NAVBAR_HEIGHT = 56;
@@ -105,7 +106,8 @@ function attachToggleButton() {
 }
 
 function attachPIPHeader() {
-  elRefs.videoNailContainer.insertAdjacentHTML('afterbegin', '<div class="videonail-header" style="display:none" id="videonailHeader"></div>');
+  elRefs.videoNailContainer.insertAdjacentHTML('afterbegin', '<div class="videonail-header" style="display:none" id="videonailHeader"><button id="minimizeButton"><i class="far fa-lg fa-window-minimize"></i></button></div>');
+  elRefs.minimize = document.getElementById("minimizeButton");
   elRefs.pipHeader = document.getElementById("videonailHeader");
 }
 
@@ -182,7 +184,6 @@ function resizePIP() {
 
     //    let newWidth = window.innerWidth / 3.75;
     let newWidth = elRefs.relatedVideoDiv.offsetWidth + 48;
-    console.log(elRefs.relatedVideoDiv.offsetWidth);
     if (newWidth < MIN_WIDTH) {
       newWidth = MIN_WIDTH;
     }
@@ -208,6 +209,7 @@ function makePIPDraggable() {
   videoNailContainer.addEventListener('mousedown', onMouseDown);
   videoNailContainer.addEventListener('mouseenter', onMouseHover);
   elRefs.videoNailContainer.addEventListener('mouseleave', onMouseOut);
+  elRefs.minimize.addEventListener('mousedown', minimizeClick);
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
   animate();
@@ -234,21 +236,21 @@ function onMove(ee) {
 function onUp(e) {
   calc(e);
   // Snapping
-//  if (clicked && clicked.isMoving) {
-//    // Snap
-//    var snapped = {
-//      width: b.width,
-//      height: b.height
-//    };
-//    let bounds = getSnapBounds();
-//    if (bounds) {
-//      setBounds(elRefs.videoNailContainer, ...bounds);
-//      preSnapped = snapped;
-//    } else {
-//      preSnapped = null;
-//    }
-//    hintHide();
-//  }
+  //  if (clicked && clicked.isMoving) {
+  //    // Snap
+  //    var snapped = {
+  //      width: b.width,
+  //      height: b.height
+  //    };
+  //    let bounds = getSnapBounds();
+  //    if (bounds) {
+  //      setBounds(elRefs.videoNailContainer, ...bounds);
+  //      preSnapped = snapped;
+  //    } else {
+  //      preSnapped = null;
+  //    }
+  //    hintHide();
+  //  }
   clicked = null;
 }
 
@@ -260,19 +262,41 @@ function saveAndResetPlayerStyle() {
   elRefs.videoNailContainer.removeEventListener('mousedown', onMouseDown);
   elRefs.videoNailContainer.removeEventListener('mouseenter', onMouseHover);
   elRefs.videoNailContainer.removeEventListener('mouseleave', onMouseOut);
+  elRefs.minimize.removeEventListener('mousedown', minimizeClick);
   document.removeEventListener('mousemove', onMove);
   document.removeEventListener('mouseup', onUp);
   clicked = null;
 }
 
+function minimizeClick() {
+  let substring = "fa-window-minimize";
+  let min = elRefs.minimize;
+  let minSVG = min.children[0];
+  if (minSVG.className.baseVal.includes(substring)) {
+    console.log(elRefs.videoNailContainer.getBoundingClientRect().top);
+    minPrevHeight = elRefs.ytPlayer.offsetHeight;
+    console.log(minPrevHeight);
+    elRefs.videoNailContainer.style.top = elRefs.videoNailContainer.getBoundingClientRect().top + minPrevHeight + 'px';
+    elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight - minPrevHeight + 'px';
+    elRefs.ytPlayer.style.display = "none";
+    state.isMinimized = true;
+    elRefs.pipHeader.style.opacity = 0.5;
+  } else {
+    elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight + minPrevHeight + 'px';
+    elRefs.videoNailContainer.style.top = elRefs.videoNailContainer.getBoundingClientRect().top - minPrevHeight + 'px';
+    elRefs.ytPlayer.style.display = "inherit";
+    state.isMinimized = false;
+  }
+  minSVG.classList.toggle("fa-window-minimize");
+  minSVG.classList.toggle("fa-window-maximize");
+}
+
 function onMouseHover() {
   elRefs.pipHeader.style.opacity = 0.5;
-//  elRefs.ytPlayer.style.borderTop = "none";
 }
 
 function onMouseOut() {
-  elRefs.pipHeader.style.opacity = 0;
-  //  elRefs.videoNailContainer.style.border = "none";
+  if(!state.isMinimized) elRefs.pipHeader.style.opacity = 0;
   elRefs.ytPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)"
 }
 
@@ -379,30 +403,30 @@ function animate() {
   // Moving or Snapping
   if (clicked && clicked.isMoving) {
     // Snapping
-//    let bounds = getSnapBounds();
-//    if (bounds) {
-//      setBounds(elRefs.ghostpane, ...bounds);
-//      elRefs.ghostpane.style.opacity = 0.3;
-//      elRefs.ghostpane.style.display = 'block';
-//    } else {
-//      hintHide();
-//    }
-//    if (preSnapped) {
-//      setBounds(elRefs.videoNailContainer,
-//        e.clientX - preSnapped.width / 2,
-//        e.clientY - Math.min(clicked.y, preSnapped.height),
-//        preSnapped.width,
-//        preSnapped.height
-//      );
-//      return;
-//    }
+    //    let bounds = getSnapBounds();
+    //    if (bounds) {
+    //      setBounds(elRefs.ghostpane, ...bounds);
+    //      elRefs.ghostpane.style.opacity = 0.3;
+    //      elRefs.ghostpane.style.display = 'block';
+    //    } else {
+    //      hintHide();
+    //    }
+    //    if (preSnapped) {
+    //      setBounds(elRefs.videoNailContainer,
+    //        e.clientX - preSnapped.width / 2,
+    //        e.clientY - Math.min(clicked.y, preSnapped.height),
+    //        preSnapped.width,
+    //        preSnapped.height
+    //      );
+    //      return;
+    //    }
 
     // Moving
     var container = videoNailContainer.getBoundingClientRect();
     videoNailContainer.style.top = Math.max(56, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
     videoNailContainer.style.left = Math.max(0, Math.min(document.body.clientWidth - container.width, (e.clientX - clicked.x))) + 'px';
-//    videoNailContainer.style.top = (e.clientY - clicked.y) + 'px';
-//    videoNailContainer.style.left = (e.clientX - clicked.x) + 'px';
+    //    videoNailContainer.style.top = (e.clientY - clicked.y) + 'px';
+    //    videoNailContainer.style.left = (e.clientX - clicked.x) + 'px';
     return;
   }
 
