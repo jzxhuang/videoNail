@@ -107,7 +107,7 @@ function attachToggleButton() {
 }
 
 function attachPIPHeader() {
-  elRefs.videoNailContainer.insertAdjacentHTML('afterbegin', '<div class="videonail-header" style="display:none" id="videonailHeader"><button id="minimizeButton"><i class="far fa-lg fa-window-minimize"></i></button></div>');
+  elRefs.videoNailContainer.insertAdjacentHTML('afterbegin', '<div class="videonail-header" style="display:none" id="videonailHeader"><button id="minimizeButton"><i class="fas fa-window-minimize"></i></button></div>');
   elRefs.minimize = document.getElementById("minimizeButton");
   elRefs.pipHeader = document.getElementById("videonailHeader");
 }
@@ -292,7 +292,7 @@ function minimizeClick() {
     state.isMinimized = false;
   }
   minSVG.classList.toggle("fa-window-minimize");
-  minSVG.classList.toggle("fa-window-maximize");
+  minSVG.classList.toggle("fa-plus");
 }
 
 function onMouseHover() {

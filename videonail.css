@@ -138,7 +138,7 @@ body#body .videonail-pip #movie_player:hover
   cursor: pointer!important;
   opacity: 1;
 }
-.fa-window-minimize, .fa-window-maximize{
+.fa-window-minimize, .fa-window-maximize, .fa-plus{
   color: white;
   opacity: inherit;;
   padding-right: 7px;
