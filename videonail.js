@@ -181,7 +181,7 @@ function resizePIP() {
     }
 
     //    let newWidth = window.innerWidth / 3.75;
-    let newWidth = elRefs.relatedVideoDiv.offsetWidth + 24;
+    let newWidth = elRefs.relatedVideoDiv.offsetWidth + 48;
     console.log(elRefs.relatedVideoDiv.offsetWidth);
     if (newWidth < MIN_WIDTH) {
       newWidth = MIN_WIDTH;

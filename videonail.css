@@ -121,7 +121,6 @@ body#body .videonail-pip #movie_player:hover
 #ghostpane {
 	background: #999;
 	opacity: 0;
-
 	width: 45%;
 	height: 45%;
 	top: 20%;
@@ -131,6 +130,5 @@ body#body .videonail-pip #movie_player:hover
 	margin: 0;
 	padding: 0;
 	z-index: 98;
-
 	transition: opacity 0.25s ease-in-out;
 }
