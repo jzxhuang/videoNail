@@ -20,8 +20,8 @@ const elRefs = {
 };
 
 const SCROLL_THRESHOLD = 0.4;
-const MIN_WIDTH = 400;
-const MIN_HEIGHT = MIN_WIDTH / 16 * 9;
+const MIN_WIDTH = 325;
+const MIN_HEIGHT = (MIN_WIDTH - 10) / 16 * 9 + 34; 
 const EDGE_MARGIN = 5;
 
 let videoNailContainer = null;
@@ -119,6 +119,7 @@ function togglePIP() {
 
   // When users scroll down
   if (state.inPipMode) {
+    if (state.isMinimized) elRefs.ytPlayer.style.display = "none";
     setPlayerPosition();
     window.addEventListener("resize", resizePIP);
     makePIPDraggable();
@@ -236,28 +237,13 @@ function onMove(ee) {
 
 function onUp(e) {
   calc(e);
-  // Snapping
-  //  if (clicked && clicked.isMoving) {
-  //    // Snap
-  //    var snapped = {
-  //      width: b.width,
-  //      height: b.height
-  //    };
-  //    let bounds = getSnapBounds();
-  //    if (bounds) {
-  //      setBounds(elRefs.videoNailContainer, ...bounds);
-  //      preSnapped = snapped;
-  //    } else {
-  //      preSnapped = null;
-  //    }
-  //    hintHide();
-  //  }
   clicked = null;
 }
 
 function saveAndResetPlayerStyle() {
   // TODO: save mini player size when scrolling up
   lastSavedStyle = elRefs.videoNailContainer.style.cssText;
+  elRefs.ytPlayer.style.display = 'flex';
   elRefs.videoNailContainer.style = null;
   elRefs.originalPlayerSection.style = null;
   elRefs.videoNailContainer.removeEventListener('mousedown', onMouseDown);

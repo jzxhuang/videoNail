@@ -127,7 +127,7 @@ body#body .videonail-pip #movie_player:hover
 
 #minimizeButton{
   background-color: transparent;
-  padding-right: 7px;
+  margin-right: 5px;
   border: none;
   margin: none;
   padding-top: 0;
