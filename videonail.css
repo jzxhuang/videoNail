@@ -102,10 +102,6 @@ body#body .videonail-pip #movie_player:hover
   justify-content: flex-end;
 }
 
-.videonail-header:hover {
-/*  opacity: 0.75 !important;*/
-}
-
 #ytd-player {
   display: inherit;
   flex: 1 1 auto;
