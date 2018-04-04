@@ -85,7 +85,7 @@ body#body .videonail-pip #movie_player:hover {
   display: flex;
   flex-flow: column;
   box-sizing: border-box;
-  z-index: 99;
+  z-index: 2147483647;
   background: transparent;
   border-top: none;
   min-width: 50px;

@@ -38,7 +38,7 @@ let rightScreenEdge, bottomScreenEdge;
 let e, b, x, y, preSnapped, minPrevHeight;
 let redraw = false;
 
-const NAVBAR_HEIGHT = 56;
+const NAVBAR_HEIGHT = 0;
 
 
 // ========================================================================= //
@@ -463,55 +463,56 @@ function animate() {
             elRefs.videoNailContainer.style.height = newHeight + 'px';
           }
         }
-      } else if (clicked.onRightEdge) {
-        newWidth = Math.max(x, MIN_WIDTH);
-        if (e.clientX < document.body.clientWidth) {
-          elRefs.videoNailContainer.style.width = newWidth + 'px';
-          elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-        } else {
-          newWidth = (document.body.clientWidth - clicked.box.left);
-          elRefs.videoNailContainer.style.width = newWidth + 'px';
-          elrefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-        }
-      } else if (clicked.onLeftEdge) {
-        newWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
-        if (newWidth > MIN_WIDTH) {
-          if (e.clientX > 0) {
-            elRefs.videoNailContainer.style.width = newWidth + 'px';
-            elRefs.videoNailContainer.style.left = e.clientX + 'px';
-            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-          } else {
-            newWidth = clicked.w + clicked.box.left;
-            elRefs.videoNailContainer.style.width = newWidth + 'px';
-            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-            elRefs.videoNailContainer.style.left = '0px';
-          }
-        }
-      } else if (clicked.onBottomEdge) {
-        newHeight = Math.max(y, MIN_HEIGHT);
-        if (e.clientY < window.innerHeight) {
-          elRefs.videoNailContainer.style.height = newHeight + 'px';
-          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-        } else {
-          newHeight = window.innerHeight - clicked.box.top;
-          elRefs.videoNailContainer.style.height = newHeight + 'px';
-          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-        }
-      } else if (clicked.onTopEdge) {
-        newHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
-        if (newHeight > MIN_HEIGHT) {
-          if (e.clientY > NAVBAR_HEIGHT) {
-            elRefs.videoNailContainer.style.height = newHeight + 'px';
-            elRefs.videoNailContainer.style.top = e.clientY + 'px';
-            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-          } else {
-            elRefs.videoNailContainer.style.top = NAVBAR_HEIGHT + 'px';
-            newHeight = clicked.h + clicked.box.top - NAVBAR_HEIGHT;
-            elRefs.videoNailContainer.style.height = newHeight + 'px';
-            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-          }
-        }
-      }
+      } 
+//        else if (clicked.onRightEdge) {
+//        newWidth = Math.max(x, MIN_WIDTH);
+//        if (e.clientX < document.body.clientWidth) {
+//          elRefs.videoNailContainer.style.width = newWidth + 'px';
+//          elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+//        } else {
+//          newWidth = (document.body.clientWidth - clicked.box.left);
+//          elRefs.videoNailContainer.style.width = newWidth + 'px';
+//          elrefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+//        }
+//      } else if (clicked.onLeftEdge) {
+//        newWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
+//        if (newWidth > MIN_WIDTH) {
+//          if (e.clientX > 0) {
+//            elRefs.videoNailContainer.style.width = newWidth + 'px';
+//            elRefs.videoNailContainer.style.left = e.clientX + 'px';
+//            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+//          } else {
+//            newWidth = clicked.w + clicked.box.left;
+//            elRefs.videoNailContainer.style.width = newWidth + 'px';
+//            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+//            elRefs.videoNailContainer.style.left = '0px';
+//          }
+//        }
+//      } else if (clicked.onBottomEdge) {
+//        newHeight = Math.max(y, MIN_HEIGHT);
+//        if (e.clientY < window.innerHeight) {
+//          elRefs.videoNailContainer.style.height = newHeight + 'px';
+//          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+//        } else {
+//          newHeight = window.innerHeight - clicked.box.top;
+//          elRefs.videoNailContainer.style.height = newHeight + 'px';
+//          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+//        }
+//      } else if (clicked.onTopEdge) {
+//        newHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
+//        if (newHeight > MIN_HEIGHT) {
+//          if (e.clientY > NAVBAR_HEIGHT) {
+//            elRefs.videoNailContainer.style.height = newHeight + 'px';
+//            elRefs.videoNailContainer.style.top = e.clientY + 'px';
+//            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+//          } else {
+//            elRefs.videoNailContainer.style.top = NAVBAR_HEIGHT + 'px';
+//            newHeight = clicked.h + clicked.box.top - NAVBAR_HEIGHT;
+//            elRefs.videoNailContainer.style.height = newHeight + 'px';
+//            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+//          }
+//        }
+//      }
       return;
     }
   }
@@ -551,11 +552,12 @@ function animate() {
       elRefs.videoNailContainer.style.cursor = 'nwse-resize';
     } else if (onRightEdge && onTopEdge || onBottomEdge && onLeftEdge) {
       elRefs.videoNailContainer.style.cursor = 'nesw-resize';
-    } else if (onRightEdge || onLeftEdge) {
-      elRefs.videoNailContainer.style.cursor = 'ew-resize';
-    } else if (onBottomEdge || onTopEdge) {
-      elRefs.videoNailContainer.style.cursor = 'ns-resize';
-    } else if (canMove()) {
+    } 
+//    else if (onRightEdge || onLeftEdge) {
+//      elRefs.videoNailContainer.style.cursor = 'ew-resize';
+//    } else if (onBottomEdge || onTopEdge) {
+//      elRefs.videoNailContainer.style.cursor = 'ns-resize';} 
+      else if (canMove()) {
       elRefs.videoNailContainer.style.cursor = 'move';
     } else {
       elRefs.videoNailContainer.style.cursor = 'default';
