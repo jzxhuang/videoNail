@@ -19,9 +19,11 @@ const elRefs = {
   pipHeader: null
 };
 
+const headerBottomBorder = 29;
+const sideBorderSizes = 10;
 const SCROLL_THRESHOLD = 0.4;
 const MIN_WIDTH = 325;
-const MIN_HEIGHT = (MIN_WIDTH - 10) / 16 * 9 + 29;
+const MIN_HEIGHT = (MIN_WIDTH - sideBorderSizes) / 16 * 9 + headerBottomBorder;
 const EDGE_MARGIN = 5;
 
 let videoNailContainer = null;
@@ -191,7 +193,7 @@ function resizePIP() {
     if (newWidth < MIN_WIDTH) {
       newWidth = MIN_WIDTH;
     }
-    let newHeight = (newWidth - 10) / 16 * 9 + 29;
+    let newHeight = (newWidth - sideBorderSizes) / 16 * 9 + headerBottomBorder;
 
     elRefs.videoNailContainer.style.width = `${newWidth}px`;
     elRefs.videoNailContainer.style.height = `${newHeight}px`;
@@ -208,7 +210,7 @@ function resizePIP() {
 
 function makePIPDraggable() {
   elRefs.videoNailContainer.style.margin = "0px 0px 0px 0px";
-//  videoNailContainer = elRefs.videoNailContainer;
+  //  videoNailContainer = elRefs.videoNailContainer;
   // Mouse events
   elRefs.videoNailContainer.addEventListener('mousedown', onMouseDown);
   elRefs.videoNailContainer.addEventListener('mouseenter', onMouseHover);
@@ -285,13 +287,13 @@ function minimizeClick() {
 
 function onMouseHover() {
   //  elRefs.pipHeader.style.opacity = 0.5;
-//  elRefs.videoNailContainer.style.borderColor = 'rgba(208, 10, 10, 0.75)';
+  //  elRefs.videoNailContainer.style.borderColor = 'rgba(208, 10, 10, 0.75)';
 }
 
 function onMouseOut() {
   //  if (!state.isMinimized) elRefs.pipHeader.style.opacity = 0;
   //  elRefs.videoNailPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)"
-//  elRefs.videoNailContainer.style.borderColor = 'rgba(208, 10, 10, 0.5)';
+  //  elRefs.videoNailContainer.style.borderColor = 'rgba(208, 10, 10, 0.5)';
 }
 
 function onDown(e) {
@@ -305,6 +307,7 @@ function onDown(e) {
     cy: e.clientY,
     w: b.width,
     h: b.height,
+    box: b,
     isResizing: isResizing,
     isMoving: !isResizing && canMove(),
     onTopEdge: onTopEdge,
@@ -367,22 +370,146 @@ function animate() {
   redraw = false;
 
   // Resizing
+  //  DO NOT READ THIS CODE 
   if (!state.isMinimized) {
     if (clicked && clicked.isResizing) {
-      if (clicked.onRightEdge) elRefs.videoNailContainer.style.width = Math.max(x, MIN_WIDTH) + 'px';
-      if (clicked.onBottomEdge) elRefs.videoNailContainer.style.height = Math.max(y, MIN_HEIGHT) + 'px';
-      if (clicked.onLeftEdge) {
-        let currentWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
-        if (currentWidth > MIN_WIDTH) {
-          elRefs.videoNailContainer.style.width = currentWidth + 'px';
-          elRefs.videoNailContainer.style.left = e.clientX + 'px';
+      let newWidth, newHeight, newLeft, newTop;
+      if (clicked.onTopEdge && clicked.onLeftEdge) {
+        newWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
+        newHeight = calculateHeight(newWidth);
+        newTop = b.top - (newHeight - b.height);
+        if (newWidth > MIN_WIDTH) {
+          if (newTop < NAVBAR_HEIGHT) {
+            newHeight = clicked.h + clicked.box.top - NAVBAR_HEIGHT;
+            elRefs.videoNailContainer.style.top = NAVBAR_HEIGHT + 'px';
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+            elRefs.videoNailContainer.style.left = clicked.box.left - (calculateWidth(newHeight) - clicked.w) + 'px';
+          } else if (e.clientX < 0) {
+            newWidth = clicked.w + clicked.box.left;
+            elRefs.videoNailContainer.style.left = '0px';
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elrefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+            elrefs.videoNailContainer.style.top = clicked.top - (calculateHeight(newWidth) - clicked.box.h) + 'px';
+          } else {
+            elRefs.videoNailContainer.style.left = e.clientX < document.body.clientWidth ? e.clientX - 3 + 'px' : document.body.clientWidth - newWidth - 5 + 'px';
+            elRefs.videoNailContainer.style.top = b.top - (newHeight - b.height) + 'px';
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+          }
         }
-      }
-      if (clicked.onTopEdge) {
-        let currentHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
-        if (currentHeight > MIN_HEIGHT) {
-          elRefs.videoNailContainer.style.height = currentHeight + 'px';
-          elRefs.videoNailContainer.style.top = e.clientY + 'px';
+        if (newWidth > MIN_WIDTH && newTop > NAVBAR_HEIGHT && e.clientX > 0) {
+          elRefs.videoNailContainer.style.left = e.clientX < document.body.clientWidth ? e.clientX - 3 + 'px' : document.body.clientWidth - newWidth - 5 + 'px';
+          elRefs.videoNailContainer.style.top = b.top - (newHeight - b.height) + 'px';
+          elRefs.videoNailContainer.style.width = newWidth + 'px';
+          elRefs.videoNailContainer.style.height = newHeight + 'px';
+        }
+      } else if (clicked.onTopEdge && clicked.onRightEdge) {
+        newWidth = Math.max(x, MIN_WIDTH);
+        newHeight = calculateHeight(newWidth);
+        newTop = b.top - (newHeight - b.height);
+        if (newWidth > MIN_WIDTH) {
+          if (newTop < NAVBAR_HEIGHT) {
+            console.log(1);
+            elRefs.videoNailContainer.style.top = NAVBAR_HEIGHT + 'px';
+            newHeight = clicked.h + clicked.box.top - NAVBAR_HEIGHT;
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+          } else if (e.clientX > document.body.clientWidth) {
+            newWidth = document.body.clientWidth - clicked.box.left;
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+            elRefs.videoNailContainer.style.top = clicked.box.top - (calculateHeight(newWidth) - clicked.h) + 'px';
+          } else {
+            elRefs.videoNailContainer.style.top = newTop + 'px';
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+          }
+        }
+      } else if (clicked.onBottomEdge && clicked.onRightEdge) {
+        newWidth = Math.max(x, MIN_WIDTH);
+        newHeight = calculateHeight(newWidth);
+        if (newWidth > MIN_WIDTH) {
+          if (b.top + newHeight > window.innerHeight) {
+            newHeight = clicked.h + window.innerHeight - clicked.box.bottom;
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+          } else if (e.clientX > document.body.clientWidth) {
+            newWidth = document.body.clientWidth - clicked.box.left;
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+          } else {
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+          }
+        }
+      } else if (clicked.onBottomEdge && clicked.onLeftEdge) {
+        console.log(1);
+        newWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
+        newHeight = calculateHeight(newWidth);
+        if (newWidth > MIN_WIDTH) {
+          if (b.top + newHeight > window.innerHeight) {
+            newHeight = clicked.h + window.innerHeight - clicked.box.bottom;
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+          } else if (e.clientX < 0) {
+            newWidth = clicked.w + clicked.box.left;
+            elRefs.videoNailContainer.style.left = '0px';
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+          } else {
+            elRefs.videoNailContainer.style.left = e.clientX + 'px';
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+          }
+        }
+      } else if (clicked.onRightEdge) {
+        newWidth = Math.max(x, MIN_WIDTH);
+        if (e.clientX < document.body.clientWidth) {
+          elRefs.videoNailContainer.style.width = newWidth + 'px';
+          elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+        } else {
+          newWidth = (document.body.clientWidth - clicked.box.left);
+          elRefs.videoNailContainer.style.width = newWidth + 'px';
+          elrefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+        }
+      } else if (clicked.onLeftEdge) {
+        newWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
+        if (newWidth > MIN_WIDTH) {
+          if (e.clientX > 0) {
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elRefs.videoNailContainer.style.left = e.clientX + 'px';
+            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+          } else {
+            newWidth = clicked.w + clicked.box.left;
+            elRefs.videoNailContainer.style.width = newWidth + 'px';
+            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+            elRefs.videoNailContainer.style.left = '0px';
+          }
+        }
+      } else if (clicked.onBottomEdge) {
+        newHeight = Math.max(y, MIN_HEIGHT);
+        if (e.clientY < window.innerHeight) {
+          elRefs.videoNailContainer.style.height = newHeight + 'px';
+          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+        } else {
+          newHeight = window.innerHeight - clicked.box.top;
+          elRefs.videoNailContainer.style.height = newHeight + 'px';
+          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+        }
+      } else if (clicked.onTopEdge) {
+        newHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
+        if (newHeight > MIN_HEIGHT) {
+          if (e.clientY > NAVBAR_HEIGHT) {
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+            elRefs.videoNailContainer.style.top = e.clientY + 'px';
+            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+          } else {
+            elRefs.videoNailContainer.style.top = NAVBAR_HEIGHT + 'px';
+            newHeight = clicked.h + clicked.box.top - NAVBAR_HEIGHT;
+            elRefs.videoNailContainer.style.height = newHeight + 'px';
+            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+          }
         }
       }
       return;
@@ -412,7 +539,7 @@ function animate() {
 
     // Moving
     var container = elRefs.videoNailContainer.getBoundingClientRect();
-    if (!state.isMinimized) elRefs.videoNailContainer.style.top = Math.max(56, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
+    if (!state.isMinimized) elRefs.videoNailContainer.style.top = Math.max(NAVBAR_HEIGHT, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
     elRefs.videoNailContainer.style.left = Math.max(0, Math.min(document.body.clientWidth - container.width, (e.clientX - clicked.x))) + 'px';
     return;
   }
@@ -481,4 +608,13 @@ function wrapAll(nodes, wrapper) {
   // Place the wrapper just after the cached previousSibling
   parent.insertBefore(wrapper, previousSibling.nextSibling);
   return wrapper;
+}
+
+// Calculates height maintaining aspect ratio
+function calculateHeight(width) {
+  return (width - sideBorderSizes) * 9 / 16 + headerBottomBorder;
+}
+// Calculate width maintaining aspect ratio
+function calculateWidth(height) {
+  return (((height - headerBottomBorder) * 16 / 9) + sideBorderSizes);
 }
