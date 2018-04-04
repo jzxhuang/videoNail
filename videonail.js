@@ -21,7 +21,7 @@ const elRefs = {
 
 const SCROLL_THRESHOLD = 0.4;
 const MIN_WIDTH = 325;
-const MIN_HEIGHT = (MIN_WIDTH - 10) / 16 * 9 + 34; 
+const MIN_HEIGHT = (MIN_WIDTH - 10) / 16 * 9 + 29; 
 const EDGE_MARGIN = 5;
 
 let videoNailContainer = null;
@@ -58,6 +58,7 @@ function injectPIP() {
     elRefs.player = document.querySelector("#movie_player");
   }
   elRefs.ytPlayer = document.getElementById("ytd-player");
+//  elRefs.ytPlayer = elRefs.player;
   console.log(elRefs.ytPlayer);
   elRefs.relatedVideoDiv = document.getElementById('related');
 
@@ -126,6 +127,7 @@ function togglePIP() {
     addPlayerMsg();
     elRefs.pipHeader.style.display = "flex";
     elRefs.ytPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)";
+    elRefs.ytPlayer.style.borderTop = "none";
     elRefs.ytPlayer.style.width = "initial";
   } else {
     // When users scroll up
@@ -189,7 +191,7 @@ function resizePIP() {
     if (newWidth < MIN_WIDTH) {
       newWidth = MIN_WIDTH;
     }
-    let newHeight = (newWidth - 10) / 16 * 9 + 34;
+    let newHeight = (newWidth - 10) / 16 * 9 + 29;
 
     elRefs.videoNailContainer.style.width = `${newWidth}px`;
     elRefs.videoNailContainer.style.height = `${newHeight}px`;
@@ -260,18 +262,20 @@ function minimizeClick() {
   let min = elRefs.minimize;
   let minSVG = min.children[0];
 
-  // if maximized
+  // if maximized -> minimized
   if (minSVG.className.baseVal.includes(substring)) {
     savedBox = elRefs.videoNailContainer.getBoundingClientRect();
     minPrevHeight = elRefs.ytPlayer.offsetHeight;
+    elRefs.videoNailContainer.style.width = '300px';
     elRefs.videoNailContainer.style.top = window.innerHeight - elRefs.pipHeader.offsetHeight + 'px';
-    elRefs.videoNailContainer.style.left = document.body.clientWidth - savedBox.width + 'px';
+    elRefs.videoNailContainer.style.left = document.body.clientWidth - 300 + 'px';
     elRefs.videoNailContainer.style.height = savedBox.height - minPrevHeight + 'px';
     elRefs.ytPlayer.style.display = "none";
     state.isMinimized = true;
     elRefs.pipHeader.style.opacity = 0.5;
   } else {
     elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight + minPrevHeight + 'px';
+    elRefs.videoNailContainer.style.width = savedBox.width + 'px';
     elRefs.videoNailContainer.style.top = savedBox.top + 'px';
     elRefs.videoNailContainer.style.left = savedBox.left + 'px';
     elRefs.ytPlayer.style.display = "inherit";
@@ -282,12 +286,12 @@ function minimizeClick() {
 }
 
 function onMouseHover() {
-  elRefs.pipHeader.style.opacity = 0.5;
+//  elRefs.pipHeader.style.opacity = 0.5;
 }
 
 function onMouseOut() {
-  if (!state.isMinimized) elRefs.pipHeader.style.opacity = 0;
-  elRefs.ytPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)"
+//  if (!state.isMinimized) elRefs.pipHeader.style.opacity = 0;
+//  elRefs.ytPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)"
 }
 
 function onDown(e) {

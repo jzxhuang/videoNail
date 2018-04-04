@@ -67,11 +67,9 @@ body#body .videonail-pip #movie_player
   z-index: 99;
   background: transparent !important;
 }
-
-.videonail-pip #player-container:hover,
-/* Polymer */
-body#body .videonail-pip #movie_player:hover
-/* Old */ {
+/* On Hover*/
+.videonail-pip #player-container:hover, body#body .videonail-pip #movie_player:hover
+{
   border-color: var(--videonail-color);
   transition: opacity 0.25s;
 }
@@ -92,10 +90,9 @@ body#body .videonail-pip #movie_player:hover
 
 /* PIP window header */
 .videonail-pip .videonail-header {
-/*  background: var(--videonail-pip-red-bg);*/
   background: rgba(208, 10, 10);
   flex: 0 1 var(--videonail-header-height);
-  opacity: 0;
+  opacity: 0.5;
   transition: var(--transition);
   margin: 0;
   padding: 0;
@@ -103,10 +100,10 @@ body#body .videonail-pip #movie_player:hover
 }
 
 .videonail-header:hover {
-/*  opacity: 0.75 !important;*/
+  opacity: 0.75 !important;
 }
 
-#ytd-player {
+#ytd-player, #movie_player {
   display: inherit;
   flex: 1 1 auto;
 }
