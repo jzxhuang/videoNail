@@ -5,6 +5,7 @@
 // ========================================================================= //
 
 const state = {
+  firstTime: true,
   isPolymer: false,
   inPipMode: false,
   manualPip: false,
@@ -65,11 +66,6 @@ function injectPIP() {
 
   // Wrap player in container
   elRefs.videoNailContainer = document.createElement('div');
-  elRefs.videoNailContainer.id = "videonail-container";
-  wrapAll([elRefs.videoNailPlayer], elRefs.videoNailContainer);
-
-  // Add header for PIP mode
-  attachPIPHeader();
 
   // Add toggle button to corner of player
   attachToggleButton();
@@ -110,42 +106,60 @@ function attachToggleButton() {
 }
 
 function attachPIPHeader() {
-  elRefs.videoNailContainer.insertAdjacentHTML('afterbegin', '<div class="videonail-header" style="display:none" id="videonailHeader"><button id="minimizeButton"><i class="fas fa-window-minimize"></i></button></div>');
-  elRefs.minimize = document.getElementById("minimizeButton");
-  elRefs.pipHeader = document.getElementById("videonailHeader");
+  return new Promise((resolve, reject) => {
+    elRefs.videoNailContainer.insertAdjacentHTML('afterbegin', '<div class="videonail-header" style="display:none" id="videonailHeader"><button id="minimizeButton"><i class="fas fa-window-minimize"></i></button></div>');
+    elRefs.minimize = document.getElementById("minimizeButton");
+    elRefs.pipHeader = document.getElementById("videonailHeader");
+    resolve();
+  })
 }
 
 function togglePIP() {
   state.inPipMode = !state.inPipMode;
   elRefs.originalPlayerSection.classList.toggle("videonail-pip", state.inPipMode);
   let theaterButton = document.querySelector("[title='Theater mode']");
+  function helper() {
+    // When users scroll down
+    if (state.inPipMode) {
+      if (state.isMinimized) elRefs.videoNailPlayer.style.display = "none";
+      setPlayerPosition();
+      window.addEventListener("resize", resizePIP);
+      makePIPDraggable();
+      addPlayerMsg();
+      elRefs.pipHeader.style.display = "flex";
+      elRefs.videoNailPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)";
+      elRefs.videoNailPlayer.style.borderTop = "none";
+    } else {
+      // When users scroll up
+      state.manualPip = false;
+      saveAndResetPlayerStyle();
+      window.removeEventListener("resize", resizePIP);
+      removePlayerMsg();
+      elRefs.pipHeader.style.display = "none";
+      elRefs.videoNailPlayer.style.border = "none";
+      elRefs.videoNailPlayer.style.width = "100%";
+    }
+    if (theaterButton) {
+      theaterButton.click();
+    }
 
-  // When users scroll down
-  if (state.inPipMode) {
-    if (state.isMinimized) elRefs.videoNailPlayer.style.display = "none";
-    setPlayerPosition();
-    window.addEventListener("resize", resizePIP);
-    makePIPDraggable();
-    addPlayerMsg();
-    elRefs.pipHeader.style.display = "flex";
-    elRefs.videoNailPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)";
-    elRefs.videoNailPlayer.style.borderTop = "none";
+    state.manualResize = false;
+    window.dispatchEvent(new Event("resize"));
+  }
+  if (state.firstTime) {
+    elRefs.videoNailContainer.id = "videonail-container";
+    wrapAll([elRefs.videoNailPlayer], elRefs.videoNailContainer)
+      .then(_ => {
+        return attachPIPHeader();
+      })
+      .then(_ => {
+        return helper();
+      })
+      .catch(err => console.log(err));
+    state.firstTime = false;
   } else {
-    // When users scroll up
-    state.manualPip = false;
-    saveAndResetPlayerStyle();
-    window.removeEventListener("resize", resizePIP);
-    removePlayerMsg();
-    elRefs.pipHeader.style.display = "none";
-    elRefs.videoNailPlayer.style.border = "none";
-    elRefs.videoNailPlayer.style.width = "100%";
+    helper();
   }
-  if (theaterButton) {
-    theaterButton.click();
-  }
-
-  state.manualResize = false;
-  window.dispatchEvent(new Event("resize"));
 }
 
 // Sets the pane position on transition
@@ -463,56 +477,56 @@ function animate() {
             elRefs.videoNailContainer.style.height = newHeight + 'px';
           }
         }
-      } 
-//        else if (clicked.onRightEdge) {
-//        newWidth = Math.max(x, MIN_WIDTH);
-//        if (e.clientX < document.body.clientWidth) {
-//          elRefs.videoNailContainer.style.width = newWidth + 'px';
-//          elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-//        } else {
-//          newWidth = (document.body.clientWidth - clicked.box.left);
-//          elRefs.videoNailContainer.style.width = newWidth + 'px';
-//          elrefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-//        }
-//      } else if (clicked.onLeftEdge) {
-//        newWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
-//        if (newWidth > MIN_WIDTH) {
-//          if (e.clientX > 0) {
-//            elRefs.videoNailContainer.style.width = newWidth + 'px';
-//            elRefs.videoNailContainer.style.left = e.clientX + 'px';
-//            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-//          } else {
-//            newWidth = clicked.w + clicked.box.left;
-//            elRefs.videoNailContainer.style.width = newWidth + 'px';
-//            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-//            elRefs.videoNailContainer.style.left = '0px';
-//          }
-//        }
-//      } else if (clicked.onBottomEdge) {
-//        newHeight = Math.max(y, MIN_HEIGHT);
-//        if (e.clientY < window.innerHeight) {
-//          elRefs.videoNailContainer.style.height = newHeight + 'px';
-//          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-//        } else {
-//          newHeight = window.innerHeight - clicked.box.top;
-//          elRefs.videoNailContainer.style.height = newHeight + 'px';
-//          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-//        }
-//      } else if (clicked.onTopEdge) {
-//        newHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
-//        if (newHeight > MIN_HEIGHT) {
-//          if (e.clientY > NAVBAR_HEIGHT) {
-//            elRefs.videoNailContainer.style.height = newHeight + 'px';
-//            elRefs.videoNailContainer.style.top = e.clientY + 'px';
-//            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-//          } else {
-//            elRefs.videoNailContainer.style.top = NAVBAR_HEIGHT + 'px';
-//            newHeight = clicked.h + clicked.box.top - NAVBAR_HEIGHT;
-//            elRefs.videoNailContainer.style.height = newHeight + 'px';
-//            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-//          }
-//        }
-//      }
+      }
+      //        else if (clicked.onRightEdge) {
+      //        newWidth = Math.max(x, MIN_WIDTH);
+      //        if (e.clientX < document.body.clientWidth) {
+      //          elRefs.videoNailContainer.style.width = newWidth + 'px';
+      //          elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+      //        } else {
+      //          newWidth = (document.body.clientWidth - clicked.box.left);
+      //          elRefs.videoNailContainer.style.width = newWidth + 'px';
+      //          elrefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+      //        }
+      //      } else if (clicked.onLeftEdge) {
+      //        newWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
+      //        if (newWidth > MIN_WIDTH) {
+      //          if (e.clientX > 0) {
+      //            elRefs.videoNailContainer.style.width = newWidth + 'px';
+      //            elRefs.videoNailContainer.style.left = e.clientX + 'px';
+      //            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+      //          } else {
+      //            newWidth = clicked.w + clicked.box.left;
+      //            elRefs.videoNailContainer.style.width = newWidth + 'px';
+      //            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
+      //            elRefs.videoNailContainer.style.left = '0px';
+      //          }
+      //        }
+      //      } else if (clicked.onBottomEdge) {
+      //        newHeight = Math.max(y, MIN_HEIGHT);
+      //        if (e.clientY < window.innerHeight) {
+      //          elRefs.videoNailContainer.style.height = newHeight + 'px';
+      //          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+      //        } else {
+      //          newHeight = window.innerHeight - clicked.box.top;
+      //          elRefs.videoNailContainer.style.height = newHeight + 'px';
+      //          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+      //        }
+      //      } else if (clicked.onTopEdge) {
+      //        newHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
+      //        if (newHeight > MIN_HEIGHT) {
+      //          if (e.clientY > NAVBAR_HEIGHT) {
+      //            elRefs.videoNailContainer.style.height = newHeight + 'px';
+      //            elRefs.videoNailContainer.style.top = e.clientY + 'px';
+      //            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+      //          } else {
+      //            elRefs.videoNailContainer.style.top = NAVBAR_HEIGHT + 'px';
+      //            newHeight = clicked.h + clicked.box.top - NAVBAR_HEIGHT;
+      //            elRefs.videoNailContainer.style.height = newHeight + 'px';
+      //            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
+      //          }
+      //        }
+      //      }
       return;
     }
   }
@@ -552,12 +566,12 @@ function animate() {
       elRefs.videoNailContainer.style.cursor = 'nwse-resize';
     } else if (onRightEdge && onTopEdge || onBottomEdge && onLeftEdge) {
       elRefs.videoNailContainer.style.cursor = 'nesw-resize';
-    } 
-//    else if (onRightEdge || onLeftEdge) {
-//      elRefs.videoNailContainer.style.cursor = 'ew-resize';
-//    } else if (onBottomEdge || onTopEdge) {
-//      elRefs.videoNailContainer.style.cursor = 'ns-resize';} 
-      else if (canMove()) {
+    }
+    //    else if (onRightEdge || onLeftEdge) {
+    //      elRefs.videoNailContainer.style.cursor = 'ew-resize';
+    //    } else if (onBottomEdge || onTopEdge) {
+    //      elRefs.videoNailContainer.style.cursor = 'ns-resize';} 
+    else if (canMove()) {
       elRefs.videoNailContainer.style.cursor = 'move';
     } else {
       elRefs.videoNailContainer.style.cursor = 'default';
@@ -596,20 +610,22 @@ checkIfWatching();
 // Wrap wrapper around nodes - Just pass a collection of nodes, and a wrapper element
 function wrapAll(nodes, wrapper) {
   // Cache the current parent and previous sibling of the first node.
-  var parent = nodes[0].parentNode;
-  var previousSibling = nodes[0].previousSibling;
+  return new Promise((resolve, reject) => {
+    var parent = nodes[0].parentNode;
+    var previousSibling = nodes[0].previousSibling;
 
-  // Place each node in wrapper.
-  //  - If nodes is an array, we must increment the index we grab from 
-  //    after each loop.
-  //  - If nodes is a NodeList, each node is automatically removed from 
-  //    the NodeList when it is removed from its parent with appendChild.
-  for (var i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
-    wrapper.appendChild(nodes[i]);
-  }
-  // Place the wrapper just after the cached previousSibling
-  parent.insertBefore(wrapper, previousSibling.nextSibling);
-  return wrapper;
+    // Place each node in wrapper.
+    //  - If nodes is an array, we must increment the index we grab from 
+    //    after each loop.
+    //  - If nodes is a NodeList, each node is automatically removed from 
+    //    the NodeList when it is removed from its parent with appendChild.
+    for (var i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
+      wrapper.appendChild(nodes[i]);
+    }
+    // Place the wrapper just after the cached previousSibling
+    parent.insertBefore(wrapper, previousSibling.nextSibling);
+    resolve();
+  })
 }
 
 // Calculates height maintaining aspect ratio
