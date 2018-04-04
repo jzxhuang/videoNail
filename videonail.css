@@ -6,6 +6,7 @@
 }
 
 /* == Toggle button at top left of video  == */
+
 #videonail-pip-toggle {
   background: transparent;
   border: 0;
@@ -22,11 +23,13 @@
 }
 
 /* Hide with other controls */
+
 .ytp-autohide #videonail-pip-toggle {
   opacity: 0;
 }
 
 /* Hide when in PIP or fullscreen */
+
 .ytp-fullscreen #videonail-pip-toggle {
   display: none;
 }
@@ -36,6 +39,7 @@
 }
 
 /* == Toggle message in place of player == */
+
 .videonail-original-player-msg {
   align-items: center;
   color: #777;
@@ -47,37 +51,50 @@
 }
 
 /* Dark Polymer design */
+
 [dark] .videonail-original-player-msg {
   color: #ccc;
 }
 
-/* == Main VideoNail PIP Pane  == */
+/* == VideoNail Player == */
+
 .videonail-pip #player-container,
 /* Polymer */
+
 body#body .videonail-pip #movie_player
 /* Old */
-{
+
+  {
   display: flex;
   flex-flow: column;
-  max-height: 100vh;
-  max-width: 100vw;
-/*  min-height: 100px;*/
-  min-width: 100px;
-  position: fixed !important;
+  flex: 1 1 auto !important;
   z-index: 99;
   background: transparent !important;
+  box-sizing: border-box;
 }
 
+/* On Hover*/
 .videonail-pip #player-container:hover,
-/* Polymer */
-body#body .videonail-pip #movie_player:hover
-/* Old */ {
+body#body .videonail-pip #movie_player:hover {
   border-color: var(--videonail-color);
   transition: opacity 0.25s;
 }
 
-/* Force video to take up available space */
+/* == VideoNail Container == */
+#videonail-container {
+  display: flex;
+  flex-flow: column;
+  box-sizing: border-box;
+  z-index: 2147483647;
+  background: transparent;
+  border-top: none;
+  min-width: 50px;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+}
 
+/* Force video to take up available space */
 .videonail-pip .html5-video-container,
 .videonail-pip video {
   height: 100% !important;
@@ -86,42 +103,34 @@ body#body .videonail-pip #movie_player:hover
 }
 
 /* Force proper width for controls at bottom */
+
 .videonail-pip .ytp-chrome-bottom {
   width: calc(100% - 24px) !important;
 }
 
 /* PIP window header */
+
 .videonail-pip .videonail-header {
-/*  background: var(--videonail-pip-red-bg);*/
-  background: rgba(208, 10, 10);
+  background: rgba(208, 10, 10, 1);
   flex: 0 1 var(--videonail-header-height);
-  opacity: 0;
+  opacity: 0.5;
   transition: var(--transition);
   margin: 0;
   padding: 0;
   justify-content: flex-end;
 }
 
-#ytd-player {
+.videonail-header:hover {
+    opacity: 0.75 !important;
+}
+
+#ytd-player,
+#movie_player {
   display: inherit;
   flex: 1 1 auto;
 }
-#ghostpane {
-	background: #999;
-	opacity: 0;
-	width: 45%;
-	height: 45%;
-	top: 20%;
-	left: 20%;
-	display: none;
-	position: fixed;
-	margin: 0;
-	padding: 0;
-	z-index: 98;
-	transition: opacity 0.25s ease-in-out;
-}
 
-#minimizeButton{
+#minimizeButton {
   background-color: transparent;
   margin-right: 5px;
   border: none;
@@ -130,13 +139,21 @@ body#body .videonail-pip #movie_player:hover
   padding-bottom: 0;
   opacity: 0.75;
 }
-#minimizeButton:hover{
+
+#minimizeButton:hover {
   cursor: pointer!important;
   opacity: 1;
 }
-.fa-window-minimize, .fa-window-maximize, .fa-plus{
+
+.fa-window-minimize,
+.fa-window-maximize,
+.fa-plus {
   color: white;
-  opacity: inherit;;
+  opacity: inherit;
+  ;
   padding-right: 7px;
 }
-.fa-window-maximize{padding-top: 1px;}
+
+.fa-window-maximize {
+  padding-top: 1px;
+}
