@@ -18,6 +18,7 @@ const elRefs = {
   videoNailContainer: null,
   videoNailPlayer: null,
   videoNailHeader: null,
+  player: null, // the html5 video
   relatedVideoDiv: null, // to calculate initial width
   msg: null
 };
