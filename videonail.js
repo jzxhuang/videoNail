@@ -19,10 +19,10 @@ const elRefs = {
   videoNailPlayer: null,
   videoNailHeader: null,
   player: null, // the html5 video
-  relatedVideoDiv: null, // to calculate initial width
   msg: null
 };
 
+const INIT_WIDTH = 474;
 const HEADER_AND_BOTTOM_BORDER = 29;
 const LEFT_AND_RIGHT_BORDER = 10;
 const SCROLL_THRESHOLD = 0.4;

@@ -14,8 +14,6 @@ function injectPIP() {
     elRefs.player = document.querySelector("#movie_player");
   }
 
-  elRefs.relatedVideoDiv = document.getElementById('related');
-
   // Wrap player in container
   elRefs.videoNailContainer = document.createElement('div');
 
@@ -151,12 +149,13 @@ function resizePIP() {
     try {
       vid.style.left = "0px";
       vid.style.top = "0px";
+    } catch(e) {
     } finally {
       if (lastSavedStyle) {
         return;
       }
 
-      let newWidth = elRefs.relatedVideoDiv.offsetWidth + 48;
+      let newWidth = INIT_WIDTH;
       if (newWidth < MIN_WIDTH) {
         newWidth = MIN_WIDTH;
       }
@@ -170,7 +169,6 @@ function resizePIP() {
         window.dispatchEvent(new Event("resize"));
       } else {
         state.manualResize = false;
-        makePIPDraggable();
       }
     }
   });
