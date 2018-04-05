@@ -149,7 +149,7 @@ function resizePIP() {
     try {
       vid.style.left = "0px";
       vid.style.top = "0px";
-    } catch(e) {
+    } catch (e) {
     } finally {
       if (lastSavedStyle) {
         return;
@@ -439,3 +439,78 @@ function calculateWidth(height) {
   return (((height - HEADER_AND_BOTTOM_BORDER) * 16 / 9) + LEFT_AND_RIGHT_BORDER);
 }
 
+function addBellsAndOrnaments() {
+  return new Promise((resolve, reject) => {
+    setPlayerPosition();
+    resizePIP();
+    makePIPDraggable();
+    bubbleIframeMouseMove(elRefs.videoNailPlayer);
+    bubbleIframeMouseUp(elRefs.videoNailPlayer);
+    resolve();
+  })
+}
+
+function bubbleIframeMouseMove(iframe) {
+  iframe.contentWindow.addEventListener('mousemove', function (event) {
+    var boundingClientRect = iframe.getBoundingClientRect();
+
+    var evt = new CustomEvent('mousemove', { bubbles: true, cancelable: false })
+    evt.clientX = event.clientX + boundingClientRect.left;
+    evt.clientY = event.clientY + boundingClientRect.top;
+
+    iframe.dispatchEvent(evt);
+  });
+};
+
+function bubbleIframeMouseUp(iframe) {
+  iframe.contentWindow.addEventListener('mouseup', function (event) {
+    var boundingClientRect = iframe.getBoundingClientRect();
+
+    var evt = new CustomEvent('mouseup', { bubbles: true, cancelable: false })
+    evt.clientX = event.clientX + boundingClientRect.left;
+    evt.clientY = event.clientY + boundingClientRect.top;
+
+    iframe.dispatchEvent(evt);
+  });
+};
+
+function removeVideoNailPlayer() {
+  return new Promise((resolve, reject) => {
+    let oldContainer = document.querySelector("#videonail-container");
+    oldContainer.parentNode.removeChild(oldContainer);
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    resolve();
+  })
+}
+
+function setupVideoNailPlayer() {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector("#videonail-container")) {
+      removeVideoNailPlayer();
+    }
+    // Insert videoNailContainer first so that we can find other elements
+    elRefs.videoNailContainer = document.createElement("div");
+    elRefs.videoNailContainer.id = "videonail-container";
+    elRefs.videoNailContainer.classList.add("videonail");
+    document.querySelector("#content").appendChild(elRefs.videoNailContainer);
+
+    elRefs.videoNailContainer.insertAdjacentHTML("afterbegin", '<div class="videonail-header" id="videonailHeader"><button id="minimizeButton"><i class="fas fa-window-minimize"></i></button></div>');
+    elRefs.minimize = document.querySelector("#minimizeButton");
+
+    elRefs.videoNailHeader = document.querySelector("#videonailHeader");
+    elRefs.videoNailHeader.style.display = "flex";
+    elRefs.videoNailContainer.appendChild(elRefs.videoNailHeader);
+
+    elRefs.videoNailPlayer = document.createElement('iframe');
+    elRefs.videoNailPlayer.id = "player-container";
+    elRefs.videoNailPlayer.type = "text/html";
+    elRefs.videoNailPlayer.frameborder = "0";
+    elRefs.videoNailPlayer.src = "https://www.youtube.com/embed/M7lc1UVf-VE?autoplay=1";
+    elRefs.videoNailPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)";
+    elRefs.videoNailPlayer.style.borderTop = "none";
+    elRefs.videoNailPlayer.style.width = "100%";
+    elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
+    resolve();
+  })
+}
