@@ -9,7 +9,7 @@
     {
       "matches": ["*://www.youtube.com/watch?*"],
       "css": ["videonail.css"],
-      "js": ["fontawesome-all.min.js", "videonail.js"],
+      "js": ["fontawesome-all.min.js", "functions.js", "videonail.js"],
       "run_at": "document_end"
     },
     {
@@ -19,7 +19,7 @@
         "*://www.youtube.com/channel/*",
         "*://www.youtube.com/playlist?*"
       ],
-      "js": ["fontawesome-all.min.js", "otherPage.js"],
+      "js": ["fontawesome-all.min.js", "functions.js", "otherPage.js"],
       "css": ["videonail.css"],
       "run_at": "document_end"
     }
