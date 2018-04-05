@@ -68,7 +68,6 @@ body#body .videonail #movie_player
   display: flex;
   flex-flow: column;
   flex: 1 1 auto !important;
-  z-index: 99;
   background: transparent !important;
   box-sizing: border-box;
 }
@@ -156,4 +155,8 @@ body#body .videonail #movie_player:hover {
 
 .fa-window-maximize {
   padding-top: 1px;
+}
+
+div.ytp-contextmenu.ytp-popup {
+  z-index: 2147483647;
 }
