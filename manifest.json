@@ -3,7 +3,7 @@
   "name": "videoNail",
   "description":
     "Keeps YouTube video on screen when scrolling down to the comment section",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "browser_action": {},
   "content_scripts": [
     {
@@ -19,7 +19,8 @@
         "*://www.youtube.com/channel/*",
         "*://www.youtube.com/playlist?*"
       ],
-      "js": ["otherPage.js"],
+      "js": ["fontawesome-all.min.js", "otherPage.js"],
+      "css": ["videonail.css"],
       "run_at": "document_end"
     }
   ],

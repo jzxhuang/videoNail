@@ -6,10 +6,10 @@ var id = "AHX6tHdQGiQ";
 var player;
 
 function onYouTubeIframeAPIReady() {
-  player = new YT.Player('videonail', {
+  player = new YT.Player('player-container', {
     // TODO: Set width, height of the player
-    height: "502",
-    width: "282",
+    height: "450",
+    width: "800",
     videoId: id,
     events: {
       'onReady': onPlayerReady
