@@ -1,8 +1,11 @@
+"use strict";
+
 // ========================================================================= //
 // GLOBAL STATE / REFERENCES                                                 //
 // ========================================================================= //
 
 const state = {
+  manualResize: false,
   isMinimized: false
 };
 
@@ -10,18 +13,27 @@ const elRefs = {
   videoNailContainer: null,
   videoNailPlayer: null,
   videoNailHeader: null,
-  minimize: null
 };
 
-const headerBottomBorder = 29;
-const sideBorderSizes = 10;
+const INIT_WIDTH = 474;
+const HEADER_AND_BOTTOM_BORDER = 29;
+const LEFT_AND_RIGHT_BORDER = 10;
 const SCROLL_THRESHOLD = 0.4;
 const MIN_WIDTH = 325;
-const MIN_HEIGHT = (MIN_WIDTH - sideBorderSizes) / 16 * 9 + headerBottomBorder;
+const MIN_HEIGHT = (MIN_WIDTH - LEFT_AND_RIGHT_BORDER) / 16 * 9 + HEADER_AND_BOTTOM_BORDER;
 const EDGE_MARGIN = 5;
+const NAVBAR_HEIGHT = 0;
 
 let lastSavedStyle = null;
 let savedBox = null;
+
+// End of what's configurable.
+let clicked = null;
+let onRightEdge, onBottomEdge, onLeftEdge, onTopEdge;
+
+let rightScreenEdge, bottomScreenEdge;
+let e, b, x, y, preSnapped, minPrevHeight;
+let redraw = false;
 
 // ========================================================================= //
 // SETUP LOGIC                                                               //
@@ -85,52 +97,24 @@ function setupVideoNailPlayer() {
 
     elRefs.videoNailContainer.insertAdjacentHTML("afterbegin", '<div class="videonail-header" id="videonailHeader"><button id="minimizeButton"><i class="fas fa-window-minimize"></i></button></div>');
     elRefs.minimize = document.querySelector("#minimizeButton");
-    
+
     elRefs.videoNailHeader = document.querySelector("#videonailHeader");
     elRefs.videoNailHeader.style.display = "flex";
+    elRefs.videoNailContainer.appendChild(elRefs.videoNailHeader);
 
     elRefs.videoNailPlayer = document.createElement('div');
     elRefs.videoNailPlayer.id = "player-container";
     elRefs.videoNailPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)";
     elRefs.videoNailPlayer.style.borderTop = "none";
-
-    elRefs.videoNailContainer.appendChild(elRefs.videoNailHeader);
     elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
+    
     setPlayerPosition();
     resizePIP();
+    makePIPDraggable();
     resolve();
   })
 }
 
-function setPlayerPosition() {
-  elRefs.videoNailContainer.style.position = 'fixed';
-  var adContainer = document.querySelector(".ad-container");
-  if (adContainer) {
-    adContainer.style.top = '0px';
-    adContainer.style.left = '0px';
-  }
-  if (lastSavedStyle) {
-    elRefs.videoNailContainer.style = lastSavedStyle;
-    return;
-  }
-  elRefs.videoNailContainer.style.right = "0px";
-  elRefs.videoNailContainer.style.bottom = "0px";
-}
-
-function resizePIP() {
-  if (lastSavedStyle) {
-    return;
-  }
-
-  let newWidth = 800;
-  if (newWidth < MIN_WIDTH) {
-    newWidth = MIN_WIDTH;
-  }
-  let newHeight = (newWidth - sideBorderSizes) / 16 * 9 + headerBottomBorder;
-
-  elRefs.videoNailContainer.style.width = `${newWidth}px`;
-  elRefs.videoNailContainer.style.height = `${newHeight}px`;
-}
 
 addScriptContainer()
   .then(_ => {

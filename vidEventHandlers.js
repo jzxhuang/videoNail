@@ -2,14 +2,14 @@
 // TODO: Fetch time, speed, width, height, id from storage
 var time = 0;
 var speed = 0;
-var id = "AHX6tHdQGiQ";
+var id = "L3YFxjvbvhM";
 var player;
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player-container', {
     // TODO: Set width, height of the player
-    height: "450",
-    width: "800",
+    height: "267",
+    width: "474",
     videoId: id,
     events: {
       'onReady': onPlayerReady
