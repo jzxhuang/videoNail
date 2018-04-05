@@ -16,6 +16,7 @@ const elRefs = {
   originalPlayerSection: null,
   videoNailContainer: null,
   videoNailPlayer: null,
+  relatedVideoDiv: null, // to calculate initial width
   msg: null,
   pipHeader: null
 };
@@ -27,7 +28,6 @@ const MIN_WIDTH = 325;
 const MIN_HEIGHT = (MIN_WIDTH - sideBorderSizes) / 16 * 9 + headerBottomBorder;
 const EDGE_MARGIN = 5;
 
-let videoNailContainer = null;
 let lastSavedStyle = null;
 let savedBox = null;
 
@@ -46,7 +46,7 @@ const NAVBAR_HEIGHT = 0;
 // PIP LOGIC                                                                 //
 // ========================================================================= //
 function injectPIP() {
-  if (document.getElementById("videonail-pip-toggle")) {
+  if (document.getElementById("videonail-toggle")) {
     return;
   }
 
@@ -61,7 +61,6 @@ function injectPIP() {
     elRefs.player = document.querySelector("#movie_player");
   }
 
-  elRefs.videoNailPlayer = elRefs.videoNailPlayer;
   elRefs.relatedVideoDiv = document.getElementById('related');
 
   // Wrap player in container
@@ -92,7 +91,7 @@ function injectPIP() {
 
 function attachToggleButton() {
   const elTogglePIP = document.createElement("button");
-  elTogglePIP.id = "videonail-pip-toggle";
+  elTogglePIP.id = "videonail-toggle";
   elTogglePIP.title = "Toggle PIP";
   elTogglePIP.innerHTML =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 22.11"><rect x="18.73" y="10.53" width="17.27" height="11.58" fill="#777"/><polygon points="30.85 1 3.48 1 1.55 1 1.55 2.93 1.55 17.48 1.55 19.41 3.48 19.41 16.69 19.41 16.69 17.48 3.48 17.48 3.48 2.93 30.85 2.93 30.85 8.69 32.78 8.69 32.78 2.93 32.78 1 30.85 1" fill="#777"/><rect x="17.18" y="9.53" width="17.27" height="11.58" fill="#fff"/><polygon points="29.3 0 1.93 0 0 0 0 1.93 0 16.48 0 18.41 1.93 18.41 15.14 18.41 15.14 16.48 1.93 16.48 1.93 1.93 29.3 1.93 29.3 7.69 31.23 7.69 31.23 1.93 31.23 0 29.3 0" fill="#fff"/></svg>';
@@ -116,7 +115,7 @@ function attachPIPHeader() {
 
 function togglePIP() {
   state.inPipMode = !state.inPipMode;
-  elRefs.originalPlayerSection.classList.toggle("videonail-pip", state.inPipMode);
+  elRefs.originalPlayerSection.classList.toggle("videonail", state.inPipMode);
   let theaterButton = document.querySelector("[title='Theater mode']");
   function helper() {
     // When users scroll down
@@ -202,7 +201,6 @@ function resizePIP() {
       return;
     }
 
-    //    let newWidth = window.innerWidth / 3.75;
     let newWidth = elRefs.relatedVideoDiv.offsetWidth + 48;
     if (newWidth < MIN_WIDTH) {
       newWidth = MIN_WIDTH;
@@ -224,11 +222,7 @@ function resizePIP() {
 
 function makePIPDraggable() {
   elRefs.videoNailContainer.style.margin = "0px 0px 0px 0px";
-  //  videoNailContainer = elRefs.videoNailContainer;
-  // Mouse events
   elRefs.videoNailContainer.addEventListener('mousedown', onMouseDown);
-  elRefs.videoNailContainer.addEventListener('mouseenter', onMouseHover);
-  elRefs.videoNailContainer.addEventListener('mouseleave', onMouseOut);
   elRefs.minimize.addEventListener('mousedown', minimizeClick);
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
@@ -264,8 +258,6 @@ function saveAndResetPlayerStyle() {
   elRefs.videoNailContainer.style = null;
   elRefs.originalPlayerSection.style = null;
   elRefs.videoNailContainer.removeEventListener('mousedown', onMouseDown);
-  elRefs.videoNailContainer.removeEventListener('mouseenter', onMouseHover);
-  elRefs.videoNailContainer.removeEventListener('mouseleave', onMouseOut);
   elRefs.minimize.removeEventListener('mousedown', minimizeClick);
   document.removeEventListener('mousemove', onMove);
   document.removeEventListener('mouseup', onUp);
@@ -297,17 +289,6 @@ function minimizeClick() {
   }
   minSVG.classList.toggle("fa-window-minimize");
   minSVG.classList.toggle("fa-plus");
-}
-
-function onMouseHover() {
-  //  elRefs.pipHeader.style.opacity = 0.5;
-  //  elRefs.videoNailContainer.style.borderColor = 'rgba(208, 10, 10, 0.75)';
-}
-
-function onMouseOut() {
-  //  if (!state.isMinimized) elRefs.pipHeader.style.opacity = 0;
-  //  elRefs.videoNailPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)"
-  //  elRefs.videoNailContainer.style.borderColor = 'rgba(208, 10, 10, 0.5)';
 }
 
 function onDown(e) {
@@ -351,29 +332,6 @@ function calc(e) {
   rightScreenEdge = window.innerWidth - EDGE_MARGIN;
   bottomScreenEdge = window.innerHeight - EDGE_MARGIN;
 }
-
-// Calculate snap coords
-//function getSnapBounds() {
-//  let bounds = []; // x, y, width, height
-//  let wiw = window.innerWidth;
-//  let wih = window.innerHeight;
-//  let bw = b.width;
-//  let bh = b.height;
-//
-//  // BR, BL, TL, TR, R, L, B, T
-//  if (b.right > rightScreenEdge && b.bottom > bottomScreenEdge) bounds = [wiw - bw - 17, wih - bh, bw, bh];
-//  else if (b.left < EDGE_MARGIN && b.bottom > bottomScreenEdge) bounds = [0, wih - bh, bw, bh];
-//  else if (b.left < EDGE_MARGIN && b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [0, NAVBAR_HEIGHT, bw, bh];
-//  else if (b.right > rightScreenEdge && b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [wiw - bw - 17, NAVBAR_HEIGHT, bw, bh];
-//  else if (b.right > rightScreenEdge) bounds = [wiw - bw - 17, b.top, bw, bh];
-//  else if (b.left < EDGE_MARGIN) bounds = [0, b.top, bw, bh];
-//  else if (b.bottom > bottomScreenEdge) bounds = [b.left, wih - bh, bw, bh];
-//  else if (b.top < EDGE_MARGIN + NAVBAR_HEIGHT) bounds = [b.left, NAVBAR_HEIGHT, bw, bh];
-//  else {
-//    return null
-//  };
-//  return bounds;
-//}
 
 function animate() {
   // requestAnimationFrame with this fct as the callback
@@ -424,7 +382,6 @@ function animate() {
         newTop = b.top - (newHeight - b.height);
         if (newWidth > MIN_WIDTH) {
           if (newTop < NAVBAR_HEIGHT) {
-            console.log(1);
             elRefs.videoNailContainer.style.top = NAVBAR_HEIGHT + 'px';
             newHeight = clicked.h + clicked.box.top - NAVBAR_HEIGHT;
             elRefs.videoNailContainer.style.height = newHeight + 'px';
@@ -458,7 +415,6 @@ function animate() {
           }
         }
       } else if (clicked.onBottomEdge && clicked.onLeftEdge) {
-        console.log(1);
         newWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
         newHeight = calculateHeight(newWidth);
         if (newWidth > MIN_WIDTH) {
@@ -478,80 +434,11 @@ function animate() {
           }
         }
       }
-      //        else if (clicked.onRightEdge) {
-      //        newWidth = Math.max(x, MIN_WIDTH);
-      //        if (e.clientX < document.body.clientWidth) {
-      //          elRefs.videoNailContainer.style.width = newWidth + 'px';
-      //          elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-      //        } else {
-      //          newWidth = (document.body.clientWidth - clicked.box.left);
-      //          elRefs.videoNailContainer.style.width = newWidth + 'px';
-      //          elrefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-      //        }
-      //      } else if (clicked.onLeftEdge) {
-      //        newWidth = Math.max(clicked.cx - e.clientX + clicked.w, MIN_WIDTH);
-      //        if (newWidth > MIN_WIDTH) {
-      //          if (e.clientX > 0) {
-      //            elRefs.videoNailContainer.style.width = newWidth + 'px';
-      //            elRefs.videoNailContainer.style.left = e.clientX + 'px';
-      //            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-      //          } else {
-      //            newWidth = clicked.w + clicked.box.left;
-      //            elRefs.videoNailContainer.style.width = newWidth + 'px';
-      //            elRefs.videoNailContainer.style.height = calculateHeight(newWidth) + 'px';
-      //            elRefs.videoNailContainer.style.left = '0px';
-      //          }
-      //        }
-      //      } else if (clicked.onBottomEdge) {
-      //        newHeight = Math.max(y, MIN_HEIGHT);
-      //        if (e.clientY < window.innerHeight) {
-      //          elRefs.videoNailContainer.style.height = newHeight + 'px';
-      //          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-      //        } else {
-      //          newHeight = window.innerHeight - clicked.box.top;
-      //          elRefs.videoNailContainer.style.height = newHeight + 'px';
-      //          elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-      //        }
-      //      } else if (clicked.onTopEdge) {
-      //        newHeight = Math.max(clicked.cy - e.clientY + clicked.h, MIN_HEIGHT);
-      //        if (newHeight > MIN_HEIGHT) {
-      //          if (e.clientY > NAVBAR_HEIGHT) {
-      //            elRefs.videoNailContainer.style.height = newHeight + 'px';
-      //            elRefs.videoNailContainer.style.top = e.clientY + 'px';
-      //            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-      //          } else {
-      //            elRefs.videoNailContainer.style.top = NAVBAR_HEIGHT + 'px';
-      //            newHeight = clicked.h + clicked.box.top - NAVBAR_HEIGHT;
-      //            elRefs.videoNailContainer.style.height = newHeight + 'px';
-      //            elRefs.videoNailContainer.style.width = calculateWidth(newHeight) + 'px';
-      //          }
-      //        }
-      //      }
       return;
     }
   }
 
-  // Moving or Snapping
   if (clicked && clicked.isMoving) {
-    // Snapping
-    //    let bounds = getSnapBounds();
-    //    if (bounds) {
-    //      setBounds(elRefs.ghostpane, ...bounds);
-    //      elRefs.ghostpane.style.opacity = 0.3;
-    //      elRefs.ghostpane.style.display = 'block';
-    //    } else {
-    //      hintHide();
-    //    }
-    //    if (preSnapped) {
-    //      setBounds(elRefs.videoNailContainer,
-    //        e.clientX - preSnapped.width / 2,
-    //        e.clientY - Math.min(clicked.y, preSnapped.height),
-    //        preSnapped.width,
-    //        preSnapped.height
-    //      );
-    //      return;
-    //    }
-
     // Moving
     var container = elRefs.videoNailContainer.getBoundingClientRect();
     if (!state.isMinimized) elRefs.videoNailContainer.style.top = Math.max(NAVBAR_HEIGHT, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
@@ -566,12 +453,7 @@ function animate() {
       elRefs.videoNailContainer.style.cursor = 'nwse-resize';
     } else if (onRightEdge && onTopEdge || onBottomEdge && onLeftEdge) {
       elRefs.videoNailContainer.style.cursor = 'nesw-resize';
-    }
-    //    else if (onRightEdge || onLeftEdge) {
-    //      elRefs.videoNailContainer.style.cursor = 'ew-resize';
-    //    } else if (onBottomEdge || onTopEdge) {
-    //      elRefs.videoNailContainer.style.cursor = 'ns-resize';} 
-    else if (canMove()) {
+    } else if (canMove()) {
       elRefs.videoNailContainer.style.cursor = 'move';
     } else {
       elRefs.videoNailContainer.style.cursor = 'default';
@@ -606,33 +488,24 @@ if (state.isPolymer) {
 
 checkIfWatching();
 
-
-// Wrap wrapper around nodes - Just pass a collection of nodes, and a wrapper element
 function wrapAll(nodes, wrapper) {
-  // Cache the current parent and previous sibling of the first node.
   return new Promise((resolve, reject) => {
     var parent = nodes[0].parentNode;
     var previousSibling = nodes[0].previousSibling;
 
-    // Place each node in wrapper.
-    //  - If nodes is an array, we must increment the index we grab from 
-    //    after each loop.
-    //  - If nodes is a NodeList, each node is automatically removed from 
-    //    the NodeList when it is removed from its parent with appendChild.
     for (var i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
       wrapper.appendChild(nodes[i]);
     }
-    // Place the wrapper just after the cached previousSibling
+
     parent.insertBefore(wrapper, previousSibling.nextSibling);
     resolve();
   })
 }
 
-// Calculates height maintaining aspect ratio
 function calculateHeight(width) {
   return (width - sideBorderSizes) * 9 / 16 + headerBottomBorder;
 }
-// Calculate width maintaining aspect ratio
+
 function calculateWidth(height) {
   return (((height - headerBottomBorder) * 16 / 9) + sideBorderSizes);
 }
