@@ -36,6 +36,7 @@ let savedBox = null;
 
 // End of what's configurable.
 let clicked = null;
+let afterMinClick = false;
 let onRightEdge, onBottomEdge, onLeftEdge, onTopEdge;
 
 let rightScreenEdge, bottomScreenEdge;
