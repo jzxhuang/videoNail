@@ -66,13 +66,13 @@ function attachVideoNailHeader() {
     elRefs.minimize = document.createElement("button");
     elRefs.minimize.id = "minimizeButton";
     elRefs.minimize.insertAdjacentHTML("afterbegin", '<i class="fas fa-window-minimize"></i>');
-    elRefs.minimize.addEventListener('mousedown', minimizeClick);
+    elRefs.minimize.addEventListener('mousedown', onMinimizeClick);
     elRefs.videoNailHeader.appendChild(elRefs.minimize);
 
     elRefs.close = document.createElement("button");
     elRefs.close.id = "closeButton";
     elRefs.close.insertAdjacentHTML("afterbegin", '<i class="fas fa-times"></i>');
-    elRefs.close.addEventListener('mousedown', closeClick);
+    elRefs.close.addEventListener('mousedown', onCloseClick);
     elRefs.videoNailHeader.appendChild(elRefs.close);
     resolve();
   })
@@ -94,6 +94,7 @@ function togglePIP() {
   state.inPipMode = !state.inPipMode;
   elRefs.originalPlayerSection.classList.toggle("videonail", state.inPipMode);
   let theaterButton = document.querySelector("[title='Theater mode']");
+
   function helper() {
     // When users scroll down
     if (state.inPipMode) {
@@ -192,6 +193,7 @@ function initVideoNailSize() {
 function makePIPDraggable() {
   elRefs.videoNailContainer.style.margin = "0px 0px 0px 0px";
   elRefs.videoNailContainer.addEventListener('mousedown', onMouseDown);
+  elRefs.minimize.addEventListener('mousedown', onMinimizeClick);
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
   animate();
@@ -231,14 +233,18 @@ function saveAndResetPlayerStyle() {
 
 function cleanUpListeners() {
   elRefs.videoNailContainer.removeEventListener('mousedown', onMouseDown);
+<<<<<<< HEAD
   elRefs.minimize.removeEventListener('mousedown', minimizeClick);
   elRefs.close.removeEventListener('mousedown', closeClick);
+=======
+  elRefs.minimize.removeEventListener('mousedown', onMinimizeClick);
+>>>>>>> d0de5ae9afa8a5ca3aa6010abb970218dcca7b3e
   document.removeEventListener('mousemove', onMove);
   document.removeEventListener('mouseup', onUp);
   window.removeEventListener("yt-navigate-finish", checkIfWatching);
 }
 
-function closeClick() {
+function onCloseClick() {
   if (elRefs.player) {
     state.manualPip = true;
     togglePIP();
@@ -247,13 +253,12 @@ function closeClick() {
   removeVideoNailPlayer();
 }
 
-function minimizeClick() {
-  let substring = "fa-window-minimize";
+function onMinimizeClick() {
   let min = elRefs.minimize;
   let minSVG = min.children[0];
-
+  afterMinClick = true;
   // if maximized -> minimized
-  if (minSVG.className.baseVal.includes(substring)) {
+  if (!state.isMinimized) {
     savedBox = elRefs.videoNailContainer.getBoundingClientRect();
     minPrevHeight = elRefs.videoNailPlayer.offsetHeight;
     elRefs.videoNailContainer.style.width = '300px';
@@ -263,11 +268,11 @@ function minimizeClick() {
     elRefs.videoNailPlayer.style.display = "none";
     state.isMinimized = true;
   } else {
-    elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight + minPrevHeight + 'px';
+    elRefs.videoNailPlayer.style.display = "inherit";
     elRefs.videoNailContainer.style.width = savedBox.width + 'px';
+    elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight + minPrevHeight + 'px';
     elRefs.videoNailContainer.style.top = savedBox.top + 'px';
     elRefs.videoNailContainer.style.left = savedBox.left + 'px';
-    elRefs.videoNailPlayer.style.display = "inherit";
     state.isMinimized = false;
   }
   minSVG.classList.toggle("fa-window-minimize");
@@ -276,7 +281,7 @@ function minimizeClick() {
 
 function onDown(e) {
   calc(e);
-  let isResizing = onRightEdge || onBottomEdge || onTopEdge || onLeftEdge;
+  let isResizing = (onRightEdge || onBottomEdge || onTopEdge || onLeftEdge) && !state.isMinimized;
 
   clicked = {
     x: x,
@@ -286,13 +291,14 @@ function onDown(e) {
     w: b.width,
     h: b.height,
     box: b,
-    isResizing: isResizing,
+    isResizing: isResizing && !afterMinClick,
     isMoving: !isResizing && canMove(),
     onTopEdge: onTopEdge,
     onLeftEdge: onLeftEdge,
     onRightEdge: onRightEdge,
     onBottomEdge: onBottomEdge
   };
+  afterMinClick = false;
 }
 
 // Checks if you can move the pane
@@ -483,7 +489,10 @@ function bubbleIframeMouseMove(iframe) {
   iframe.contentWindow.addEventListener('mousemove', function (event) {
     var boundingClientRect = iframe.getBoundingClientRect();
 
-    var evt = new CustomEvent('mousemove', { bubbles: true, cancelable: false })
+    var evt = new CustomEvent('mousemove', {
+      bubbles: true,
+      cancelable: false
+    })
     evt.clientX = event.clientX + boundingClientRect.left;
     evt.clientY = event.clientY + boundingClientRect.top;
 
@@ -495,7 +504,10 @@ function bubbleIframeMouseUp(iframe) {
   iframe.contentWindow.addEventListener('mouseup', function (event) {
     var boundingClientRect = iframe.getBoundingClientRect();
 
-    var evt = new CustomEvent('mouseup', { bubbles: true, cancelable: false })
+    var evt = new CustomEvent('mouseup', {
+      bubbles: true,
+      cancelable: false
+    })
     evt.clientX = event.clientX + boundingClientRect.left;
     evt.clientY = event.clientY + boundingClientRect.top;
 

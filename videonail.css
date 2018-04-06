@@ -131,12 +131,15 @@ body#body .videonail #movie_player:hover {
 
 #minimizeButton, #closeButton {
   background-color: transparent;
-  margin-right: 5px;
+/*  margin-right: 5px;*/
   border: none;
   margin: none;
   padding-top: 0;
   padding-bottom: 0;
   opacity: 0.75;
+}
+button#closeButton {
+  margin-right: 5px;
 }
 
 #minimizeButton:hover, 
@@ -146,17 +149,10 @@ body#body .videonail #movie_player:hover {
 }
 
 .fa-window-minimize,
-.fa-window-maximize,
 .fa-times,
 .fa-plus {
   color: white;
   opacity: inherit;
-  ;
-  padding-right: 7px;
-}
-
-.fa-window-maximize {
-  padding-top: 1px;
 }
 
 div.ytp-contextmenu.ytp-popup {
