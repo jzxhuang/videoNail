@@ -1,15 +1,29 @@
 {
   "manifest_version": 2,
   "name": "videoNail",
-  "description":
-    "Keeps YouTube video on screen when scrolling down to the comment section",
+  "description": "Keeps YouTube video on screen when scrolling down to the comment section",
   "version": "0.2.2",
   "browser_action": {},
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
   "content_scripts": [
     {
-      "matches": ["*://www.youtube.com/watch?*"],
-      "css": ["videonail.css"],
-      "js": ["fontawesome-all.min.js", "functions.js", "videonail.js"],
+      "matches": [
+        "*://www.youtube.com/watch?*"
+      ],
+      "css": [
+        "videonail.css"
+      ],
+      "js": [
+        "fontawesome-all.min.js",
+        "functions.js",
+        "constants.js",
+        "videonail.js"
+      ],
       "run_at": "document_end"
     },
     {
@@ -19,8 +33,15 @@
         "*://www.youtube.com/channel/*",
         "*://www.youtube.com/playlist?*"
       ],
-      "js": ["fontawesome-all.min.js", "functions.js", "otherPage.js"],
-      "css": ["videonail.css"],
+      "js": [
+        "fontawesome-all.min.js",
+        "functions.js",
+        "constants.js",
+        "otherPage.js"
+      ],
+      "css": [
+        "videonail.css"
+      ],
       "run_at": "document_end"
     }
   ],
@@ -31,5 +52,17 @@
     "64": "VideoNail_x64.png",
     "128": "VideoNail_x128.png"
   },
-  "web_accessible_resources": ["vidEventHandlers.js"]
+  "permissions": [
+    "webNavigation",
+    "tabs",
+    "activeTab",
+    "http://*/",
+    "https://*/"
+  ],
+  "web_accessible_resources": [
+    "otherPage.js",
+    "videonail.js",
+    "resetState.js",
+    "vidEventHandlers.js"
+  ]
 }
