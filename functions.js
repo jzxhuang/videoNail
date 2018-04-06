@@ -55,11 +55,25 @@ function attachToggleButton() {
   });
 }
 
-function attachPIPHeader() {
+function attachVideoNailHeader() {
   return new Promise((resolve, reject) => {
-    elRefs.videoNailContainer.insertAdjacentHTML('afterbegin', '<div class="videonail-header" style="display:none" id="videonailHeader"><button id="minimizeButton"><i class="fas fa-window-minimize"></i></button></div>');
-    elRefs.minimize = document.getElementById("minimizeButton");
-    elRefs.videoNailHeader = document.getElementById("videonailHeader");
+    elRefs.videoNailHeader = document.createElement("div");
+    elRefs.videoNailHeader.id = "videonailHeader";
+    elRefs.videoNailHeader.classList.add("videonail-header");
+    elRefs.videoNailHeader.style.display = "flex";
+    elRefs.videoNailContainer.insertBefore(elRefs.videoNailHeader, elRefs.videoNailPlayer);
+
+    elRefs.minimize = document.createElement("button");
+    elRefs.minimize.id = "minimizeButton";
+    elRefs.minimize.insertAdjacentHTML("afterbegin", '<i class="fas fa-window-minimize"></i>');
+    elRefs.minimize.addEventListener('mousedown', minimizeClick);
+    elRefs.videoNailHeader.appendChild(elRefs.minimize);
+
+    elRefs.close = document.createElement("button");
+    elRefs.close.id = "closeButton";
+    elRefs.close.insertAdjacentHTML("afterbegin", '<i class="fas fa-times"></i>');
+    elRefs.close.addEventListener('mousedown', closeClick);
+    elRefs.videoNailHeader.appendChild(elRefs.close);
     resolve();
   })
 }
@@ -100,7 +114,7 @@ function togglePIP() {
     elRefs.videoNailContainer.id = "videonail-container";
     wrapAll([elRefs.videoNailPlayer], elRefs.videoNailContainer)
       .then(_ => {
-        return attachPIPHeader();
+        return attachVideoNailHeader();
       })
       .then(_ => {
         return helper();
@@ -177,7 +191,6 @@ function resizePIP() {
 function makePIPDraggable() {
   elRefs.videoNailContainer.style.margin = "0px 0px 0px 0px";
   elRefs.videoNailContainer.addEventListener('mousedown', onMouseDown);
-  elRefs.minimize.addEventListener('mousedown', minimizeClick);
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
   animate();
@@ -216,6 +229,15 @@ function saveAndResetPlayerStyle() {
   document.removeEventListener('mousemove', onMove);
   document.removeEventListener('mouseup', onUp);
   clicked = null;
+}
+
+function closeClick() {
+  if (elRefs.player) {
+    state.manualPip = true;
+    togglePIP();
+    return;
+  }
+  removeVideoNailPlayer();
 }
 
 function minimizeClick() {
@@ -489,18 +511,11 @@ function setupVideoNailPlayer() {
     if (document.querySelector("#videonail-container")) {
       removeVideoNailPlayer();
     }
-    // Insert videoNailContainer first so that we can find other elements
+
     elRefs.videoNailContainer = document.createElement("div");
     elRefs.videoNailContainer.id = "videonail-container";
     elRefs.videoNailContainer.classList.add("videonail");
     document.querySelector("#content").appendChild(elRefs.videoNailContainer);
-
-    elRefs.videoNailContainer.insertAdjacentHTML("afterbegin", '<div class="videonail-header" id="videonailHeader"><button id="minimizeButton"><i class="fas fa-window-minimize"></i></button></div>');
-    elRefs.minimize = document.querySelector("#minimizeButton");
-
-    elRefs.videoNailHeader = document.querySelector("#videonailHeader");
-    elRefs.videoNailHeader.style.display = "flex";
-    elRefs.videoNailContainer.appendChild(elRefs.videoNailHeader);
 
     elRefs.videoNailPlayer = document.createElement('iframe');
     elRefs.videoNailPlayer.id = "player-container";
@@ -511,6 +526,9 @@ function setupVideoNailPlayer() {
     elRefs.videoNailPlayer.style.borderTop = "none";
     elRefs.videoNailPlayer.style.width = "100%";
     elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
-    resolve();
+    
+    attachVideoNailHeader()
+      .then(_ => resolve())
+      .catch(err => console.log(err));
   })
 }

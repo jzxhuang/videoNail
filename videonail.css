@@ -129,7 +129,7 @@ body#body .videonail #movie_player:hover {
   flex: 1 1 auto;
 }
 
-#minimizeButton {
+#minimizeButton, #closeButton {
   background-color: transparent;
   margin-right: 5px;
   border: none;
@@ -139,13 +139,15 @@ body#body .videonail #movie_player:hover {
   opacity: 0.75;
 }
 
-#minimizeButton:hover {
+#minimizeButton:hover, 
+#closeButton:hover {
   cursor: pointer!important;
   opacity: 1;
 }
 
 .fa-window-minimize,
 .fa-window-maximize,
+.fa-times,
 .fa-plus {
   color: white;
   opacity: inherit;
