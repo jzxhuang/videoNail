@@ -5,8 +5,7 @@ var state = {
   firstTime: true,
   isPolymer: false,
   inPipMode: false,
-  manualPip: false,
-  manualResize: false,
+  manualClose: false,
   isMinimized: false
 };
 
@@ -31,6 +30,7 @@ const EDGE_MARGIN = 5;
 const NAVBAR_HEIGHT = 0;
 
 let lastSavedStyle = null;
+let defaultStyle = null;
 let savedBox = null;
 
 // End of what's configurable.

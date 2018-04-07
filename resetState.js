@@ -4,14 +4,13 @@ try {
 
 }
 
-cleanUpListeners();
+clearListeners();
 
 state = {
   firstTime: true,
   isPolymer: false,
   inPipMode: false,
-  manualPip: false,
-  manualResize: false,
+  manualClose: false,
   isMinimized: false
 };
 

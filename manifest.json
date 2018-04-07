@@ -53,7 +53,6 @@
     "128": "VideoNail_x128.png"
   },
   "permissions": [
-    "webNavigation",
     "tabs",
     "activeTab",
     "http://*/",

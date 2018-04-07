@@ -1,5 +1,5 @@
 function injectPIP() {
-  if (document.getElementById("videonail-toggle")) {
+  if (document.getElementById("videonail-container")) {
     return;
   }
 
@@ -14,12 +14,20 @@ function injectPIP() {
     elRefs.player = document.querySelector("#movie_player");
   }
 
+  elRefs.videoNailPlayer.classList.add("player-container");
+
   // Wrap player in container
   elRefs.videoNailContainer = document.createElement('div');
-
-  // Add toggle button to corner of player
-  // attachToggleButton();
-
+  elRefs.videoNailContainer.classList.add("videonail-container-std-mode");
+  wrapAll([elRefs.videoNailPlayer], elRefs.videoNailContainer)
+    .then(_ => {
+      return attachVideoNailHeader();
+    })
+    .then(_ => {
+      window.dispatchEvent(new Event("resize"));
+    })
+  animate();
+  
   // Auto-PIP on scroll (if not manually done)
   observer = new IntersectionObserver(
     (entries, observer) => {
@@ -28,7 +36,7 @@ function injectPIP() {
           (entry.intersectionRatio < SCROLL_THRESHOLD && !state.inPipMode) ||
           (entry.intersectionRatio > SCROLL_THRESHOLD &&
             state.inPipMode &&
-            !state.manualPip)
+            !state.manualClose)
         ) {
           togglePIP();
         }
@@ -40,27 +48,11 @@ function injectPIP() {
   observer.observe(elRefs.originalPlayerSection);
 }
 
-// function attachToggleButton() {
-//   var elTogglePIP = document.createElement("button");
-//   elTogglePIP.id = "videonail-toggle";
-//   elTogglePIP.title = "Toggle PIP";
-//   elTogglePIP.innerHTML =
-//     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 22.11"><rect x="18.73" y="10.53" width="17.27" height="11.58" fill="#777"/><polygon points="30.85 1 3.48 1 1.55 1 1.55 2.93 1.55 17.48 1.55 19.41 3.48 19.41 16.69 19.41 16.69 17.48 3.48 17.48 3.48 2.93 30.85 2.93 30.85 8.69 32.78 8.69 32.78 2.93 32.78 1 30.85 1" fill="#777"/><rect x="17.18" y="9.53" width="17.27" height="11.58" fill="#fff"/><polygon points="29.3 0 1.93 0 0 0 0 1.93 0 16.48 0 18.41 1.93 18.41 15.14 18.41 15.14 16.48 1.93 16.48 1.93 1.93 29.3 1.93 29.3 7.69 31.23 7.69 31.23 1.93 31.23 0 29.3 0" fill="#fff"/></svg>';
-//   elRefs.player.appendChild(elTogglePIP);
-
-//   // Add listener to toggle button
-//   elTogglePIP.addEventListener("click", () => {
-//     state.manualPip = true;
-//     togglePIP();
-//   });
-// }
-
 function attachVideoNailHeader() {
   return new Promise((resolve, reject) => {
     elRefs.videoNailHeader = document.createElement("div");
-    elRefs.videoNailHeader.id = "videonailHeader";
-    elRefs.videoNailHeader.classList.add("videonail-header");
-    elRefs.videoNailHeader.style.display = "flex";
+    elRefs.videoNailHeader.id = "videonail-header";
+    elRefs.videoNailHeader.classList.add("videonail-header-std-mode");
     elRefs.videoNailContainer.insertBefore(elRefs.videoNailHeader, elRefs.videoNailPlayer);
 
     elRefs.minimize = document.createElement("button");
@@ -93,53 +85,46 @@ function checkIfWatching() {
 function togglePIP() {
   state.inPipMode = !state.inPipMode;
   elRefs.originalPlayerSection.classList.toggle("videonail", state.inPipMode);
+  elRefs.videoNailContainer.classList.toggle("videonail-container", state.inPipMode);
+  elRefs.videoNailHeader.classList.toggle("videonail-header", state.inPipMode);
+  elRefs.videoNailPlayer.classList.toggle("videonail-player-container", state.inPipMode);
+  elRefs.videoNailPlayer.classList.toggle("minimize", state.isMinimized);
+
   let theaterButton = document.querySelector("[title='Theater mode']");
-
-  function helper() {
-    // When users scroll down
-    if (state.inPipMode) {
-      if (state.isMinimized) elRefs.videoNailPlayer.style.display = "none";
-      setPlayerPosition();
-      initVideoNailSize();
-      makePIPDraggable();
-      elRefs.videoNailHeader.style.display = "flex";
-      elRefs.videoNailPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)";
-      elRefs.videoNailPlayer.style.borderTop = "none";
-    } else {
-      // When users scroll up
-      state.manualPip = false;
-      saveAndResetPlayerStyle();
-      initVideoNailSize();
-      elRefs.videoNailHeader.style.display = "none";
-      elRefs.videoNailPlayer.style.border = "none";
-      elRefs.videoNailPlayer.style.width = "100%";
-    }
-    if (theaterButton) {
-      theaterButton.click();
-    }
-
-    state.manualResize = false;
-    window.dispatchEvent(new Event("resize"));
-  }
-  if (state.firstTime) {
-    elRefs.videoNailContainer.id = "videonail-container";
-    wrapAll([elRefs.videoNailPlayer], elRefs.videoNailContainer)
-      .then(_ => {
-        return attachVideoNailHeader();
-      })
-      .then(_ => {
-        return helper();
-      })
-      .catch(err => console.log(err));
-    state.firstTime = false;
+  if (theaterButton) theaterButton.click();
+  
+  // When users scroll down
+  if (state.inPipMode) {
+    saveDefaultStyle();
+    setVNPlayerStyle();
+    initOrRestoreSize();
+    addListeners();
   } else {
-    helper();
+    // When users scroll up
+    state.manualClose = false;
+    saveVNPlayerStyle();
+    setDefaultStyle();
+    clearListeners();
   }
+  window.dispatchEvent(new Event("resize"));
 }
 
-// Sets the pane position on transition
-function setPlayerPosition() {
-  elRefs.videoNailContainer.style.position = 'fixed';
+function saveDefaultStyle() {
+  defaultStyle = elRefs.videoNailContainer.style.cssText;
+}
+
+function setDefaultStyle() {
+  if (defaultStyle) {
+    elRefs.videoNailContainer.style.cssText = defaultStyle;
+  }
+  window.dispatchEvent(new Event("resize"));
+}
+
+function saveVNPlayerStyle() {
+  lastSavedStyle = elRefs.videoNailContainer.style.cssText;
+}
+
+function setVNPlayerStyle() {
   var adContainer = document.querySelector(".ad-container");
   if (adContainer) {
     adContainer.style.top = '0px';
@@ -149,54 +134,44 @@ function setPlayerPosition() {
     elRefs.videoNailContainer.style = lastSavedStyle;
     return;
   }
-  elRefs.videoNailContainer.style.right = "0px";
-  elRefs.videoNailContainer.style.bottom = "0px";
+  window.dispatchEvent(new Event("resize"));
 }
 
-// Adds message to original video container
-// function addPlayerMsg() {
-//   elRefs.msg = document.createElement("div");
-//   elRefs.msg.classList.add("videonail-original-player-msg");
-//   elRefs.msg.innerText = "Click to return player";
-//   elRefs.msg.addEventListener("click", togglePIP);
-//   elRefs.originalPlayerSection.appendChild(elRefs.msg);
-// }
-
-// function removePlayerMsg() {
-//   elRefs.msg.removeEventListener("click", togglePIP);
-//   elRefs.originalPlayerSection.removeChild(elRefs.msg);
-//   elRefs.msg = null;
-// }
-
-function initVideoNailSize() {
+function initOrRestoreSize() {
   let vid = document.querySelector(".html5-main-video");
   try {
     vid.style.left = "0px";
     vid.style.top = "0px";
-  } catch (e) {
-  } finally {
-    if (lastSavedStyle) {
-      return;
-    }
-
-    let newWidth = INIT_WIDTH;
-    if (newWidth < MIN_WIDTH) {
-      newWidth = MIN_WIDTH;
-    }
-    let newHeight = (newWidth - LEFT_AND_RIGHT_BORDER) / 16 * 9 + HEADER_AND_BOTTOM_BORDER;
-
-    elRefs.videoNailContainer.style.width = `${newWidth}px`;
-    elRefs.videoNailContainer.style.height = `${newHeight}px`;
+  } catch (e) {}
+  if (lastSavedStyle) {
+    return;
   }
+
+  let newWidth = INIT_WIDTH;
+  if (newWidth < MIN_WIDTH) {
+    newWidth = MIN_WIDTH;
+  }
+  let newHeight = (newWidth - LEFT_AND_RIGHT_BORDER) / 16 * 9 + HEADER_AND_BOTTOM_BORDER;
+
+  elRefs.videoNailContainer.style.width = `${newWidth}px`;
+  elRefs.videoNailContainer.style.height = `${newHeight}px`;
 }
 
-function makePIPDraggable() {
-  elRefs.videoNailContainer.style.margin = "0px 0px 0px 0px";
+function addListeners() {
   elRefs.videoNailContainer.addEventListener('mousedown', onMouseDown);
   elRefs.minimize.addEventListener('mousedown', onMinimizeClick);
+  elRefs.close.addEventListener('mousedown', onCloseClick);
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
-  animate();
+}
+
+function clearListeners() {
+  elRefs.videoNailContainer.removeEventListener('mousedown', onMouseDown);
+  elRefs.minimize.removeEventListener('mousedown', onMinimizeClick);
+  elRefs.close.removeEventListener('mousedown', onCloseClick);
+  document.removeEventListener('mousemove', onMove);
+  document.removeEventListener('mouseup', onUp);
+  clicked = null;
 }
 
 function setBounds(element, x, y, w, h) {
@@ -222,31 +197,8 @@ function onUp(e) {
   clicked = null;
 }
 
-function saveAndResetPlayerStyle() {
-  lastSavedStyle = elRefs.videoNailContainer.style.cssText;
-  elRefs.videoNailPlayer.style.display = 'flex';
-  elRefs.videoNailContainer.style = null;
-  elRefs.originalPlayerSection.style = null;
-  // cleanUpListeners();
-  clicked = null;
-}
-
-function cleanUpListeners() {
-  elRefs.videoNailContainer.removeEventListener('mousedown', onMouseDown);
-<<<<<<< HEAD
-  elRefs.minimize.removeEventListener('mousedown', minimizeClick);
-  elRefs.close.removeEventListener('mousedown', closeClick);
-=======
-  elRefs.minimize.removeEventListener('mousedown', onMinimizeClick);
->>>>>>> d0de5ae9afa8a5ca3aa6010abb970218dcca7b3e
-  document.removeEventListener('mousemove', onMove);
-  document.removeEventListener('mouseup', onUp);
-  window.removeEventListener("yt-navigate-finish", checkIfWatching);
-}
-
 function onCloseClick() {
-  if (elRefs.player) {
-    state.manualPip = true;
+  if (window.location.pathname == "/watch") {
     togglePIP();
     return;
   }
@@ -476,80 +428,76 @@ function calculateWidth(height) {
 
 function addBellsAndOrnaments() {
   return new Promise((resolve, reject) => {
-    setPlayerPosition();
-    initVideoNailSize();
-    makePIPDraggable();
+    setVNPlayerStyle();
+    initOrRestoreSize();
+    addListeners();
     bubbleIframeMouseMove(elRefs.videoNailPlayer);
     bubbleIframeMouseUp(elRefs.videoNailPlayer);
+    function bubbleIframeMouseMove(iframe) {
+      iframe.contentWindow.addEventListener('mousemove', function (event) {
+        var boundingClientRect = iframe.getBoundingClientRect();
+    
+        var evt = new CustomEvent('mousemove', {
+          bubbles: true,
+          cancelable: false
+        })
+        evt.clientX = event.clientX + boundingClientRect.left;
+        evt.clientY = event.clientY + boundingClientRect.top;
+    
+        iframe.dispatchEvent(evt);
+      });
+    };
+    function bubbleIframeMouseUp(iframe) {
+      iframe.contentWindow.addEventListener('mouseup', function (event) {
+        var boundingClientRect = iframe.getBoundingClientRect();
+    
+        var evt = new CustomEvent('mouseup', {
+          bubbles: true,
+          cancelable: false
+        })
+        evt.clientX = event.clientX + boundingClientRect.left;
+        evt.clientY = event.clientY + boundingClientRect.top;
+    
+        iframe.dispatchEvent(evt);
+      });
+    };
     resolve();
   })
 }
 
-function bubbleIframeMouseMove(iframe) {
-  iframe.contentWindow.addEventListener('mousemove', function (event) {
-    var boundingClientRect = iframe.getBoundingClientRect();
-
-    var evt = new CustomEvent('mousemove', {
-      bubbles: true,
-      cancelable: false
-    })
-    evt.clientX = event.clientX + boundingClientRect.left;
-    evt.clientY = event.clientY + boundingClientRect.top;
-
-    iframe.dispatchEvent(evt);
-  });
-};
-
-function bubbleIframeMouseUp(iframe) {
-  iframe.contentWindow.addEventListener('mouseup', function (event) {
-    var boundingClientRect = iframe.getBoundingClientRect();
-
-    var evt = new CustomEvent('mouseup', {
-      bubbles: true,
-      cancelable: false
-    })
-    evt.clientX = event.clientX + boundingClientRect.left;
-    evt.clientY = event.clientY + boundingClientRect.top;
-
-    iframe.dispatchEvent(evt);
-  });
-};
+function removeVideoNailHeader() {
+  let header = document.querySelector("#videonail-header");
+  header.parentNode.removeChild(header);
+}
 
 function removeVideoNailPlayer() {
-  return new Promise((resolve, reject) => {
-    let oldContainer = document.querySelector("#videonail-container");
-    oldContainer.parentNode.removeChild(oldContainer);
-    cleanUpListeners();
-    resolve();
-  })
+  var container = document.querySelector("#videonail-container");
+  container.parentNode.removeChild(container);
+  document.removeEventListener('mousemove', onMove);
+  document.removeEventListener('mouseup', onUp);
 }
 
 function setupVideoNailPlayer() {
   return new Promise((resolve, reject) => {
-    if (document.querySelector("#videonail-container")) {
-      var movie_player = document.querySelector("#player-container");
-      var player = document.querySelector("#top #player");
-      player.appendChild(movie_player);
-      removeVideoNailPlayer();
-    }
-
     elRefs.videoNailContainer = document.createElement("div");
     elRefs.videoNailContainer.id = "videonail-container";
     elRefs.videoNailContainer.classList.add("videonail");
-    document.querySelector("#content").appendChild(elRefs.videoNailContainer);
+    elRefs.videoNailContainer.classList.add("videonail-container");
+    document.body.appendChild(elRefs.videoNailContainer);
 
     elRefs.videoNailPlayer = document.createElement('iframe');
-    elRefs.videoNailPlayer.id = "player-container";
     elRefs.videoNailPlayer.type = "text/html";
     elRefs.videoNailPlayer.frameborder = "0";
     elRefs.videoNailPlayer.src = "https://www.youtube.com/embed/M7lc1UVf-VE?autoplay=1";
-    elRefs.videoNailPlayer.style.border = "5px solid rgba(208, 10, 10, 0.5)";
-    elRefs.videoNailPlayer.style.borderTop = "none";
-    elRefs.videoNailPlayer.style.width = "100%";
+    elRefs.videoNailPlayer.classList.add("videonail-player-container");
     elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
 
     attachVideoNailHeader()
-      .then(_ => resolve())
+      .then(_ => {
+        elRefs.videoNailHeader.classList.toggle("videonail-header-std-mode", false);
+        elRefs.videoNailHeader.classList.add("videonail-header");
+        window.dispatchEvent(new Event("resize"));
+      })
       .catch(err => console.log(err));
   })
 }

@@ -5,92 +5,53 @@
   --transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* == Toggle button at top left of video  == */
+/* Player Container */
 
-#videonail-toggle {
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  height: var(--videonail-toggle-size);
-  top: 0;
-  left: 0;
-  opacity: 0.75;
-  padding: 6px;
-  position: absolute;
-  transition: var(--transition);
-  width: var(--videonail-toggle-size);
-  z-index: 99;
-}
-
-/* Hide with other controls */
-
-.ytp-autohide #videonail-toggle {
-  opacity: 0;
-}
-
-/* Hide when in PIP or fullscreen */
-
-.ytp-fullscreen #videonail-toggle {
-  display: none;
-}
-
-#videonail-toggle:hover {
-  opacity: 1;
-}
-
-/* == Toggle message in place of player == */
-
-.videonail-original-player-msg {
-  align-items: center;
-  color: #777;
-  cursor: pointer;
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  width: 100%;
-}
-
-/* Dark Polymer design */
-
-[dark] .videonail-original-player-msg {
-  color: #ccc;
-}
-
-/* == VideoNail Player == */
-
-.videonail #player-container,
+.videonail .player-container,
 /* Polymer */
 
 body#body .videonail #movie_player
 /* Old */
 
-  {
+ {
   display: flex;
   flex-flow: column;
   flex: 1 1 auto !important;
   background: transparent !important;
   box-sizing: border-box;
+  width: 100% !important;
+  border: none;
 }
 
-/* On Hover*/
-.videonail #player-container:hover,
-body#body .videonail #movie_player:hover {
-  border-color: var(--videonail-color);
-  transition: opacity 0.25s;
+.videonail-player-container {
+  border: 5px solid var(--videonail-color) !important;
+  border-top: none !important;
+  margin: 0px 0px 0px 0px !important;
 }
 
-/* == VideoNail Container == */
-#videonail-container {
+.videonail .minimize {
+  display: none !important;
+}
+
+
+/* Container */
+.videonail-container-std-mode {
   display: flex;
   flex-flow: column;
   box-sizing: border-box;
-  z-index: 2147483647;
   background: transparent;
   border-top: none;
   min-width: 50px;
   width: 100%;
   height: 100%;
   margin: 0 auto;
+}
+
+.videonail .videonail-container {
+  right: 0px !important;
+  bottom: 0px !important;
+  position: fixed !important;
+  z-index: 2147483647;
 }
 
 /* Force video to take up available space */
@@ -107,7 +68,11 @@ body#body .videonail #movie_player:hover {
   width: calc(100% - 24px) !important;
 }
 
-/* PIP window header */
+/* Header */
+
+.videonail-header-std-mode {
+  display: none;
+}
 
 .videonail .videonail-header {
   background: rgba(208, 10, 10, 1);
@@ -117,11 +82,15 @@ body#body .videonail #movie_player:hover {
   margin: 0;
   padding: 0;
   justify-content: flex-end;
+  display: flex;
 }
 
-.videonail-header:hover {
-    opacity: 0.75 !important;
+.videonail .videonail-header:hover {
+  opacity: 0.75 !important;
 }
+
+
+
 
 #ytd-player,
 #movie_player {
@@ -129,9 +98,10 @@ body#body .videonail #movie_player:hover {
   flex: 1 1 auto;
 }
 
-#minimizeButton, #closeButton {
+#minimizeButton,
+#closeButton {
   background-color: transparent;
-/*  margin-right: 5px;*/
+  /*  margin-right: 5px;*/
   border: none;
   margin: none;
   padding-top: 0;
@@ -142,9 +112,9 @@ button#closeButton {
   margin-right: 5px;
 }
 
-#minimizeButton:hover, 
+#minimizeButton:hover,
 #closeButton:hover {
-  cursor: pointer!important;
+  cursor: pointer !important;
   opacity: 1;
 }
 
