@@ -14,11 +14,11 @@ function injectPIP() {
     elRefs.player = document.querySelector("#movie_player");
   }
 
-  elRefs.videoNailPlayer.classList.add("player-container");
+  elRefs.videoNailPlayer.classList.add("videonail-player");
 
   // Wrap player in container
   elRefs.videoNailContainer = document.createElement('div');
-  elRefs.videoNailContainer.classList.add("videonail-container-std-mode");
+  elRefs.videoNailContainer.classList.add("videonail-container-std-mode", "videonail-container");
   wrapAll([elRefs.videoNailPlayer], elRefs.videoNailContainer)
     .then(_ => {
       return attachVideoNailHeader();
@@ -85,10 +85,11 @@ function checkIfWatching() {
 function togglePIP() {
   state.inPipMode = !state.inPipMode;
   elRefs.originalPlayerSection.classList.toggle("videonail", state.inPipMode);
-  elRefs.videoNailContainer.classList.toggle("videonail-container", state.inPipMode);
+  elRefs.videoNailContainer.classList.toggle("videonail-container-std-mode", !state.inPipMode);
+  elRefs.videoNailContainer.classList.toggle("videonail-container-pip-mode", state.inPipMode);
   elRefs.videoNailHeader.classList.toggle("videonail-header", state.inPipMode);
-  elRefs.videoNailPlayer.classList.toggle("videonail-player-container", state.inPipMode);
-  elRefs.videoNailPlayer.classList.toggle("minimize", state.isMinimized);
+  elRefs.videoNailPlayer.classList.toggle("videonail-player-active", state.inPipMode);
+  elRefs.videoNailPlayer.classList.toggle("minimize", state.isMinimized && state.inPipMode);
 
   let theaterButton = document.querySelector("[title='Theater mode']");
   if (theaterButton) theaterButton.click();
@@ -115,7 +116,8 @@ function saveDefaultStyle() {
 
 function setDefaultStyle() {
   if (defaultStyle) {
-    elRefs.videoNailContainer.style.cssText = defaultStyle;
+    // elRefs.videoNailContainer.style.cssText = defaultStyle;
+    elRefs.videoNailContainer.removeAttribute('style');
   }
   window.dispatchEvent(new Event("resize"));
 }
@@ -217,10 +219,12 @@ function onMinimizeClick() {
     elRefs.videoNailContainer.style.top = window.innerHeight - elRefs.videoNailHeader.offsetHeight + 'px';
     elRefs.videoNailContainer.style.left = document.body.clientWidth - 300 + 'px';
     elRefs.videoNailContainer.style.height = savedBox.height - minPrevHeight + 'px';
-    elRefs.videoNailPlayer.style.display = "none";
+    // elRefs.videoNailPlayer.style.display = "none";
+    elRefs.videoNailPlayer.classList.toggle('minimize', true)
     state.isMinimized = true;
   } else {
-    elRefs.videoNailPlayer.style.display = "inherit";
+    // elRefs.videoNailPlayer.style.display = "inherit";
+    elRefs.videoNailPlayer.classList.toggle('minimize', false);
     elRefs.videoNailContainer.style.width = savedBox.width + 'px';
     elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight + minPrevHeight + 'px';
     elRefs.videoNailContainer.style.top = savedBox.top + 'px';
@@ -481,7 +485,7 @@ function setupVideoNailPlayer() {
   return new Promise((resolve, reject) => {
     elRefs.videoNailContainer = document.createElement("div");
     elRefs.videoNailContainer.id = "videonail-container";
-    elRefs.videoNailContainer.classList.add("videonail");
+    elRefs.videoNailContainer.classList.add("videonail", "videonail-container-pip-mode");
     elRefs.videoNailContainer.classList.add("videonail-container");
     document.body.appendChild(elRefs.videoNailContainer);
 
@@ -489,7 +493,7 @@ function setupVideoNailPlayer() {
     elRefs.videoNailPlayer.type = "text/html";
     elRefs.videoNailPlayer.frameborder = "0";
     elRefs.videoNailPlayer.src = "https://www.youtube.com/embed/M7lc1UVf-VE?autoplay=1";
-    elRefs.videoNailPlayer.classList.add("videonail-player-container");
+    elRefs.videoNailPlayer.classList.add("videonail-player-active");
     elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
 
     attachVideoNailHeader()
@@ -499,5 +503,7 @@ function setupVideoNailPlayer() {
         window.dispatchEvent(new Event("resize"));
       })
       .catch(err => console.log(err));
+
+    resolve();
   })
 }

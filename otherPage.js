@@ -11,12 +11,14 @@ if (document.querySelector("#videonail-container")) {
       return setupVideoNailPlayer();
     })
     .then(_ => {
+      animate();
       return addBellsAndOrnaments();
     })
     .catch(err => console.log(err));
 }
 setupVideoNailPlayer()
   .then(_ => {
+    animate();
     return addBellsAndOrnaments();
   })
   .catch(err => console.log(err));
