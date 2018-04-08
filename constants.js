@@ -6,7 +6,8 @@ var state = {
   isPolymer: false,
   inPipMode: false,
   manualClose: false,
-  isMinimized: false
+  isMinimized: false,
+  currPage: "",
 };
 
 var elRefs = {

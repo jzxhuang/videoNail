@@ -22,7 +22,7 @@
         "fontawesome-all.min.js",
         "functions.js",
         "constants.js",
-        "videonail.js"
+        "handlers.js"
       ],
       "run_at": "document_end"
     },
@@ -37,7 +37,7 @@
         "fontawesome-all.min.js",
         "functions.js",
         "constants.js",
-        "otherPage.js"
+        "handlers.js"
       ],
       "css": [
         "videonail.css"
@@ -57,11 +57,5 @@
     "activeTab",
     "http://*/",
     "https://*/"
-  ],
-  "web_accessible_resources": [
-    "otherPage.js",
-    "videonail.js",
-    "resetState.js",
-    "vidEventHandlers.js"
   ]
 }

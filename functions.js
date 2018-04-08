@@ -422,6 +422,21 @@ function wrapAll(nodes, wrapper) {
   })
 }
 
+function unwrapAll(wrapper) {
+  return new Promise((resolve, reject) => {
+    var parent = wrapper.parentNode;
+    var children = wrapper.children;
+    var insertBeforeNode = wrapper.nextSibling;
+
+    for (var i = 0; i < children.length; i++) {
+      parent.insertBefore(children[i], insertBeforeNode);
+    }
+
+    parent.removeChild(wrapper);
+    resolve();
+  })
+}
+
 function calculateHeight(width) {
   return (width - LEFT_AND_RIGHT_BORDER) * 9 / 16 + HEADER_AND_BOTTOM_BORDER;
 }
@@ -470,8 +485,10 @@ function addBellsAndOrnaments() {
 }
 
 function removeVideoNailHeader() {
-  let header = document.querySelector("#videonail-header");
-  header.parentNode.removeChild(header);
+  return new Promise((resolve, reject) => {
+    elRefs.videoNailHeader.parentNode.removeChild(elRefs.videoNailHeader);
+    resolve();
+  })
 }
 
 function removeVideoNailPlayer() {
