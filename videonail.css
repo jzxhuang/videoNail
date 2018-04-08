@@ -6,7 +6,7 @@
 }
 
 /* VideoNail Player */
-.videonail .videonail-player {
+.videonail-player {
   display: flex;
   flex-flow: column;
   background: transparent !important;
@@ -58,6 +58,11 @@
   height: 100% !important;
   flex: 1 1 auto !important;
   width: 100% !important;
+}
+
+.videonail-player-active .html5-video-player .html5-video-container .html5-main-video {
+  left: 0px !important;
+  top: 0px !important;
 }
 
 /* Force proper width for controls at bottom */

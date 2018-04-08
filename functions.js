@@ -15,7 +15,8 @@ function injectPIP() {
   }
 
   elRefs.videoNailPlayer.classList.add("videonail-player");
-
+  elRefs.videoNailPlayer.classList.toggle("videonail-player-active", false);
+  
   // Wrap player in container
   elRefs.videoNailContainer = document.createElement('div');
   elRefs.videoNailContainer.classList.add("videonail-container-std-mode", "videonail-container");
@@ -140,11 +141,6 @@ function setVNPlayerStyle() {
 }
 
 function initOrRestoreSize() {
-  let vid = document.querySelector(".html5-main-video");
-  try {
-    vid.style.left = "0px";
-    vid.style.top = "0px";
-  } catch (e) {}
   if (lastSavedStyle) {
     return;
   }
