@@ -42,6 +42,9 @@
 .videonail-container-std-mode {
   width: 100% !important;
   height: 100% !important;
+  top: 0px !important;
+  left: 0px !important;
+  cursor: default !important;
   margin: 0 auto;
 }
 /* Pip Mode */

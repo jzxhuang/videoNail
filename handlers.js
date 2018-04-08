@@ -1,8 +1,40 @@
-chrome.runtime.onMessage.addListener(function(request, sender) {
-  if (request.to === "watch page") {
-    onWatchPage();
-  } else if (request.to === "other YT page") {
-    onOtherPage();
+// ** TO-DO: send message to background script when 'x' button is closed on otherPages
+
+// On loading a new page, get data from chrome.storage. 
+// Only background script has access to tabId, so we need to send message to background to get tabId
+chrome.runtime.sendMessage({type: "GET"}, response => {
+  console.log(response);  // this is the tabId, now read from storage
+  chrome.storage.local.get(response.toString(), result => {
+    // would write this to a variable / init videonail based on this result
+    console.log(result);
+  })
+});
+
+// Listen for navigation events detected by background.js
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  // If YouTube same page nav
+  if (request.type === "YT-NAV") {
+    if (request.target === "watch page") {
+      onWatchPage();
+    } else if (request.target === "other YT page") {
+      onOtherPage();
+    }
+  }
+  // Regular nav
+  else if (request.type === "REGULAR-NAV") {
+    console.log(window.location.href);
+    let response = {
+      type: "SET",
+      url: window.location.href
+    }
+    // TODO: getBoundingClientRect will not work as expected if on watch page in std-mode. In this case, use lastsavedstyle?
+    if (elRefs.videoNailContainer) {
+      response.body = {
+        position: elRefs.videoNailContainer.getBoundingClientRect(),
+        vidMetadata: null
+      }
+    } else { response.body - null};
+    sendResponse(response);
   }
 });
 
