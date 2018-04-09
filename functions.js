@@ -120,8 +120,7 @@ function saveDefaultStyle() {
 
 function setDefaultStyle() {
   if (defaultStyle) {
-    // elRefs.videoNailContainer.style.cssText = defaultStyle;
-    elRefs.videoNailContainer.removeAttribute('style');
+    // elRefs.videoNailContainer.removeAttribute('style');
   }
   window.dispatchEvent(new Event("resize"));
 }

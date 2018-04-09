@@ -13,7 +13,7 @@
   "content_scripts": [
     {
       "matches": [
-        "*://www.youtube.com/watch?*"
+        "<all_urls>"
       ],
       "css": [
         "videonail.css"
@@ -23,24 +23,6 @@
         "functions.js",
         "constants.js",
         "handlers.js"
-      ],
-      "run_at": "document_end"
-    },
-    {
-      "matches": [
-        "*://www.youtube.com/",
-        "*://www.youtube.com/feed/*",
-        "*://www.youtube.com/channel/*",
-        "*://www.youtube.com/playlist?*"
-      ],
-      "js": [
-        "fontawesome-all.min.js",
-        "functions.js",
-        "constants.js",
-        "handlers.js"
-      ],
-      "css": [
-        "videonail.css"
       ],
       "run_at": "document_end"
     }
@@ -56,6 +38,8 @@
     "tabs",
     "activeTab",
     "http://*/",
-    "https://*/"
+    "https://*/",
+    "webNavigation",
+    "storage"
   ]
 }
