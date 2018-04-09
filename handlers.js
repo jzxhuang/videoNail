@@ -30,19 +30,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // TODO: getBoundingClientRect will not work as expected if on watch page in std-mode. In this case, use lastsavedstyle?
     if (elRefs.videoNailContainer) {
       response.body = {
-        position: elRefs.videoNailContainer.getBoundingClientRect(),
+        position: lastSavedStyle,
         vidMetadata: null
       }
-    } else { response.body - null};
+    } else { response.body = null };
     sendResponse(response);
   }
 });
 
-if (window.location.pathname == "/watch") {
-  initWatchPage();
-} else {
-  initOtherPage();
-}
+if (window.location.pathname == "/watch") initWatchPage();
+else initOtherPage();
+
 state.currPage = window.location.href;
 
 function initWatchPage() {
