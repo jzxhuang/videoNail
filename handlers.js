@@ -21,18 +21,18 @@ function initWatchPage() {
 }
 
 function onWatchPage() {
+  lastSavedStyle = elRefs.videoNailContainer.style.cssText;
+  state.inPipMode = false;
+
   // If we're from other YT pages, remove the entire container,
   // then set up like usual
-  if (document.querySelector("#videonail-container")) {
+  if (!state.currPage.includes("youtube.com/watch")) {
     removeVideoNailPlayer();
     initWatchPage();
   }
 
   // If we're from another /watch page, remove the header & unwrap container
-  if (
-    state.currPage.includes("youtube.com/watch") &&
-    elRefs.videoNailContainer
-  ) {
+  if (state.currPage.includes("youtube.com/watch")) {
     removeVideoNailHeader()
       .then(_ => {
         return unwrapAll(elRefs.videoNailContainer);
@@ -51,7 +51,6 @@ function onWatchPage() {
 function initOtherPage() {
   setupVideoNailPlayer()
     .then(_ => {
-      animate();
       return addBellsAndOrnaments();
     })
     .catch(err => console.log(err));
@@ -61,10 +60,8 @@ function onOtherPage() {
   // If we're from YT, remove the header & unwrap
   // If we're from other YT pages, do nothing to keep the same video
   // from reloading
-  if (
-    state.currPage.includes("youtube.com/watch") &&
-    elRefs.videoNailContainer
-  ) {
+  lastSavedStyle = elRefs.videoNailContainer.style.cssText;
+  if (state.currPage.includes("youtube.com/watch")) {
     removeVideoNailHeader()
       .then(_ => {
         return unwrapAll(elRefs.videoNailContainer);

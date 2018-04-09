@@ -16,7 +16,7 @@ function injectPIP() {
 
   elRefs.videoNailPlayer.classList.add("videonail-player");
   elRefs.videoNailPlayer.classList.toggle("videonail-player-active", false);
-  
+
   // Wrap player in container
   elRefs.videoNailContainer = document.createElement('div');
   elRefs.videoNailContainer.classList.add("videonail-container-std-mode", "videonail-container");
@@ -58,7 +58,10 @@ function attachVideoNailHeader() {
 
     elRefs.minimize = document.createElement("button");
     elRefs.minimize.id = "minimizeButton";
-    elRefs.minimize.insertAdjacentHTML("afterbegin", '<i class="fas fa-window-minimize"></i>');
+    if (state.isMinimized)
+      elRefs.minimize.insertAdjacentHTML("afterbegin", '<i class="fas fa-plus"></i>');
+    else
+      elRefs.minimize.insertAdjacentHTML("afterbegin", '<i class="fas fa-window-minimize"></i>');
     elRefs.minimize.addEventListener('mousedown', onMinimizeClick);
     elRefs.videoNailHeader.appendChild(elRefs.minimize);
 
@@ -443,6 +446,7 @@ function calculateWidth(height) {
 
 function addBellsAndOrnaments() {
   return new Promise((resolve, reject) => {
+    animate();
     setVNPlayerStyle();
     initOrRestoreSize();
     addListeners();
@@ -513,10 +517,11 @@ function setupVideoNailPlayer() {
       .then(_ => {
         elRefs.videoNailHeader.classList.toggle("videonail-header-std-mode", false);
         elRefs.videoNailHeader.classList.add("videonail-header");
+        if (lastSavedStyle) elRefs.videoNailContainer.style.cssText = lastSavedStyle;
         window.dispatchEvent(new Event("resize"));
       })
       .catch(err => console.log(err));
-
+    
     resolve();
   })
 }
