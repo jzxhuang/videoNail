@@ -20,6 +20,7 @@ var elRefs = {
 };
 
 var observer;
+var vidId, metadata, lastSavedStyle;
 
 const INIT_WIDTH = 474;
 const HEADER_AND_BOTTOM_BORDER = 29;
@@ -30,7 +31,6 @@ const MIN_HEIGHT = (MIN_WIDTH - LEFT_AND_RIGHT_BORDER) / 16 * 9 + HEADER_AND_BOT
 const EDGE_MARGIN = 5;
 const NAVBAR_HEIGHT = 0;
 
-let lastSavedStyle = null;
 let defaultStyle = null;
 let savedBox = null;
 

@@ -1,47 +1,37 @@
 // ** TO-DO: send message to background script when 'x' button is closed on otherPages
 
-// On loading a new page, get data from chrome.storage. 
-// Only background script has access to tabId, so we need to send message to background to get tabId
-chrome.runtime.sendMessage({type: "GET"}, response => {
-  console.log(response);  // this is the tabId, now read from storage
-  chrome.storage.local.get(response.toString(), result => {
-    // would write this to a variable / init videonail based on this result
-    console.log(result);
-  })
-});
-
 // Listen for navigation events detected by background.js
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   // If YouTube same page nav
-  if (request.type === "YT-NAV") {
-    if (request.target === "watch page") {
-      onWatchPage();
-    } else if (request.target === "other YT page") {
-      onOtherPage();
-    }
-  }
-  // Regular nav
-  else if (request.type === "REGULAR-NAV") {
-    console.log(window.location.href);
-    let response = {
+  if (request.type === "YT-WATCH") {
+    onWatchPage();
+  } else if (request.type === "YT-OTHER") {
+    onOtherPage();
+  } else if (request.type === "OTHER") {
+    initOtherPage();
+  } else if (request.type == "SAVE") {
+    // TODO: extract data and send it back thru sendResponse
+    var response = {
       type: "SET",
-      url: window.location.href
-    }
-    // TODO: getBoundingClientRect will not work as expected if on watch page in std-mode. In this case, use lastsavedstyle?
-    if (elRefs.videoNailContainer) {
-      response.body = {
-        position: lastSavedStyle,
-        vidMetadata: null
+      data: {
+        id: "ZHb-QsAnEiY",
+        style:
+          "width: 526px; height: 319.25px; cursor: default; top: 402px; left: 192px;",
+        metadata: {
+          position: "1:24",
+          speed: "0.5",
+          quality: "480p"
+        }
       }
-    } else { response.body = null };
+    };
     sendResponse(response);
   }
 });
 
-if (window.location.pathname == "/watch") initWatchPage();
-else initOtherPage();
-
 state.currPage = window.location.href;
+if (state.currPage.includes("youtube.com/watch")) initWatchPage();
+else if (state.currPage.includes("youtube.com")) {
+} else initOtherPage();
 
 function initWatchPage() {
   state.isPolymer = document.querySelector("body#body") === null;
@@ -51,18 +41,22 @@ function initWatchPage() {
 }
 
 function onWatchPage() {
-  lastSavedStyle = elRefs.videoNailContainer.style.cssText;
+  // Only save style if the video was in pip mode
+  // (other page, watch page when scrolled down)
+  if (elRefs.videoNailContainer && state.inPipMode)
+    lastSavedStyle = elRefs.videoNailContainer.style.cssText;
   state.inPipMode = false;
 
   // If we're from other YT pages, remove the entire container,
   // then set up like usual
-  if (!state.currPage.includes("youtube.com/watch")) {
+  if (
+    !state.currPage.includes("youtube.com/watch") &&
+    document.querySelector("#videonail-container")
+  ) {
     removeVideoNailPlayer();
     initWatchPage();
-  }
-
-  // If we're from another /watch page, remove the header & unwrap container
-  if (state.currPage.includes("youtube.com/watch")) {
+  } else if (state.currPage.includes("youtube.com/watch")) {
+    // If we're from another /watch page, remove the header & unwrap container
     removeVideoNailHeader()
       .then(_ => {
         return unwrapAll(elRefs.videoNailContainer);
@@ -74,12 +68,17 @@ function onWatchPage() {
         initWatchPage();
       })
       .catch(err => console.log(err));
+  } else {
+    initWatchPage();
   }
   state.currPage = window.location.href;
 }
 
 function initOtherPage() {
-  setupVideoNailPlayer()
+  fetchVidData()
+    .then(data => {
+      return setupVideoNailPlayer(data);
+    })
     .then(_ => {
       return addBellsAndOrnaments();
     })

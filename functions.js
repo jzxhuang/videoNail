@@ -497,7 +497,11 @@ function removeVideoNailPlayer() {
   document.removeEventListener('mouseup', onUp);
 }
 
-function setupVideoNailPlayer() {
+function setupVideoNailPlayer(vidData) {
+  vidId = vidData.id;
+  lastSavedStyle =  vidData.style;
+  metadata = vidData.metadata;
+
   return new Promise((resolve, reject) => {
     elRefs.videoNailContainer = document.createElement("div");
     elRefs.videoNailContainer.id = "videonail-container";
@@ -508,7 +512,7 @@ function setupVideoNailPlayer() {
     elRefs.videoNailPlayer = document.createElement('iframe');
     elRefs.videoNailPlayer.type = "text/html";
     elRefs.videoNailPlayer.frameborder = "0";
-    elRefs.videoNailPlayer.src = "https://www.youtube.com/embed/M7lc1UVf-VE?autoplay=1";
+    elRefs.videoNailPlayer.src = `https://www.youtube.com/embed/T5sGdUIC-X8?autoplay=1`;
     elRefs.videoNailPlayer.classList.add("videonail-player-active");
     elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
 
@@ -518,9 +522,22 @@ function setupVideoNailPlayer() {
         elRefs.videoNailHeader.classList.add("videonail-header");
         if (lastSavedStyle) elRefs.videoNailContainer.style.cssText = lastSavedStyle;
         window.dispatchEvent(new Event("resize"));
+        resolve();
       })
       .catch(err => console.log(err));
-    
-    resolve();
   })
+}
+
+function fetchVidData() {
+  return new Promise((resolve, reject) => {
+    // On loading a new page, get vidData from chrome.storage.
+    // Only background script has access to tabId, so we need to send message to background to get tabId
+    chrome.runtime.sendMessage({ type: "GET" }, tabId => {
+      if (!tabId) return;
+      chrome.storage.local.get(tabId.toString(), vidData => {
+        if (vidData[tabId]) resolve(vidData[tabId]);
+        else reject("No video for this tab.");
+      });
+    });
+  });
 }
