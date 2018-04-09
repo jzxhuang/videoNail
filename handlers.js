@@ -15,8 +15,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       type: "SET",
       data: {
         id: "ZHb-QsAnEiY",
-        style:
-          "width: 526px; height: 319.25px; cursor: default; top: 402px; left: 192px;",
+        style: "width: 526px; height: 319.25px; cursor: default; top: 402px; left: 192px;",
         metadata: {
           position: "1:24",
           speed: "0.5",

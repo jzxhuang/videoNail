@@ -95,33 +95,30 @@
   opacity: 0.75 !important;
 }
 
-
-
-
 #ytd-player,
 #movie_player {
   display: inherit;
   flex: 1 1 auto;
 }
 
-#minimizeButton,
-#closeButton {
-  background-color: transparent;
+button.videonail-button {
+  background-color: transparent !important;
   /*  margin-right: 5px;*/
-  border: none;
-  margin: none;
-  padding-top: 0;
-  padding-bottom: 0;
-  opacity: 0.75;
+  border: none !important;
+  box-shadow: none !important;
+  margin: none !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  opacity: 0.75 !important;
 }
-button#closeButton {
+button.videonail-button#closeButton {
   margin-right: 5px;
 }
 
 #minimizeButton:hover,
 #closeButton:hover {
   cursor: pointer !important;
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 .fa-window-minimize,

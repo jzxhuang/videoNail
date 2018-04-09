@@ -17,7 +17,7 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.url) {
         chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-            if (!tabs.length) return;
+            if (!tabs.length || tabs[0].id !== tabId) return;
             var tab = tabs[0];
             if (tab.url.includes("youtube.com/watch?v=")) {
               chrome.tabs.sendMessage(tab.id, { type: "YT-WATCH" });  
@@ -39,7 +39,6 @@ chrome.webNavigation.onBeforeNavigate.addListener(navEvent => {
         let vidData = {};
         vidData[navEvent.tabId] = response.data;
         chrome.storage.local.set(vidData);
-        chrome.tabs.sendMessage(navEvent.tabId, { type: "OTHER" });
       }
     })
   }
