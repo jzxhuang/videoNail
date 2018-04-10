@@ -1,7 +1,7 @@
 // ** TO-DO: send message to background script when 'x' button is closed on otherPages
 
 // Listen for navigation events detected by background.js
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // If YouTube same page nav
   if (request.type === "YT-WATCH") {
     onWatchPage();
@@ -9,21 +9,25 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     onOtherPage();
   } else if (request.type === "OTHER") {
     initOtherPage();
-  } else if (request.type == "SAVE") {
-    // TODO: extract data and send it back thru sendResponse
-    var response = {
-      type: "SET",
-      data: {
-        id: "ZHb-QsAnEiY",
-        style: "width: 526px; height: 319.25px; cursor: default; top: 402px; left: 192px;",
-        metadata: {
-          position: "1:24",
-          speed: "0.5",
-          quality: "480p"
-        }
+  } else if (request.type === "SAVE") {
+    if (elRefs.videoNailContainer) {
+      // Logic for iframe
+      if (state.currPage.includes("youtube.com/watch")) {
+        console.log('meh');
+        videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
+        document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? videoData.metadata.isPlaying = false : videoData.metadata.isPlaying = true;
+        sendResponse({ type: "SET", data: videoData });        
+      } else {
+        let iframeInner = elRefs.videoNailPlayer.contentDocument || elRefs.videoNailPlayer.contentWindow.document;
+        console.log(iframeInner);
+        videoData.metadata.timestamp = iframeInner.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
+        iframeInner.querySelector("div.html5-video-player").classList.contains("paused-mode") ? videoData.metadata.isPlaying = false : videoData.metadata.isPlaying = true;
+        console.log(videoData);
+        sendResponse({ type: "SET", data: 2 });        
       }
-    };
-    sendResponse(response);
+    } else {
+      console.log('no');
+    }
   }
 });
 
@@ -76,6 +80,7 @@ function onWatchPage() {
 function initOtherPage() {
   fetchVidData()
     .then(data => {
+      videoData = data;
       return setupVideoNailPlayer(data);
     })
     .then(_ => {
@@ -104,3 +109,5 @@ function onOtherPage() {
   }
   state.currPage = window.location.href;
 }
+
+function testFunc() { return 10 }

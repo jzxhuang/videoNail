@@ -19,6 +19,23 @@ var elRefs = {
   msg: null
 };
 
+let videoData = {
+  metadata: {
+    id: null,
+    isPlaying: false,
+    isPlaylist: false,
+    playlistId: null,
+    timestamp: "0:00"
+  },
+  style: {
+    right: 0,
+    bottom: 0,
+    width: null,
+    height: null
+  },
+  isMinimized: false,
+}
+
 var observer;
 var vidId, metadata, lastSavedStyle;
 

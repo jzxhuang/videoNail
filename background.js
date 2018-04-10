@@ -38,6 +38,8 @@ chrome.webNavigation.onBeforeNavigate.addListener(navEvent => {
         // Write data to storage
         let vidData = {};
         vidData[navEvent.tabId] = response.data;
+        console.log(response);
+        console.log(vidData);
         chrome.storage.local.set(vidData);
       }
     })

@@ -28,7 +28,8 @@ function injectPIP() {
       window.dispatchEvent(new Event("resize"));
     })
   animate();
-  
+  setVidId();
+
   // Auto-PIP on scroll (if not manually done)
   observer = new IntersectionObserver(
     (entries, observer) => {
@@ -99,7 +100,7 @@ function togglePIP() {
 
   let theaterButton = document.querySelector("[title='Theater mode']");
   if (theaterButton) theaterButton.click();
-  
+
   // When users scroll down
   if (state.inPipMode) {
     saveDefaultStyle();
@@ -197,14 +198,17 @@ function onMove(ee) {
 function onUp(e) {
   calc(e);
   clicked = null;
+  if(!state.isMinimized) videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
 }
 
 function onCloseClick() {
   if (window.location.pathname == "/watch") {
     togglePIP();
     return;
+  } else {
+    removeVideoNailPlayer();
+    chrome.runtime.sendMessage({type: "DELETE"});
   }
-  removeVideoNailPlayer();
 }
 
 function onMinimizeClick() {
@@ -213,26 +217,27 @@ function onMinimizeClick() {
   afterMinClick = true;
   // if maximized -> minimized
   if (!state.isMinimized) {
-    savedBox = elRefs.videoNailContainer.getBoundingClientRect();
-    minPrevHeight = elRefs.videoNailPlayer.offsetHeight;
+    videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
     elRefs.videoNailContainer.style.width = '300px';
     elRefs.videoNailContainer.style.top = window.innerHeight - elRefs.videoNailHeader.offsetHeight + 'px';
     elRefs.videoNailContainer.style.left = document.body.clientWidth - 300 + 'px';
-    elRefs.videoNailContainer.style.height = savedBox.height - minPrevHeight + 'px';
-    // elRefs.videoNailPlayer.style.display = "none";
-    elRefs.videoNailPlayer.classList.toggle('minimize', true)
+    elRefs.videoNailContainer.style.height = 24 + 'px';
+    elRefs.videoNailPlayer.classList.toggle('minimize', true);
+    minSVG.classList.toggle("fa-window-minimize", false);
+    minSVG.classList.toggle("fa-plus", true);
     state.isMinimized = true;
+    videoData.isMinimized = true;
   } else {
-    // elRefs.videoNailPlayer.style.display = "inherit";
     elRefs.videoNailPlayer.classList.toggle('minimize', false);
-    elRefs.videoNailContainer.style.width = savedBox.width + 'px';
-    elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight + minPrevHeight + 'px';
-    elRefs.videoNailContainer.style.top = savedBox.top + 'px';
-    elRefs.videoNailContainer.style.left = savedBox.left + 'px';
+    elRefs.videoNailContainer.style.width = videoData.style.width + 'px';
+    elRefs.videoNailContainer.style.height = videoData.style.height + 'px';
+    elRefs.videoNailContainer.style.top = videoData.style.top + 'px';
+    elRefs.videoNailContainer.style.left = videoData.style.left + 'px';
     state.isMinimized = false;
+    videoData.isMinimized = false;
+    minSVG.classList.toggle("fa-window-minimize", true);
+    minSVG.classList.toggle("fa-plus", false);
   }
-  minSVG.classList.toggle("fa-window-minimize");
-  minSVG.classList.toggle("fa-plus");
 }
 
 function onDown(e) {
@@ -448,36 +453,36 @@ function calculateWidth(height) {
 function addBellsAndOrnaments() {
   return new Promise((resolve, reject) => {
     animate();
-    setVNPlayerStyle();
-    initOrRestoreSize();
+    // setVNPlayerStyle();
+    // initOrRestoreSize();
     addListeners();
     bubbleIframeMouseMove(elRefs.videoNailPlayer);
     bubbleIframeMouseUp(elRefs.videoNailPlayer);
     function bubbleIframeMouseMove(iframe) {
       iframe.contentWindow.addEventListener('mousemove', function (event) {
         var boundingClientRect = iframe.getBoundingClientRect();
-    
+
         var evt = new CustomEvent('mousemove', {
           bubbles: true,
           cancelable: false
         })
         evt.clientX = event.clientX + boundingClientRect.left;
         evt.clientY = event.clientY + boundingClientRect.top;
-    
+
         iframe.dispatchEvent(evt);
       });
     };
     function bubbleIframeMouseUp(iframe) {
       iframe.contentWindow.addEventListener('mouseup', function (event) {
         var boundingClientRect = iframe.getBoundingClientRect();
-    
+
         var evt = new CustomEvent('mouseup', {
           bubbles: true,
           cancelable: false
         })
         evt.clientX = event.clientX + boundingClientRect.left;
         evt.clientY = event.clientY + boundingClientRect.top;
-    
+
         iframe.dispatchEvent(evt);
       });
     };
@@ -500,8 +505,7 @@ function removeVideoNailPlayer() {
 }
 
 function setupVideoNailPlayer(vidData) {
-  vidId = vidData.id;
-  lastSavedStyle =  vidData.style;
+  let startTime = 0;
   metadata = vidData.metadata;
 
   return new Promise((resolve, reject) => {
@@ -512,17 +516,50 @@ function setupVideoNailPlayer(vidData) {
     document.body.appendChild(elRefs.videoNailContainer);
 
     elRefs.videoNailPlayer = document.createElement('iframe');
+    // elRefs.videoNailPlayer.src = `https://www.youtube.com/embed/T5sGdUIC-X8?autoplay=1`;
+    let srcString = "https://www.youtube.com/embed/" + vidData.metadata.id;
+    // srcString += "?start=180";
+    let timeArray = vidData.metadata.timestamp.split(":");
+    for (let i = timeArray.length - 1; i >= 0; --i) {
+      startTime += parseInt(timeArray[i])*Math.pow(60, timeArray.length - 1 - i);
+    }
+    srcString += "?start=" + startTime.toString();
+    if(vidData.metadata.isPlaying) srcString += "&autoplay=1";
+    srcString += "&origin=" + window.location.hostname;
+    
+    elRefs.videoNailPlayer.src = srcString;
     elRefs.videoNailPlayer.type = "text/html";
     elRefs.videoNailPlayer.frameborder = "0";
-    elRefs.videoNailPlayer.src = `https://www.youtube.com/embed/T5sGdUIC-X8?autoplay=1`;
     elRefs.videoNailPlayer.classList.add("videonail-player-active");
     elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
+
+    state.isMinimized = vidData.isMinimized;
 
     attachVideoNailHeader()
       .then(_ => {
         elRefs.videoNailHeader.classList.toggle("videonail-header-std-mode", false);
         elRefs.videoNailHeader.classList.add("videonail-header");
-        if (lastSavedStyle) elRefs.videoNailContainer.style.cssText = lastSavedStyle;
+        if (!vidData.style.width) {
+          let newWidth = INIT_WIDTH;
+          if (newWidth < MIN_WIDTH) {
+            newWidth = MIN_WIDTH;
+          }
+          let newHeight = (newWidth - LEFT_AND_RIGHT_BORDER) / 16 * 9 + HEADER_AND_BOTTOM_BORDER;
+          elRefs.videoNailContainer.style.width = `${newWidth}px`;
+          elRefs.videoNailContainer.style.height = `${newHeight}px`;
+          elRefs.videoNailContainer.style.right = `0px`;
+          elRefs.videoNailContainer.style.bottom = `0px`;
+        }
+        else if (vidData.isMinimized) {
+          let min = elRefs.minimize;
+          let minSVG = min.children[0];
+          setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
+          elRefs.videoNailPlayer.classList.toggle('minimize', true);
+          minSVG.classList.toggle("fa-window-minimize", false);
+          minSVG.classList.toggle("fa-plus", true);
+        } else {
+          setBounds(elRefs.videoNailContainer, vidData.style.left, vidData.style.top, vidData.style.width, vidData.style.height);
+        }
         window.dispatchEvent(new Event("resize"));
         resolve();
       })
@@ -542,4 +579,25 @@ function fetchVidData() {
       });
     });
   });
+}
+
+function setVidId() {
+  if (state.currPage.includes("youtube.com/watch")) {
+    let vidUrl = state.currPage;
+    vidUrl = vidUrl.split("watch?");
+    if (vidUrl )
+    vidUrl = vidUrl[1].split("&");
+    vidUrl.forEach((element, index) => {
+      if (element.startsWith("list=")) {
+        videoData.metadata.isPlaylist = true;
+        videoData.metadata.playlistId = element.substr(5);
+      } else if (element.startsWith("v=")) {
+        videoData.metadata.id = element.substr(2);
+      }
+    });
+    console.log(videoData);
+  }
+  else {
+    // vnContainer = document.getElementById()
+  }
 }

@@ -106,13 +106,12 @@ button.videonail-button {
   /*  margin-right: 5px;*/
   border: none !important;
   box-shadow: none !important;
-  margin: none !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
+  margin: 0 !important;
+  padding: 0 5px 0 !important;
   opacity: 0.75 !important;
 }
 button.videonail-button#closeButton {
-  margin-right: 5px;
+  margin-right: 5px !important;
 }
 
 #minimizeButton:hover,
@@ -121,11 +120,13 @@ button.videonail-button#closeButton {
   opacity: 1 !important;
 }
 
-.fa-window-minimize,
-.fa-times,
-.fa-plus {
-  color: white;
-  opacity: inherit;
+button.videonail-button>svg.fa-window-minimize,
+button.videonail-button>svg.fa-times,
+button.videonail-button>svg.fa-plus {
+  color: white !important;
+  opacity: inherit !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 div.ytp-contextmenu.ytp-popup {
