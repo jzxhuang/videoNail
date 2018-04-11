@@ -13,28 +13,23 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (elRefs.videoNailContainer) {
       // Logic for iframe
       if (state.currPage.includes("youtube.com/watch")) {
-        console.log('meh');
         videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
         document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? videoData.metadata.isPlaying = false : videoData.metadata.isPlaying = true;
-        sendResponse({ type: "SET", data: videoData });        
       } else {
         let iframeInner = elRefs.videoNailPlayer.contentDocument || elRefs.videoNailPlayer.contentWindow.document;
-        console.log(iframeInner);
         videoData.metadata.timestamp = iframeInner.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
         iframeInner.querySelector("div.html5-video-player").classList.contains("paused-mode") ? videoData.metadata.isPlaying = false : videoData.metadata.isPlaying = true;
-        console.log(videoData);
-        sendResponse({ type: "SET", data: 2 });        
       }
-    } else {
-      console.log('no');
+      console.log(videoData);
+      sendResponse({ type: "SET", data: videoData });
     }
   }
 });
 
 state.currPage = window.location.href;
 if (state.currPage.includes("youtube.com/watch")) initWatchPage();
-else if (state.currPage.includes("youtube.com")) {
-} else initOtherPage();
+// else if (state.currPage.includes("youtube.com")) {}
+else initOtherPage();
 
 function initWatchPage() {
   state.isPolymer = document.querySelector("body#body") === null;

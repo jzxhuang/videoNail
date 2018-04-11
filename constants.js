@@ -61,3 +61,4 @@ let e, b, x, y, preSnapped, minPrevHeight;
 let redraw = false;
 
 let watchCheckQuery;
+let afterMinClick = false;

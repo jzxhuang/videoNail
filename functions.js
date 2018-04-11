@@ -489,7 +489,6 @@ function setupVideoNailPlayer(vidData) {
     document.body.appendChild(elRefs.videoNailContainer);
 
     elRefs.videoNailPlayer = document.createElement('iframe');
-    // elRefs.videoNailPlayer.src = `https://www.youtube.com/embed/T5sGdUIC-X8?autoplay=1`;
     let srcString = "https://www.youtube.com/embed/" + vidData.metadata.id;
     let timeArray = vidData.metadata.timestamp.split(":");
     for (let i = timeArray.length - 1; i >= 0; --i) {
@@ -497,7 +496,8 @@ function setupVideoNailPlayer(vidData) {
     }
     srcString += "?start=" + startTime.toString();
     if (vidData.metadata.isPlaying) srcString += "&autoplay=1";
-    // srcString += "&origin=" + window.location.hostname;
+    // srcString += "&origin=" + window.location.origin;
+    srcString += "&domain=" + window.location.hostname;
 
     elRefs.videoNailPlayer.src = srcString;
     elRefs.videoNailPlayer.type = "text/html";
