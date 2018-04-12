@@ -560,8 +560,12 @@ function setVidId() {
 // Inject videonail custom script into the browser environment
 // TODO: Check if the script already exists (possible if I close -> manually init from browser action)
 function injectBrowserScript() {
+  if (document.querySelector("#vn-injected-script")) {
+    return;
+  }
   let script = document.createElement("script");
   script.type = "text/javascript";
+  script.id = "vn-injected-script";
   script.src = chrome.runtime.getURL("vnInjectedScript.js");
   script.onload = function () {
     sendWindowMessage("INIT");
