@@ -7,7 +7,7 @@ var state = {
   inPipMode: false,
   manualClose: false,
   isMinimized: false,
-  currPage: "",
+  currPage: ""
 };
 
 var elRefs = {

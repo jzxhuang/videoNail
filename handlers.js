@@ -11,14 +11,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     initOtherPage();
   } else if (request.type === "SAVE") {
     if (elRefs.videoNailContainer) {
-      // Logic for iframe
+      //If on /watch page, get vid metadata. On other pages, it is updated through timer
       if (state.currPage.includes("youtube.com/watch")) {
         videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
         document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? videoData.metadata.isPlaying = false : videoData.metadata.isPlaying = true;
-      } else {
-        let iframeInner = elRefs.videoNailPlayer.contentDocument || elRefs.videoNailPlayer.contentWindow.document;
-        videoData.metadata.timestamp = iframeInner.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
-        iframeInner.querySelector("div.html5-video-player").classList.contains("paused-mode") ? videoData.metadata.isPlaying = false : videoData.metadata.isPlaying = true;
       }
       console.log(videoData);
       sendResponse({ type: "SET", data: videoData });
@@ -76,9 +72,11 @@ function initOtherPage() {
   fetchVidData()
     .then(data => {
       videoData = data;
+      console.log(videoData);
       return setupVideoNailPlayer(data);
     })
     .then(_ => {
+      injectBrowserScript();
       return addBellsAndOrnaments();
     })
     .catch(err => console.log(err));
@@ -105,4 +103,11 @@ function onOtherPage() {
   state.currPage = window.location.href;
 }
 
-function testFunc() { return 10 }
+// Listen for message from VN browser script and update videoData object
+window.addEventListener("message", event => {
+  if(event.source == window && event.data.type) {
+    if(event.data.type === "VIDEONAIL-BROWSER-SCRIPT-YTP-STATUS") {
+      videoData.metadata = event.data.vidMetadata;
+    }
+  }
+}, false)

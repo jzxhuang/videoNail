@@ -187,6 +187,8 @@ function onCloseClick() {
   } else {
     removeVideoNailPlayer();
     chrome.runtime.sendMessage({ type: "DELETE" });
+    sendWindowMessage("DELETE");
+    reset();
   }
 }
 
@@ -426,8 +428,6 @@ function calculateWidth(height) {
 function addBellsAndOrnaments() {
   return new Promise((resolve, reject) => {
     animate();
-    // setVNPlayerStyle();
-    // initOrRestoreSize();
     addListeners();
     bubbleIframeMouseMove(elRefs.videoNailPlayer);
     bubbleIframeMouseUp(elRefs.videoNailPlayer);
@@ -479,8 +479,6 @@ function removeVideoNailPlayer() {
 
 function setupVideoNailPlayer(vidData) {
   let startTime = 0;
-  metadata = vidData.metadata;
-
   return new Promise((resolve, reject) => {
     elRefs.videoNailContainer = document.createElement("div");
     elRefs.videoNailContainer.id = "videonail-container";
@@ -489,15 +487,19 @@ function setupVideoNailPlayer(vidData) {
     document.body.appendChild(elRefs.videoNailContainer);
 
     elRefs.videoNailPlayer = document.createElement('iframe');
-    let srcString = "https://www.youtube.com/embed/" + vidData.metadata.id;
-    let timeArray = vidData.metadata.timestamp.split(":");
-    for (let i = timeArray.length - 1; i >= 0; --i) {
-      startTime += parseInt(timeArray[i]) * Math.pow(60, timeArray.length - 1 - i);
-    }
-    srcString += "?start=" + startTime.toString();
+    elRefs.videoNailPlayer.id = "videonail-iframe";
+
+    let srcString = `https://www.youtube.com/embed/${vidData.metadata.id}?enablejsapi=1&modestbranding=1`;
+    // Check if you need to convert from xx:xx:xx to seconds
+    if (typeof vidData.metadata.timestamp !== 'number') {
+      let timeArray = vidData.metadata.timestamp.split(":");
+      for (let i = timeArray.length - 1; i >= 0; --i) {
+        startTime += parseInt(timeArray[i]) * Math.pow(60, timeArray.length - 1 - i);
+      }
+    } else startTime = Math.round(vidData.metadata.timestamp);
+    srcString += "&start=" + startTime;
     if (vidData.metadata.isPlaying) srcString += "&autoplay=1";
-    // srcString += "&origin=" + window.location.origin;
-    srcString += "&domain=" + window.location.hostname;
+    srcString += "&origin=" + window.location.origin;
 
     elRefs.videoNailPlayer.src = srcString;
     elRefs.videoNailPlayer.type = "text/html";
@@ -533,6 +535,7 @@ function fetchVidData() {
   });
 }
 
+// Sets the video id, parses parameters for playlist information (used on /watch)
 function setVidId() {
   if (state.currPage.includes("youtube.com/watch")) {
     let vidUrl = state.currPage;
@@ -547,9 +550,64 @@ function setVidId() {
         videoData.metadata.id = element.substr(2);
       }
     });
-    console.log(videoData);
   }
-  else {
-    // vnContainer = document.getElementById()
+}
+
+// Inject videonail custom script inot the browser environment
+// TODO: Check if the script already exists (possible if I close -> manually init from browser action)
+function injectBrowserScript() {
+  let script = document.createElement("script");
+  script.type = "text/javascript";
+  script.src = chrome.runtime.getURL("vnInjectedScript.js");
+  script.onload = function () {
+    sendWindowMessage("INIT");
+    injectYTIframeAPIScript();
+  };
+  document.body.appendChild(script);
+}
+
+// Inject YT Iframe API script into the browser environment
+function injectYTIframeAPIScript() {
+  let YTscript = document.createElement("script");
+  YTscript.type = "text/javascript";
+  YTscript.src = "https://www.youtube.com/iframe_api";
+  document.body.appendChild(YTscript);
+}
+
+// Send message to the videonail custom script with the videoData object
+function sendWindowMessage(type) {
+  if (type === "INIT") window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-INIT", videoData: videoData }, "*");
+  else if (type === "DELETE") window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-DELETE" }, "*");
+}
+
+function reset() {
+  try {
+    observer.unobserve(elRefs.originalPlayerSection);
+  } catch (e) {
+
+  }
+  clearListeners();
+  state = {
+    firstTime: true,
+    isPolymer: false,
+    inPipMode: false,
+    manualClose: false,
+    isMinimized: false,
+    currPage: ""
+  };
+  elRefs = {
+    originalPlayerSection: null,
+    videoNailContainer: null,
+    videoNailPlayer: null,
+    videoNailHeader: null,
+    player: null, // the html5 video
+    msg: null
+  };
+  videoData.metadata = {
+    id: null,
+    isPlaying: false,
+    isPlaylist: false,
+    playlistId: null,
+    timestamp: "0:00"
   }
 }
