@@ -9,6 +9,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     initOtherPage();
   } else if (request.type === "SAVE") {
     if (elRefs.videoNailContainer) {
+      setVidId();
       //If on /watch page, get vid metadata. On other pages, it is updated through timer
       if (state.currPage.includes("youtube.com/watch")) {
         videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
@@ -32,7 +33,6 @@ function initWatchPage() {
   if (state.isPolymer) watchCheckQuery = "ytd-watch";
   else watchCheckQuery = "#player-api";
   checkIfWatching();
-  setVidId();
 }
 
 function onWatchPage() {
