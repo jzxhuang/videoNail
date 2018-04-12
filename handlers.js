@@ -1,10 +1,8 @@
-// ** TO-DO: send message to background script when 'x' button is closed on otherPages
-
 // Listen for navigation events detected by background.js
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // If YouTube same page nav
   if (request.type === "YT-WATCH") {
-    onWatchPage();
+    onWatchPage.call(this);
   } else if (request.type === "YT-OTHER") {
     onOtherPage();
   } else if (request.type === "OTHER") {
@@ -17,6 +15,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? videoData.metadata.isPlaying = false : videoData.metadata.isPlaying = true;
       }
       console.log(videoData);
+      console.log(videoData.metadata.id);
       sendResponse({ type: "SET", data: videoData });
     }
   }
@@ -29,16 +28,16 @@ else initOtherPage();
 
 function initWatchPage() {
   state.isPolymer = document.querySelector("body#body") === null;
+  state.currPage = window.location.href;
   if (state.isPolymer) watchCheckQuery = "ytd-watch";
   else watchCheckQuery = "#player-api";
   checkIfWatching();
+  setVidId();
 }
 
 function onWatchPage() {
   // Only save style if the video was in pip mode
   // (other page, watch page when scrolled down)
-  if (elRefs.videoNailContainer && state.inPipMode)
-    lastSavedStyle = elRefs.videoNailContainer.style.cssText;
   state.inPipMode = false;
 
   // If we're from other YT pages, remove the entire container,
@@ -86,7 +85,6 @@ function onOtherPage() {
   // If we're from YT, remove the header & unwrap
   // If we're from other YT pages, do nothing to keep the same video
   // from reloading
-  lastSavedStyle = elRefs.videoNailContainer.style.cssText;
   if (state.currPage.includes("youtube.com/watch")) {
     removeVideoNailHeader()
       .then(_ => {

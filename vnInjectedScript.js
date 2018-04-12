@@ -28,5 +28,6 @@ function onYTPError(err) {
 function postYTPStatus() {
     player.getPlayerState() === 1 || player.getPlayerState === 3 ? videoData.metadata.isPlaying = true : videoData.metadata.isPlaying = false;
     videoData.metadata.timestamp = player.getCurrentTime();
+    videoData.metadata.id = player.getVideoUrl().split("v=")[1].split("&")[0];
     window.postMessage({type: "VIDEONAIL-BROWSER-SCRIPT-YTP-STATUS", vidMetadata: videoData.metadata}, "*");
 }

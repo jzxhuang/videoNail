@@ -46,6 +46,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(navEvent => {
       if (response && response.type === "SET") {
         // Write data to storage
         let vidData = {};
+        console.log(response.data);
         vidData[navEvent.tabId] = response.data;
         chrome.storage.local.set(vidData);
       }

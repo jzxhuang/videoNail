@@ -38,7 +38,7 @@ let videoData = {
 }
 
 var observer;
-var vidId, metadata, lastSavedStyle;
+var vidId, metadata;
 
 const INIT_WIDTH = 474;
 const HEADER_AND_BOTTOM_BORDER = 29;

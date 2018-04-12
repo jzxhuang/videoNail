@@ -28,7 +28,6 @@ function injectPIP() {
       window.dispatchEvent(new Event("resize"));
     })
   animate();
-  setVidId();
 
   // Auto-PIP on scroll (if not manually done)
   observer = new IntersectionObserver(
@@ -501,6 +500,9 @@ function setupVideoNailPlayer(vidData) {
     if (vidData.metadata.isPlaying) srcString += "&autoplay=1";
     srcString += "&origin=" + window.location.origin;
 
+    // Check playlist
+    if (vidData.metadata.isPlaylist) srcString += `&listType=playlist&list=${vidData.metadata.playlistId}`;
+
     elRefs.videoNailPlayer.src = srcString;
     elRefs.videoNailPlayer.type = "text/html";
     elRefs.videoNailPlayer.frameborder = "0";
@@ -538,6 +540,8 @@ function fetchVidData() {
 // Sets the video id, parses parameters for playlist information (used on /watch)
 function setVidId() {
   if (state.currPage.includes("youtube.com/watch")) {
+    videoData.metadata.isPlaylist = false;
+    videoData.metadata.playlistId = null;
     let vidUrl = state.currPage;
     vidUrl = vidUrl.split("watch?");
     if (vidUrl)
@@ -553,7 +557,7 @@ function setVidId() {
   }
 }
 
-// Inject videonail custom script inot the browser environment
+// Inject videonail custom script into the browser environment
 // TODO: Check if the script already exists (possible if I close -> manually init from browser action)
 function injectBrowserScript() {
   let script = document.createElement("script");
