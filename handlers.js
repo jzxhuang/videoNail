@@ -2,7 +2,7 @@
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // If YouTube same page nav
   if (request.type === "YT-WATCH") {
-    onWatchPage.call(this);
+    onWatchPage();
   } else if (request.type === "YT-OTHER") {
     onOtherPage();
   } else if (request.type === "OTHER") {
