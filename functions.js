@@ -487,6 +487,7 @@ function setupVideoNailPlayer(vidData) {
 
     elRefs.videoNailPlayer = document.createElement('iframe');
     elRefs.videoNailPlayer.id = "videonail-iframe";
+    elRefs.videoNailPlayer.setAttribute('allowFullScreen', '');
 
     let srcString = `https://www.youtube.com/embed/${vidData.metadata.id}?enablejsapi=1&modestbranding=1`;
     // Check if you need to convert from xx:xx:xx to seconds
