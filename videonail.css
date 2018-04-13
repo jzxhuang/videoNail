@@ -57,7 +57,7 @@
 
 /* Force video to take up available space */
 .videonail .html5-video-container,
-.videonail video {
+.videonail .videonail-player-active video {
   height: 100% !important;
   flex: 1 1 auto !important;
   width: 100% !important;
