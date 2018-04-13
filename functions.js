@@ -180,6 +180,7 @@ function onUp(e) {
   if(!state.currPage.includes("youtube.com/watch")) {
     elRefs.videoNailPlayer.style.pointerEvents = 'auto';
   }
+  window.dispatchEvent(new Event("resize"));
 }
 
 function onCloseClick() {
