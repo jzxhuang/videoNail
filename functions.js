@@ -219,7 +219,7 @@ function onMinimizeClick() {
 
 function onDown(e) {
   calc(e);
-  let isResizing = (onRightEdge || onBottomEdge || onTopEdge || onLeftEdge) && !state.isMinimized;
+  let isResizing = ((onLeftEdge && onBottomEdge) || (onRightEdge && onBottomEdge) || (onTopEdge && onLeftEdge) || (onTopEdge && onRightEdge)) && !state.isMinimized;
 
   clicked = {
     x: x,
@@ -244,8 +244,7 @@ function onDown(e) {
 
 // Checks if you can move the pane
 function canMove() {
-  return x > 0 && x < b.width && y > 0 && y < b.height &&
-    y < 30;
+  return x > 0 && x < b.width && y > 0 && y < 24;
 }
 
 // Calculates size of pane and location of cursor relative to pane after a click. Checks if cursor is on an edge for resizing. Defines right and bottom edges
@@ -370,7 +369,7 @@ function animate() {
 
   if (clicked && clicked.isMoving) {
     // Moving
-    var container = elRefs.videoNailContainer.getBoundingClientRect();
+    let container = elRefs.videoNailContainer.getBoundingClientRect();
     if (!state.isMinimized) elRefs.videoNailContainer.style.top = Math.max(NAVBAR_HEIGHT, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
     elRefs.videoNailContainer.style.left = Math.max(0, Math.min(document.body.clientWidth - container.width, (e.clientX - clicked.x))) + 'px';
     return;
@@ -389,16 +388,16 @@ function animate() {
       elRefs.videoNailContainer.style.cursor = 'default';
     }
   } else {
-    elRefs.videoNailContainer.style.cursor = 'move' ? canMove() : elRefs.videoNailContainer.style.cursor = 'default';
+    canMove() ? elRefs.videoNailContainer.style.cursor = 'move'  : elRefs.videoNailContainer.style.cursor = 'default';
   }
 }
 
 function wrapAll(nodes, wrapper) {
   return new Promise((resolve, reject) => {
-    var parent = nodes[0].parentNode;
-    var previousSibling = nodes[0].previousSibling;
+    let parent = nodes[0].parentNode;
+    let previousSibling = nodes[0].previousSibling;
 
-    for (var i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
+    for (let i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
       wrapper.appendChild(nodes[i]);
     }
 
@@ -409,11 +408,11 @@ function wrapAll(nodes, wrapper) {
 
 function unwrapAll(wrapper) {
   return new Promise((resolve, reject) => {
-    var parent = wrapper.parentNode;
-    var children = wrapper.children;
-    var insertBeforeNode = wrapper.nextSibling;
+    let parent = wrapper.parentNode;
+    let children = wrapper.children;
+    let insertBeforeNode = wrapper.nextSibling;
 
-    for (var i = 0; i < children.length; i++) {
+    for (let i = 0; i < children.length; i++) {
       parent.insertBefore(children[i], insertBeforeNode);
     }
 
@@ -476,7 +475,7 @@ function removeVideoNailHeader() {
 }
 
 function removeVideoNailPlayer() {
-  var container = document.querySelector("#videonail-container");
+  let container = document.querySelector("#videonail-container");
   container.parentNode.removeChild(container);
   document.removeEventListener('mousemove', onMove);
   document.removeEventListener('mouseup', onUp);

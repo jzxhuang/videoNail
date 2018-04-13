@@ -1,7 +1,7 @@
 // ========================================================================= //
 // GLOBAL STATE / REFERENCES                                                 //
 // ========================================================================= //
-var state = {
+let state = {
   firstTime: true,
   isPolymer: false,
   inPipMode: false,
@@ -10,7 +10,7 @@ var state = {
   currPage: ""
 };
 
-var elRefs = {
+let elRefs = {
   originalPlayerSection: null,
   videoNailContainer: null,
   videoNailPlayer: null,
@@ -37,8 +37,8 @@ let videoData = {
   isInitialStyle: true
 }
 
-var observer;
-var vidId, metadata;
+let observer;
+let vidId, metadata;
 
 const INIT_WIDTH = 474;
 const HEADER_AND_BOTTOM_BORDER = 29;
@@ -48,9 +48,7 @@ const MIN_WIDTH = 325;
 const MIN_HEIGHT = (MIN_WIDTH - LEFT_AND_RIGHT_BORDER) / 16 * 9 + HEADER_AND_BOTTOM_BORDER;
 const EDGE_MARGIN = 5;
 const NAVBAR_HEIGHT = 0;
-
-let defaultStyle = null;
-let savedBox = null;
+const HEADER_HEIGHT = 24;
 
 // End of what's configurable.
 let clicked = null;
