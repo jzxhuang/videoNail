@@ -177,6 +177,9 @@ function onUp(e) {
   clicked = null;
   if (!state.isMinimized) videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
   videoData.isInitialStyle = false;
+  if(!state.currPage.includes("youtube.com/watch")) {
+    elRefs.videoNailPlayer.style.pointerEvents = 'auto';
+  }
 }
 
 function onCloseClick() {
@@ -234,6 +237,9 @@ function onDown(e) {
     onBottomEdge: onBottomEdge
   };
   afterMinClick = false;
+  if(!state.currPage.includes("youtube.com/watch")) {
+    elRefs.videoNailPlayer.style.pointerEvents = 'none';
+  }
 }
 
 // Checks if you can move the pane
