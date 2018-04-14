@@ -434,36 +434,6 @@ function addBellsAndOrnaments() {
   return new Promise((resolve, reject) => {
     animate();
     addListeners();
-    bubbleIframeMouseMove(elRefs.videoNailPlayer);
-    bubbleIframeMouseUp(elRefs.videoNailPlayer);
-    function bubbleIframeMouseMove(iframe) {
-      iframe.contentWindow.addEventListener('mousemove', function (event) {
-        var boundingClientRect = iframe.getBoundingClientRect();
-
-        var evt = new CustomEvent('mousemove', {
-          bubbles: true,
-          cancelable: false
-        })
-        evt.clientX = event.clientX + boundingClientRect.left;
-        evt.clientY = event.clientY + boundingClientRect.top;
-
-        iframe.dispatchEvent(evt);
-      });
-    };
-    function bubbleIframeMouseUp(iframe) {
-      iframe.contentWindow.addEventListener('mouseup', function (event) {
-        var boundingClientRect = iframe.getBoundingClientRect();
-
-        var evt = new CustomEvent('mouseup', {
-          bubbles: true,
-          cancelable: false
-        })
-        evt.clientX = event.clientX + boundingClientRect.left;
-        evt.clientY = event.clientY + boundingClientRect.top;
-
-        iframe.dispatchEvent(evt);
-      });
-    };
     resolve();
   })
 }
