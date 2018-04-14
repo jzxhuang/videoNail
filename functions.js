@@ -28,6 +28,7 @@ function injectPIP() {
       window.dispatchEvent(new Event("resize"));
     })
   animate();
+  setVidId();
 
   // Auto-PIP on scroll (if not manually done)
   observer = new IntersectionObserver(
@@ -177,7 +178,7 @@ function onUp(e) {
   clicked = null;
   if (!state.isMinimized) videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
   videoData.isInitialStyle = false;
-  if(!state.currPage.includes("youtube.com/watch")) {
+  if (!state.currPage.includes("youtube.com/watch")) {
     elRefs.videoNailPlayer.style.pointerEvents = 'auto';
   }
   window.dispatchEvent(new Event("resize"));
@@ -189,8 +190,8 @@ function onCloseClick() {
     return;
   } else {
     removeVideoNailPlayer();
-    chrome.runtime.sendMessage({ type: "DELETE" });
-    sendWindowMessage("DELETE");
+    chrome.runtime.sendMessage({ type: "DELETE" }); // Delete from storage
+    sendWindowMessage("DELETE");          // Send DELETE message to in browser script
     reset();
   }
 }
@@ -238,7 +239,7 @@ function onDown(e) {
     onBottomEdge: onBottomEdge
   };
   afterMinClick = false;
-  if(!state.currPage.includes("youtube.com/watch")) {
+  if (!state.currPage.includes("youtube.com/watch")) {
     elRefs.videoNailPlayer.style.pointerEvents = 'none';
   }
 }
@@ -389,7 +390,7 @@ function animate() {
       elRefs.videoNailContainer.style.cursor = 'default';
     }
   } else {
-    canMove() ? elRefs.videoNailContainer.style.cursor = 'move'  : elRefs.videoNailContainer.style.cursor = 'default';
+    canMove() ? elRefs.videoNailContainer.style.cursor = 'move' : elRefs.videoNailContainer.style.cursor = 'default';
   }
 }
 
@@ -480,6 +481,7 @@ function removeVideoNailPlayer() {
   container.parentNode.removeChild(container);
   document.removeEventListener('mousemove', onMove);
   document.removeEventListener('mouseup', onUp);
+  window.removeEventListener("message", windowMessageListener, false);
 }
 
 function setupVideoNailPlayer(vidData) {
@@ -493,30 +495,28 @@ function setupVideoNailPlayer(vidData) {
 
     elRefs.videoNailPlayer = document.createElement('iframe');
     elRefs.videoNailPlayer.id = "videonail-iframe";
-    elRefs.videoNailPlayer.setAttribute('allowFullScreen', '');
-
-    let srcString = `https://www.youtube.com/embed/${vidData.metadata.id}?enablejsapi=1&modestbranding=1`;
-    // Check if you need to convert from xx:xx:xx to seconds
-    if (typeof vidData.metadata.timestamp !== 'number') {
-      let timeArray = vidData.metadata.timestamp.split(":");
-      for (let i = timeArray.length - 1; i >= 0; --i) {
-        startTime += parseInt(timeArray[i]) * Math.pow(60, timeArray.length - 1 - i);
-      }
-    } else startTime = Math.round(vidData.metadata.timestamp);
-    srcString += "&start=" + startTime;
-    if (vidData.metadata.isPlaying) srcString += "&autoplay=1";
-    srcString += "&origin=" + window.location.origin;
-
-    // Check playlist
-    if (vidData.metadata.isPlaylist) srcString += `&listType=playlist&list=${vidData.metadata.playlistId}`;
-
-    elRefs.videoNailPlayer.src = srcString;
     elRefs.videoNailPlayer.type = "text/html";
     elRefs.videoNailPlayer.frameborder = "0";
+    elRefs.videoNailPlayer.setAttribute('allowFullScreen', '');
     elRefs.videoNailPlayer.classList.add("videonail-player-active");
     elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
 
     state.isMinimized = vidData.isMinimized;
+    let srcString = `https://www.youtube.com/embed/${vidData.metadata.id}?enablejsapi=1&modestbranding=1`;
+
+    // Check if you need to convert from xx:xx:xx to seconds
+    if (typeof vidData.metadata.timestamp !== 'number') {
+      let timeArray = vidData.metadata.timestamp.split(":");
+      for (let i = timeArray.length - 1; i >= 0; --i)
+        startTime += parseInt(timeArray[i]) * Math.pow(60, timeArray.length - 1 - i);
+    } else startTime = Math.round(vidData.metadata.timestamp);
+    srcString += "&start=" + startTime;
+    if (vidData.metadata.isPlaying) srcString += "&autoplay=1";
+    srcString += "&origin=" + window.location.origin;
+    // Check playlist
+    if (vidData.metadata.isPlaylist) srcString += `&listType=playlist&list=${vidData.metadata.playlistId}`;
+
+    elRefs.videoNailPlayer.src = srcString;
 
     attachVideoNailHeader()
       .then(_ => {
@@ -568,6 +568,7 @@ function setVidId() {
 // TODO: Check if the script already exists (possible if I close -> manually init from browser action)
 function injectBrowserScript() {
   if (document.querySelector("#vn-injected-script")) {
+    sendWindowMessage("START-NEW");
     return;
   }
   let script = document.createElement("script");
@@ -593,6 +594,7 @@ function injectYTIframeAPIScript() {
 function sendWindowMessage(type) {
   if (type === "INIT") window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-INIT", videoData: videoData }, "*");
   else if (type === "DELETE") window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-DELETE" }, "*");
+  else if (type === "START-NEW") window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW" }, "*")
 }
 
 function reset() {
@@ -624,5 +626,14 @@ function reset() {
     isPlaylist: false,
     playlistId: null,
     timestamp: "0:00"
+  }
+}
+
+// Listen for message from VN browser script and update videoData object
+function windowMessageListener(event) {
+  if (event.source == window && event.data.type) {
+    if (event.data.type === "VIDEONAIL-BROWSER-SCRIPT-YTP-STATUS") {
+      videoData.metadata = event.data.vidMetadata;
+    }
   }
 }

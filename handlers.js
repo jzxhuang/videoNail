@@ -9,7 +9,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     initOtherPage();
   } else if (request.type === "SAVE") {
     if (elRefs.videoNailContainer) {
-      setVidId();
       //If on /watch page, get vid metadata. On other pages, it is updated through timer
       if (state.currPage.includes("youtube.com/watch")) {
         videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
@@ -46,6 +45,7 @@ function onWatchPage() {
     !state.currPage.includes("youtube.com/watch") &&
     document.querySelector("#videonail-container")
   ) {
+    sendWindowMessage("DELETE");
     removeVideoNailPlayer();
     initWatchPage();
   } else if (state.currPage.includes("youtube.com/watch")) {
@@ -72,6 +72,7 @@ function initOtherPage() {
     .then(data => {
       videoData = data;
       console.log(videoData);
+      window.addEventListener("message", windowMessageListener, false);
       return setupVideoNailPlayer(data);
     })
     .then(_ => {
@@ -83,8 +84,7 @@ function initOtherPage() {
 
 function onOtherPage() {
   // If we're from YT, remove the header & unwrap
-  // If we're from other YT pages, do nothing to keep the same video
-  // from reloading
+  // If we're from other YT pages, do nothing to keep the same video from reloading
   if (state.currPage.includes("youtube.com/watch")) {
     removeVideoNailHeader()
       .then(_ => {
@@ -100,12 +100,3 @@ function onOtherPage() {
   }
   state.currPage = window.location.href;
 }
-
-// Listen for message from VN browser script and update videoData object
-window.addEventListener("message", event => {
-  if(event.source == window && event.data.type) {
-    if(event.data.type === "VIDEONAIL-BROWSER-SCRIPT-YTP-STATUS") {
-      videoData.metadata = event.data.vidMetadata;
-    }
-  }
-}, false)
