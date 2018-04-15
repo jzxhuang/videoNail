@@ -41,5 +41,8 @@
     "https://*/",
     "webNavigation",
     "storage"
+  ],
+  "web_accessible_resources": [
+    "vnInjectedScript.js"
   ]
 }

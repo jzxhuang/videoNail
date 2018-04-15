@@ -28,7 +28,8 @@ function injectPIP() {
       window.dispatchEvent(new Event("resize"));
     })
   animate();
-  
+  setVidId();
+
   // Auto-PIP on scroll (if not manually done)
   observer = new IntersectionObserver(
     (entries, observer) => {
@@ -79,6 +80,7 @@ function attachVideoNailHeader() {
 function checkIfWatching() {
   if (document.location.pathname === "/watch") {
     const interval = setInterval(checkForPlayer, 100);
+
     function checkForPlayer() {
       if (document.querySelector(watchCheckQuery)) {
         clearInterval(interval);
@@ -99,64 +101,42 @@ function togglePIP() {
 
   let theaterButton = document.querySelector("[title='Theater mode']");
   if (theaterButton) theaterButton.click();
-  
+
   // When users scroll down
   if (state.inPipMode) {
-    saveDefaultStyle();
     setVNPlayerStyle();
-    initOrRestoreSize();
     addListeners();
   } else {
     // When users scroll up
     state.manualClose = false;
-    saveVNPlayerStyle();
-    setDefaultStyle();
     clearListeners();
   }
   window.dispatchEvent(new Event("resize"));
 }
 
-function saveDefaultStyle() {
-  defaultStyle = elRefs.videoNailContainer.style.cssText;
-}
-
-function setDefaultStyle() {
-  if (defaultStyle) {
-    // elRefs.videoNailContainer.removeAttribute('style');
-  }
-  window.dispatchEvent(new Event("resize"));
-}
-
-function saveVNPlayerStyle() {
-  lastSavedStyle = elRefs.videoNailContainer.style.cssText;
-}
-
 function setVNPlayerStyle() {
-  var adContainer = document.querySelector(".ad-container");
+  let adContainer = document.querySelector(".ad-container");
   if (adContainer) {
     adContainer.style.top = '0px';
     adContainer.style.left = '0px';
   }
-  if (lastSavedStyle) {
-    elRefs.videoNailContainer.style = lastSavedStyle;
-    return;
-  }
-  window.dispatchEvent(new Event("resize"));
-}
 
-function initOrRestoreSize() {
-  if (lastSavedStyle) {
-    return;
+  if (videoData.isInitialStyle) {
+    let newWidth = INIT_WIDTH;
+    if (newWidth < MIN_WIDTH) newWidth = MIN_WIDTH;
+    let newHeight = (newWidth - LEFT_AND_RIGHT_BORDER) / 16 * 9 + HEADER_AND_BOTTOM_BORDER;
+    elRefs.videoNailContainer.style.width = `${newWidth}px`;
+    elRefs.videoNailContainer.style.height = `${newHeight}px`;
+  } else if (state.isMinimized) {
+    let min = elRefs.minimize;
+    let minSVG = min.children[0];
+    setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
+    elRefs.videoNailPlayer.classList.toggle('minimize', true);
+    minSVG.classList.toggle("fa-window-minimize", false);
+    minSVG.classList.toggle("fa-plus", true);
+  } else {
+    setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height);
   }
-
-  let newWidth = INIT_WIDTH;
-  if (newWidth < MIN_WIDTH) {
-    newWidth = MIN_WIDTH;
-  }
-  let newHeight = (newWidth - LEFT_AND_RIGHT_BORDER) / 16 * 9 + HEADER_AND_BOTTOM_BORDER;
-
-  elRefs.videoNailContainer.style.width = `${newWidth}px`;
-  elRefs.videoNailContainer.style.height = `${newHeight}px`;
 }
 
 function addListeners() {
@@ -197,14 +177,26 @@ function onMove(ee) {
 function onUp(e) {
   calc(e);
   clicked = null;
+  if (!state.isMinimized)
+    videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
+  videoData.isInitialStyle = false;
+  if (!state.currPage.includes("youtube.com/watch"))
+    elRefs.videoNailPlayer.style.pointerEvents = 'auto';
+  window.dispatchEvent(new Event("resize"));
 }
 
 function onCloseClick() {
   if (window.location.pathname == "/watch") {
     togglePIP();
     return;
+  } else {
+    removeVideoNailPlayer();
+    chrome.runtime.sendMessage({
+      type: "DELETE"
+    }); // Delete from storage
+    sendWindowMessage("DELETE"); // Send DELETE message to in browser script
+    reset();
   }
-  removeVideoNailPlayer();
 }
 
 function onMinimizeClick() {
@@ -213,31 +205,26 @@ function onMinimizeClick() {
   afterMinClick = true;
   // if maximized -> minimized
   if (!state.isMinimized) {
-    savedBox = elRefs.videoNailContainer.getBoundingClientRect();
-    minPrevHeight = elRefs.videoNailPlayer.offsetHeight;
-    elRefs.videoNailContainer.style.width = '300px';
-    elRefs.videoNailContainer.style.top = window.innerHeight - elRefs.videoNailHeader.offsetHeight + 'px';
-    elRefs.videoNailContainer.style.left = document.body.clientWidth - 300 + 'px';
-    elRefs.videoNailContainer.style.height = savedBox.height - minPrevHeight + 'px';
-    // elRefs.videoNailPlayer.style.display = "none";
-    elRefs.videoNailPlayer.classList.toggle('minimize', true)
+    videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
+    setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
+    elRefs.videoNailPlayer.classList.toggle("minimize", true);
+    minSVG.classList.toggle("fa-window-minimize", false);
+    minSVG.classList.toggle("fa-plus", true);
     state.isMinimized = true;
+    videoData.isMinimized = true;
   } else {
-    // elRefs.videoNailPlayer.style.display = "inherit";
     elRefs.videoNailPlayer.classList.toggle('minimize', false);
-    elRefs.videoNailContainer.style.width = savedBox.width + 'px';
-    elRefs.videoNailContainer.style.height = elRefs.videoNailContainer.offsetHeight + minPrevHeight + 'px';
-    elRefs.videoNailContainer.style.top = savedBox.top + 'px';
-    elRefs.videoNailContainer.style.left = savedBox.left + 'px';
+    setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height);
     state.isMinimized = false;
+    videoData.isMinimized = false;
+    minSVG.classList.toggle("fa-window-minimize", true);
+    minSVG.classList.toggle("fa-plus", false);
   }
-  minSVG.classList.toggle("fa-window-minimize");
-  minSVG.classList.toggle("fa-plus");
 }
 
 function onDown(e) {
   calc(e);
-  let isResizing = (onRightEdge || onBottomEdge || onTopEdge || onLeftEdge) && !state.isMinimized;
+  let isResizing = ((onLeftEdge && onBottomEdge) || (onRightEdge && onBottomEdge) || (onTopEdge && onLeftEdge) || (onTopEdge && onRightEdge)) && !state.isMinimized;
 
   clicked = {
     x: x,
@@ -255,12 +242,14 @@ function onDown(e) {
     onBottomEdge: onBottomEdge
   };
   afterMinClick = false;
+  if (!state.currPage.includes("youtube.com/watch")) {
+    elRefs.videoNailPlayer.style.pointerEvents = 'none';
+  }
 }
 
 // Checks if you can move the pane
 function canMove() {
-  return x > 0 && x < b.width && y > 0 && y < b.height &&
-    y < 30;
+  return x > 0 && x < b.width && y > 0 && y < 24;
 }
 
 // Calculates size of pane and location of cursor relative to pane after a click. Checks if cursor is on an edge for resizing. Defines right and bottom edges
@@ -379,13 +368,12 @@ function animate() {
           }
         }
       }
-      return;
     }
   }
 
   if (clicked && clicked.isMoving) {
     // Moving
-    var container = elRefs.videoNailContainer.getBoundingClientRect();
+    let container = elRefs.videoNailContainer.getBoundingClientRect();
     if (!state.isMinimized) elRefs.videoNailContainer.style.top = Math.max(NAVBAR_HEIGHT, Math.min(window.innerHeight - container.height, (e.clientY - clicked.y))) + 'px';
     elRefs.videoNailContainer.style.left = Math.max(0, Math.min(document.body.clientWidth - container.width, (e.clientX - clicked.x))) + 'px';
     return;
@@ -400,20 +388,16 @@ function animate() {
       elRefs.videoNailContainer.style.cursor = 'nesw-resize';
     } else if (canMove()) {
       elRefs.videoNailContainer.style.cursor = 'move';
-    } else {
-      elRefs.videoNailContainer.style.cursor = 'default';
-    }
-  } else {
-    elRefs.videoNailContainer.style.cursor = 'move' ? canMove() : elRefs.videoNailContainer.style.cursor = 'default';
-  }
+    } else elRefs.videoNailContainer.style.cursor = 'default';
+  } else elRefs.videoNailContainer.style.cursor = canMove() ? 'move' : 'default';
 }
 
 function wrapAll(nodes, wrapper) {
   return new Promise((resolve, reject) => {
-    var parent = nodes[0].parentNode;
-    var previousSibling = nodes[0].previousSibling;
+    let parent = nodes[0].parentNode;
+    let previousSibling = nodes[0].previousSibling;
 
-    for (var i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
+    for (let i = 0; nodes.length - i; wrapper.firstChild === nodes[0] && i++) {
       wrapper.appendChild(nodes[i]);
     }
 
@@ -424,11 +408,11 @@ function wrapAll(nodes, wrapper) {
 
 function unwrapAll(wrapper) {
   return new Promise((resolve, reject) => {
-    var parent = wrapper.parentNode;
-    var children = wrapper.children;
-    var insertBeforeNode = wrapper.nextSibling;
+    let parent = wrapper.parentNode;
+    let children = wrapper.children;
+    let insertBeforeNode = wrapper.nextSibling;
 
-    for (var i = 0; i < children.length; i++) {
+    for (let i = 0; i < children.length; i++) {
       parent.insertBefore(children[i], insertBeforeNode);
     }
 
@@ -448,39 +432,7 @@ function calculateWidth(height) {
 function addBellsAndOrnaments() {
   return new Promise((resolve, reject) => {
     animate();
-    setVNPlayerStyle();
-    initOrRestoreSize();
     addListeners();
-    bubbleIframeMouseMove(elRefs.videoNailPlayer);
-    bubbleIframeMouseUp(elRefs.videoNailPlayer);
-    function bubbleIframeMouseMove(iframe) {
-      iframe.contentWindow.addEventListener('mousemove', function (event) {
-        var boundingClientRect = iframe.getBoundingClientRect();
-    
-        var evt = new CustomEvent('mousemove', {
-          bubbles: true,
-          cancelable: false
-        })
-        evt.clientX = event.clientX + boundingClientRect.left;
-        evt.clientY = event.clientY + boundingClientRect.top;
-    
-        iframe.dispatchEvent(evt);
-      });
-    };
-    function bubbleIframeMouseUp(iframe) {
-      iframe.contentWindow.addEventListener('mouseup', function (event) {
-        var boundingClientRect = iframe.getBoundingClientRect();
-    
-        var evt = new CustomEvent('mouseup', {
-          bubbles: true,
-          cancelable: false
-        })
-        evt.clientX = event.clientX + boundingClientRect.left;
-        evt.clientY = event.clientY + boundingClientRect.top;
-    
-        iframe.dispatchEvent(evt);
-      });
-    };
     resolve();
   })
 }
@@ -493,17 +445,15 @@ function removeVideoNailHeader() {
 }
 
 function removeVideoNailPlayer() {
-  var container = document.querySelector("#videonail-container");
+  let container = document.querySelector("#videonail-container");
   container.parentNode.removeChild(container);
   document.removeEventListener('mousemove', onMove);
   document.removeEventListener('mouseup', onUp);
+  window.removeEventListener("message", windowMessageListener, false);
 }
 
 function setupVideoNailPlayer(vidData) {
-  vidId = vidData.id;
-  lastSavedStyle =  vidData.style;
-  metadata = vidData.metadata;
-
+  let startTime = 0;
   return new Promise((resolve, reject) => {
     elRefs.videoNailContainer = document.createElement("div");
     elRefs.videoNailContainer.id = "videonail-container";
@@ -512,17 +462,35 @@ function setupVideoNailPlayer(vidData) {
     document.body.appendChild(elRefs.videoNailContainer);
 
     elRefs.videoNailPlayer = document.createElement('iframe');
+    elRefs.videoNailPlayer.id = "videonail-iframe";
     elRefs.videoNailPlayer.type = "text/html";
     elRefs.videoNailPlayer.frameborder = "0";
-    elRefs.videoNailPlayer.src = `https://www.youtube.com/embed/T5sGdUIC-X8?autoplay=1`;
+    elRefs.videoNailPlayer.setAttribute('allowFullScreen', '');
     elRefs.videoNailPlayer.classList.add("videonail-player-active");
     elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
+
+    state.isMinimized = vidData.isMinimized;
+    let srcString = `https://www.youtube.com/embed/${vidData.metadata.id}?enablejsapi=1&modestbranding=1`;
+
+    // Check if you need to convert from xx:xx:xx to seconds
+    if (typeof vidData.metadata.timestamp !== 'number') {
+      let timeArray = vidData.metadata.timestamp.split(":");
+      for (let i = timeArray.length - 1; i >= 0; --i)
+        startTime += parseInt(timeArray[i]) * Math.pow(60, timeArray.length - 1 - i);
+    } else startTime = Math.round(vidData.metadata.timestamp);
+    srcString += "&start=" + startTime;
+    if (vidData.metadata.isPlaying) srcString += "&autoplay=1";
+    srcString += "&origin=" + window.location.origin;
+    // Check playlist
+    if (vidData.metadata.isPlaylist) srcString += `&listType=playlist&list=${vidData.metadata.playlistId}`;
+
+    elRefs.videoNailPlayer.src = srcString;
 
     attachVideoNailHeader()
       .then(_ => {
         elRefs.videoNailHeader.classList.toggle("videonail-header-std-mode", false);
         elRefs.videoNailHeader.classList.add("videonail-header");
-        if (lastSavedStyle) elRefs.videoNailContainer.style.cssText = lastSavedStyle;
+        setVNPlayerStyle();
         window.dispatchEvent(new Event("resize"));
         resolve();
       })
@@ -534,7 +502,9 @@ function fetchVidData() {
   return new Promise((resolve, reject) => {
     // On loading a new page, get vidData from chrome.storage.
     // Only background script has access to tabId, so we need to send message to background to get tabId
-    chrome.runtime.sendMessage({ type: "GET" }, tabId => {
+    chrome.runtime.sendMessage({
+      type: "GET"
+    }, tabId => {
       if (!tabId) return;
       chrome.storage.local.get(tabId.toString(), vidData => {
         if (vidData[tabId]) resolve(vidData[tabId]);
@@ -542,4 +512,105 @@ function fetchVidData() {
       });
     });
   });
+}
+
+// Sets the video id, parses parameters for playlist information (used on /watch)
+function setVidId() {
+  if (state.currPage.includes("youtube.com/watch")) {
+    videoData.metadata.isPlaylist = false;
+    videoData.metadata.playlistId = null;
+    let vidUrl = state.currPage;
+    vidUrl = vidUrl.split("watch?");
+    if (vidUrl)
+      vidUrl = vidUrl[1].split("&");
+    vidUrl.forEach((element, index) => {
+      if (element.startsWith("list=")) {
+        videoData.metadata.isPlaylist = true;
+        videoData.metadata.playlistId = element.substr(5);
+      } else if (element.startsWith("v=")) {
+        videoData.metadata.id = element.substr(2);
+      }
+    });
+  }
+}
+
+// Inject videonail custom script into the browser environment
+// TODO: Check if the script already exists (possible if I close -> manually init from browser action)
+function injectBrowserScript() {
+  if (document.querySelector("#vn-injected-script")) {
+    sendWindowMessage("START-NEW");
+    return;
+  }
+  let script = document.createElement("script");
+  script.type = "text/javascript";
+  script.id = "vn-injected-script";
+  script.src = chrome.runtime.getURL("vnInjectedScript.js");
+  script.onload = function () {
+    sendWindowMessage("INIT");
+    injectYTIframeAPIScript();
+  };
+  document.body.appendChild(script);
+}
+
+// Inject YT Iframe API script into the browser environment
+function injectYTIframeAPIScript() {
+  let YTscript = document.createElement("script");
+  YTscript.type = "text/javascript";
+  YTscript.src = "https://www.youtube.com/iframe_api";
+  document.body.appendChild(YTscript);
+}
+
+// Send message to the videonail custom script with the videoData object
+function sendWindowMessage(type) {
+  if (type === "INIT") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-INIT",
+    videoData: videoData
+  }, "*");
+  else if (type === "DELETE") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-DELETE"
+  }, "*");
+  else if (type === "START-NEW") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW"
+  }, "*")
+}
+
+function reset() {
+  try {
+    observer.unobserve(elRefs.originalPlayerSection);
+  } catch (e) {
+
+  }
+  clearListeners();
+  state = {
+    firstTime: true,
+    isPolymer: false,
+    inPipMode: false,
+    manualClose: false,
+    isMinimized: false,
+    currPage: ""
+  };
+  elRefs = {
+    originalPlayerSection: null,
+    videoNailContainer: null,
+    videoNailPlayer: null,
+    videoNailHeader: null,
+    player: null, // the html5 video
+    msg: null
+  };
+  videoData.metadata = {
+    id: null,
+    isPlaying: false,
+    isPlaylist: false,
+    playlistId: null,
+    timestamp: "0:00"
+  }
+}
+
+// Listen for message from VN browser script and update videoData object
+function windowMessageListener(event) {
+  if (event.source == window && event.data.type) {
+    if (event.data.type === "VIDEONAIL-BROWSER-SCRIPT-YTP-STATUS") {
+      videoData.metadata = event.data.vidMetadata;
+    }
+  }
 }

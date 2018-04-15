@@ -1,7 +1,5 @@
-// ** TO-DO: send message to background script when 'x' button is closed on otherPages
-
 // Listen for navigation events detected by background.js
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // If YouTube same page nav
   if (request.type === "YT-WATCH") {
     onWatchPage();
@@ -9,31 +7,25 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     onOtherPage();
   } else if (request.type === "OTHER") {
     initOtherPage();
-  } else if (request.type == "SAVE") {
-    // TODO: extract data and send it back thru sendResponse
-    var response = {
-      type: "SET",
-      data: {
-        id: "ZHb-QsAnEiY",
-        style: "width: 526px; height: 319.25px; cursor: default; top: 402px; left: 192px;",
-        metadata: {
-          position: "1:24",
-          speed: "0.5",
-          quality: "480p"
-        }
+  } else if (request.type === "SAVE") {
+    if (elRefs.videoNailContainer) {
+      //If on /watch page, get vid metadata. On other pages, it is updated through timer
+      if (state.currPage.includes("youtube.com/watch")) {
+        videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
+        videoData.metadata.isPlaying = document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? false : true;
       }
-    };
-    sendResponse(response);
+      sendResponse({ type: "SET", data: videoData });
+    }
   }
 });
 
 state.currPage = window.location.href;
 if (state.currPage.includes("youtube.com/watch")) initWatchPage();
-else if (state.currPage.includes("youtube.com")) {
-} else initOtherPage();
+else initOtherPage();
 
 function initWatchPage() {
   state.isPolymer = document.querySelector("body#body") === null;
+  state.currPage = window.location.href;
   if (state.isPolymer) watchCheckQuery = "ytd-watch";
   else watchCheckQuery = "#player-api";
   checkIfWatching();
@@ -42,8 +34,6 @@ function initWatchPage() {
 function onWatchPage() {
   // Only save style if the video was in pip mode
   // (other page, watch page when scrolled down)
-  if (elRefs.videoNailContainer && state.inPipMode)
-    lastSavedStyle = elRefs.videoNailContainer.style.cssText;
   state.inPipMode = false;
 
   // If we're from other YT pages, remove the entire container,
@@ -52,6 +42,7 @@ function onWatchPage() {
     !state.currPage.includes("youtube.com/watch") &&
     document.querySelector("#videonail-container")
   ) {
+    sendWindowMessage("DELETE");
     removeVideoNailPlayer();
     initWatchPage();
   } else if (state.currPage.includes("youtube.com/watch")) {
@@ -76,9 +67,13 @@ function onWatchPage() {
 function initOtherPage() {
   fetchVidData()
     .then(data => {
+      videoData = data;
+      console.log(videoData);
+      window.addEventListener("message", windowMessageListener, false);
       return setupVideoNailPlayer(data);
     })
     .then(_ => {
+      injectBrowserScript();
       return addBellsAndOrnaments();
     })
     .catch(err => console.log(err));
@@ -86,9 +81,7 @@ function initOtherPage() {
 
 function onOtherPage() {
   // If we're from YT, remove the header & unwrap
-  // If we're from other YT pages, do nothing to keep the same video
-  // from reloading
-  lastSavedStyle = elRefs.videoNailContainer.style.cssText;
+  // If we're from other YT pages, do nothing to keep the same video from reloading
   if (state.currPage.includes("youtube.com/watch")) {
     removeVideoNailHeader()
       .then(_ => {
