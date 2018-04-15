@@ -1,15 +1,29 @@
 {
   "manifest_version": 2,
   "name": "videoNail",
-  "description":
-    "This extension keeps YouTube video on screen when scrolling down to the comment section",
-  "version": "0.2.0",
+  "description": "Keeps YouTube video on screen when scrolling down to the comment section",
+  "version": "0.2.2",
   "browser_action": {},
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
   "content_scripts": [
     {
-      "matches": ["*://www.youtube.com/*"],
-      "css": ["videonail.css"],
-      "js": ["fontawesome-all.min.js", "videonail.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "css": [
+        "videonail.css"
+      ],
+      "js": [
+        "fontawesome-all.min.js",
+        "functions.js",
+        "constants.js",
+        "handlers.js"
+      ],
       "run_at": "document_end"
     }
   ],
@@ -19,5 +33,16 @@
     "48": "VideoNail_x48.png",
     "64": "VideoNail_x64.png",
     "128": "VideoNail_x128.png"
-  }
+  },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "http://*/",
+    "https://*/",
+    "webNavigation",
+    "storage"
+  ],
+  "web_accessible_resources": [
+    "vnInjectedScript.js"
+  ]
 }

@@ -1,116 +1,86 @@
 :root {
-  --videonail-pip-toggle-size: 36px;
+  --videonail-toggle-size: 36px;
   --videonail-header-height: 24px;
   --videonail-color: rgba(208, 10, 10, 0.5);
   --transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* == Toggle button at top left of video  == */
-
-#videonail-pip-toggle {
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  height: var(--videonail-pip-toggle-size);
-  top: 0;
-  left: 0;
-  opacity: 0.75;
-  padding: 6px;
-  position: absolute;
-  transition: var(--transition);
-  width: var(--videonail-pip-toggle-size);
-  z-index: 99;
-}
-
-/* Hide with other controls */
-
-.ytp-autohide #videonail-pip-toggle {
-  opacity: 0;
-}
-
-/* Hide when in PIP or fullscreen */
-
-.ytp-fullscreen #videonail-pip-toggle {
-  display: none;
-}
-
-#videonail-pip-toggle:hover {
-  opacity: 1;
-}
-
-/* == Toggle message in place of player == */
-
-.videonail-original-player-msg {
-  align-items: center;
-  color: #777;
-  cursor: pointer;
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  width: 100%;
-}
-
-/* Dark Polymer design */
-
-[dark] .videonail-original-player-msg {
-  color: #ccc;
-}
-
-/* == VideoNail Player == */
-
-.videonail-pip #player-container,
-/* Polymer */
-
-body#body .videonail-pip #movie_player
-/* Old */
-
-  {
+/* VideoNail Player */
+.videonail-player {
   display: flex;
   flex-flow: column;
-  flex: 1 1 auto !important;
-  z-index: 99;
   background: transparent !important;
+  width: 100% !important;
+  border: none;
+}
+
+/* Apply this class for border */
+.videonail-player-active {
+  flex: 1 1 auto !important;
+  border: 5px solid var(--videonail-color) !important;
   box-sizing: border-box;
+  border-top: none !important;
+  margin: 0px 0px 0px 0px !important;
 }
 
-/* On Hover*/
-.videonail-pip #player-container:hover,
-body#body .videonail-pip #movie_player:hover {
-  border-color: var(--videonail-color);
-  transition: opacity 0.25s;
+.videonail .minimize {
+  display: none !important;
 }
 
-/* == VideoNail Container == */
-#videonail-container {
+
+/* VideoNail Outer Container */
+.videonail-container {
   display: flex;
   flex-flow: column;
   box-sizing: border-box;
-  z-index: 2147483647;
   background: transparent;
   border-top: none;
   min-width: 50px;
-  width: 100%;
-  height: 100%;
+  z-index: 2147483647;
+}
+/* Default mode */
+.videonail-container-std-mode {
+  width: 100% !important;
+  height: 100% !important;
+  top: 0px !important;
+  left: 0px !important;
+  cursor: default !important;
   margin: 0 auto;
+}
+/* Pip Mode */
+.videonail-container-pip-mode {
+  right: 0px;
+  bottom: 0px;
+  margin: 0;
+  position: fixed !important;
 }
 
 /* Force video to take up available space */
-.videonail-pip .html5-video-container,
-.videonail-pip video {
+.videonail .html5-video-container,
+.videonail .videonail-player-active video {
   height: 100% !important;
   flex: 1 1 auto !important;
   width: 100% !important;
 }
 
+.videonail-player-active .html5-video-player .html5-video-container .html5-main-video {
+  left: 0px !important;
+  top: 0px !important;
+}
+
 /* Force proper width for controls at bottom */
 
-.videonail-pip .ytp-chrome-bottom {
+.videonail .ytp-chrome-bottom {
   width: calc(100% - 24px) !important;
 }
 
-/* PIP window header */
+/* Header */
 
-.videonail-pip .videonail-header {
+.videonail-header-std-mode {
+  display: none;
+}
+
+.videonail .videonail-header {
   background: rgba(208, 10, 10, 1);
   flex: 0 1 var(--videonail-header-height);
   opacity: 0.5;
@@ -118,10 +88,11 @@ body#body .videonail-pip #movie_player:hover {
   margin: 0;
   padding: 0;
   justify-content: flex-end;
+  display: flex;
 }
 
-.videonail-header:hover {
-    opacity: 0.75 !important;
+.videonail .videonail-header:hover {
+  opacity: 0.75 !important;
 }
 
 #ytd-player,
@@ -130,30 +101,34 @@ body#body .videonail-pip #movie_player:hover {
   flex: 1 1 auto;
 }
 
-#minimizeButton {
-  background-color: transparent;
-  margin-right: 5px;
-  border: none;
-  margin: none;
-  padding-top: 0;
-  padding-bottom: 0;
-  opacity: 0.75;
+button.videonail-button {
+  background-color: transparent !important;
+  /*  margin-right: 5px;*/
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 5px 0 !important;
+  opacity: 0.75 !important;
+}
+button.videonail-button#closeButton {
+  margin-right: 5px !important;
 }
 
-#minimizeButton:hover {
-  cursor: pointer!important;
-  opacity: 1;
+#minimizeButton:hover,
+#closeButton:hover {
+  cursor: pointer !important;
+  opacity: 1 !important;
 }
 
-.fa-window-minimize,
-.fa-window-maximize,
-.fa-plus {
-  color: white;
-  opacity: inherit;
-  ;
-  padding-right: 7px;
+button.videonail-button>svg.fa-window-minimize,
+button.videonail-button>svg.fa-times,
+button.videonail-button>svg.fa-plus {
+  color: white !important;
+  opacity: inherit !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
-.fa-window-maximize {
-  padding-top: 1px;
+div.ytp-contextmenu.ytp-popup {
+  z-index: 2147483647;
 }
