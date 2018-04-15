@@ -189,10 +189,13 @@ function onMove(ee) {
 
 function onUp(e) {
   calc(e);
-  if (clicked && !state.isMinimized) saveBounds(elRefs.videoNailContainer); // Save bounds if clicked within the videonail container and not minimized
+   // Save bounds if clicked within the videonail container and not minimized
+  if (clicked && !state.isMinimized) {
+  videoData.isInitialStyle = false;
+  saveBounds(elRefs.videoNailContainer);
+  }
   if (!state.currPage.includes("youtube.com/watch"))
     elRefs.videoNailPlayer.style.pointerEvents = 'auto';
-  videoData.isInitialStyle = false;
   clicked = null;
   window.dispatchEvent(new Event("resize"));
 }
