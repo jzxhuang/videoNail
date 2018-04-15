@@ -42,7 +42,6 @@ let videoData = {
 }
 
 let observer;
-let vidId, metadata;
 
 const INIT_WIDTH = 474;
 const HEADER_AND_BOTTOM_BORDER = 29;

@@ -1,16 +1,16 @@
-let videoData, player, myInterval;
+let videoNailData, videoNailPlayer, videoNailInterval;
 
 // Listens for messages posted from the extension 
 window.addEventListener("message", event => {
 	if (event.data.type) {
 		if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-INIT" && event.source == window)
-			videoData = event.data.videoData;
+			videoNailData = event.data.videoData;
 		else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-DELETE") {
-			clearInterval(myInterval)
-			myInterval = null;
-			player.destroy();
+			clearInterval(videoNailInterval)
+			videoNailInterval = null;
+			videoNailPlayer.destroy();
 		} else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-START-NEW") {
-			player = new YT.Player('videonail-iframe', {
+			videoNailPlayer = new YT.Player('videonail-iframe', {
 				events: {
 					'onReady': onYTPReady,
 					'onError': onYTPError
@@ -22,7 +22,7 @@ window.addEventListener("message", event => {
 
 // Create the player object
 function onYouTubeIframeAPIReady() {
-	player = new YT.Player('videonail-iframe', {
+	videoNailPlayer = new YT.Player('videonail-iframe', {
 		events: {
 			'onReady': onYTPReady,
 			'onError': onYTPError
@@ -32,7 +32,7 @@ function onYouTubeIframeAPIReady() {
 
 function onYTPReady() {
 	// Start the interval
-	myInterval = setInterval(postYTPStatus, 250);
+	videoNailInterval = setInterval(postYTPStatus, 250);
 }
 
 function onYTPError(err) {
@@ -41,12 +41,12 @@ function onYTPError(err) {
 
 // Update video metadata through window message in an interval
 function postYTPStatus() {
-	videoData.metadata.isPlaying =
-		(player.getPlayerState() == 1 || player.getPlayerState() == 3) ? true : false;
-	videoData.metadata.timestamp = player.getCurrentTime();
-	videoData.metadata.id = player.getVideoUrl().split("v=")[1].split("&")[0];
+	videoNailData.metadata.isPlaying =
+		(videoNailPlayer.getPlayerState() == 1 || videoNailPlayer.getPlayerState() == 3) ? true : false;
+	videoNailData.metadata.timestamp = videoNailPlayer.getCurrentTime();
+	videoNailData.metadata.id = videoNailPlayer.getVideoUrl().split("v=")[1].split("&")[0];
 	window.postMessage({
 		type: "VIDEONAIL-BROWSER-SCRIPT-YTP-STATUS",
-		vidMetadata: videoData.metadata
+		vidMetadata: videoNailData.metadata
 	}, "*");
 }
