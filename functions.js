@@ -80,6 +80,7 @@ function attachVideoNailHeader() {
 function checkIfWatching() {
   if (document.location.pathname === "/watch") {
     const interval = setInterval(checkForPlayer, 100);
+
     function checkForPlayer() {
       if (document.querySelector(watchCheckQuery)) {
         clearInterval(interval);
@@ -176,11 +177,11 @@ function onMove(ee) {
 function onUp(e) {
   calc(e);
   clicked = null;
-  if (!state.isMinimized) videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
+  if (!state.isMinimized)
+    videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
   videoData.isInitialStyle = false;
-  if (!state.currPage.includes("youtube.com/watch")) {
+  if (!state.currPage.includes("youtube.com/watch"))
     elRefs.videoNailPlayer.style.pointerEvents = 'auto';
-  }
   window.dispatchEvent(new Event("resize"));
 }
 
@@ -190,8 +191,10 @@ function onCloseClick() {
     return;
   } else {
     removeVideoNailPlayer();
-    chrome.runtime.sendMessage({ type: "DELETE" }); // Delete from storage
-    sendWindowMessage("DELETE");          // Send DELETE message to in browser script
+    chrome.runtime.sendMessage({
+      type: "DELETE"
+    }); // Delete from storage
+    sendWindowMessage("DELETE"); // Send DELETE message to in browser script
     reset();
   }
 }
@@ -365,7 +368,6 @@ function animate() {
           }
         }
       }
-      return;
     }
   }
 
@@ -386,12 +388,8 @@ function animate() {
       elRefs.videoNailContainer.style.cursor = 'nesw-resize';
     } else if (canMove()) {
       elRefs.videoNailContainer.style.cursor = 'move';
-    } else {
-      elRefs.videoNailContainer.style.cursor = 'default';
-    }
-  } else {
-    canMove() ? elRefs.videoNailContainer.style.cursor = 'move' : elRefs.videoNailContainer.style.cursor = 'default';
-  }
+    } else elRefs.videoNailContainer.style.cursor = 'default';
+  } else elRefs.videoNailContainer.style.cursor = canMove() ? 'move' : 'default';
 }
 
 function wrapAll(nodes, wrapper) {
@@ -504,7 +502,9 @@ function fetchVidData() {
   return new Promise((resolve, reject) => {
     // On loading a new page, get vidData from chrome.storage.
     // Only background script has access to tabId, so we need to send message to background to get tabId
-    chrome.runtime.sendMessage({ type: "GET" }, tabId => {
+    chrome.runtime.sendMessage({
+      type: "GET"
+    }, tabId => {
       if (!tabId) return;
       chrome.storage.local.get(tabId.toString(), vidData => {
         if (vidData[tabId]) resolve(vidData[tabId]);
@@ -562,9 +562,16 @@ function injectYTIframeAPIScript() {
 
 // Send message to the videonail custom script with the videoData object
 function sendWindowMessage(type) {
-  if (type === "INIT") window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-INIT", videoData: videoData }, "*");
-  else if (type === "DELETE") window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-DELETE" }, "*");
-  else if (type === "START-NEW") window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW" }, "*")
+  if (type === "INIT") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-INIT",
+    videoData: videoData
+  }, "*");
+  else if (type === "DELETE") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-DELETE"
+  }, "*");
+  else if (type === "START-NEW") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW"
+  }, "*")
 }
 
 function reset() {

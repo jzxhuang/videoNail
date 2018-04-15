@@ -1,5 +1,5 @@
 // Listen for navigation events detected by background.js
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // If YouTube same page nav
   if (request.type === "YT-WATCH") {
     onWatchPage();
@@ -12,10 +12,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       //If on /watch page, get vid metadata. On other pages, it is updated through timer
       if (state.currPage.includes("youtube.com/watch")) {
         videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
-        document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? videoData.metadata.isPlaying = false : videoData.metadata.isPlaying = true;
+        videoData.metadata.isPlaying = document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? false : true;
       }
-      console.log(videoData);
-      console.log(videoData.metadata.id);
       sendResponse({ type: "SET", data: videoData });
     }
   }
@@ -23,7 +21,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 state.currPage = window.location.href;
 if (state.currPage.includes("youtube.com/watch")) initWatchPage();
-// else if (state.currPage.includes("youtube.com")) {}
 else initOtherPage();
 
 function initWatchPage() {
