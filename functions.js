@@ -121,6 +121,7 @@ function setVNPlayerStyle() {
     adContainer.style.left = '0px';
   }
 
+  // Cases: Initial state (bottom, right 0 thru CSS), minimized (set to bottom right), all other cases (use % to deal with zoom issues)
   if (videoData.isInitialStyle) {
     let newWidth = INIT_WIDTH;
     if (newWidth < MIN_WIDTH) newWidth = MIN_WIDTH;
@@ -135,7 +136,7 @@ function setVNPlayerStyle() {
     minSVG.classList.toggle("fa-window-minimize", false);
     minSVG.classList.toggle("fa-plus", true);
   } else {
-    setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height);
+    setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height, videoData.leftPercentage, videoData.topPercentage, videoData.widthPercentage, videoData.heightPercentage);
   }
 }
 
@@ -156,11 +157,23 @@ function clearListeners() {
   clicked = null;
 }
 
-function setBounds(element, x, y, w, h) {
-  element.style.left = x + 'px';
-  element.style.top = y + 'px';
-  element.style.width = w + 'px';
-  element.style.height = h + 'px';
+function setBounds(element, l, t, w, h, lPct, tPct, wPct, hPct) {
+  let docWidth = document.body.clientWidth;
+  let docHeight = window.innerHeight;
+  lPct ? element.style.left = docWidth * lPct + 'px' : element.style.left = l + 'px';
+  tPct ? element.style.top = docHeight * tPct + 'px' : element.style.top = t + 'px';
+  wPct ? element.style.width = docWidth * wPct + 'px' : element.style.width = w + 'px';
+  hPct ? element.style.height = docHeight * hPct + 'px' : element.style.height = h + 'px';
+}
+
+// Save the box as well as the % location
+function saveBounds(element) {
+  let box = element.getBoundingClientRect();
+  videoData.style = box;
+  videoData.leftPercentage = box.left / document.body.clientWidth;
+  videoData.topPercentage = box.top / window.innerHeight;
+  videoData.widthPercentage = box.width / document.body.clientWidth;
+  videoData.heightPercentage = box.height / window.innerHeight;
 }
 
 function onMouseDown(e) {
@@ -176,12 +189,11 @@ function onMove(ee) {
 
 function onUp(e) {
   calc(e);
-  clicked = null;
-  if (!state.isMinimized)
-    videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
-  videoData.isInitialStyle = false;
+  if (clicked && !state.isMinimized) saveBounds(elRefs.videoNailContainer); // Save bounds if clicked within the videonail container and not minimized
   if (!state.currPage.includes("youtube.com/watch"))
     elRefs.videoNailPlayer.style.pointerEvents = 'auto';
+  videoData.isInitialStyle = false;
+  clicked = null;
   window.dispatchEvent(new Event("resize"));
 }
 
@@ -205,7 +217,7 @@ function onMinimizeClick() {
   afterMinClick = true;
   // if maximized -> minimized
   if (!state.isMinimized) {
-    videoData.style = elRefs.videoNailContainer.getBoundingClientRect();
+    saveBounds(elRefs.videoNailContainer);
     setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
     elRefs.videoNailPlayer.classList.toggle("minimize", true);
     minSVG.classList.toggle("fa-window-minimize", false);
@@ -214,7 +226,7 @@ function onMinimizeClick() {
     videoData.isMinimized = true;
   } else {
     elRefs.videoNailPlayer.classList.toggle('minimize', false);
-    setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height);
+    setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height, videoData.leftPercentage, videoData.topPercentage, videoData.widthPercentage, videoData.heightPercentage);
     state.isMinimized = false;
     videoData.isMinimized = false;
     minSVG.classList.toggle("fa-window-minimize", true);

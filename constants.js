@@ -34,7 +34,11 @@ let videoData = {
     height: null
   },
   isMinimized: false,
-  isInitialStyle: true
+  isInitialStyle: true,
+  leftPercentage: null,
+  topPercentage: null,
+  widthPercentage: null,
+  heightPercentage: null
 }
 
 let observer;
