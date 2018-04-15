@@ -556,7 +556,7 @@ function injectBrowserScript() {
   let script = document.createElement("script");
   script.type = "text/javascript";
   script.id = "vn-injected-script";
-  script.src = chrome.runtime.getURL("vnInjectedScript.js");
+  script.src = chrome.runtime.getURL("browser-script.js");
   script.onload = function () {
     sendWindowMessage("INIT");
     injectYTIframeAPIScript();

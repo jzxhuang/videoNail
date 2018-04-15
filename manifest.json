@@ -1,14 +1,14 @@
 {
   "manifest_version": 2,
-  "name": "videoNail",
-  "description": "Keeps YouTube video on screen when scrolling down to the comment section",
+  "name": "VideoNail - Floating YouTube PiP Player",
+  "description": "Watch YouTube videos on any site in a floating, always on top window.",
   "version": "0.2.2",
   "browser_action": {},
   "background": {
     "scripts": [
       "background.js"
     ],
-    "persistent": true
+    "persistent": false
   },
   "content_scripts": [
     {
@@ -19,20 +19,21 @@
         "videonail.css"
       ],
       "js": [
-        "fontawesome-all.min.js",
+        "fa-solid.min.js",
+        "fontawesome.min.js",
         "functions.js",
-        "constants.js",
+        "global-vars.js",
         "handlers.js"
       ],
       "run_at": "document_end"
     }
   ],
   "icons": {
-    "16": "VideoNail_x16.png",
-    "32": "VideoNail_x32.png",
-    "48": "VideoNail_x48.png",
-    "64": "VideoNail_x64.png",
-    "128": "VideoNail_x128.png"
+    "16": "assets/VideoNail_x16.png",
+    "32": "assets/VideoNail_x32.png",
+    "48": "assets/VideoNail_x48.png",
+    "64": "assets/VideoNail_x64.png",
+    "128": "assets/VideoNail_x128.png"
   },
   "permissions": [
     "tabs",
@@ -43,6 +44,6 @@
     "storage"
   ],
   "web_accessible_resources": [
-    "vnInjectedScript.js"
+    "browser-script.js"
   ]
 }
