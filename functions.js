@@ -160,10 +160,10 @@ function clearListeners() {
 function setBounds(element, l, t, w, h, lPct, tPct, wPct, hPct) {
   let docWidth = document.body.clientWidth;
   let docHeight = window.innerHeight;
-  lPct ? element.style.left = docWidth * lPct + 'px' : element.style.left = l + 'px';
-  tPct ? element.style.top = docHeight * tPct + 'px' : element.style.top = t + 'px';
-  wPct ? element.style.width = docWidth * wPct + 'px' : element.style.width = w + 'px';
-  hPct ? element.style.height = docHeight * hPct + 'px' : element.style.height = h + 'px';
+  element.style.left = lPct ? docWidth * lPct + 'px' : l + 'px';
+  element.style.top = tPct ? docHeight * tPct + 'px' : t + 'px';
+  element.style.width = wPct ? docWidth * wPct + 'px' : w + 'px';
+  element.style.height = hPct ? docHeight * hPct + 'px' : h + 'px';
 }
 
 // Save the box as well as the % location
