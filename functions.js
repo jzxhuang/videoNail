@@ -160,10 +160,27 @@ function clearListeners() {
 function setBounds(element, l, t, w, h, lPct, tPct, wPct, hPct) {
   let docWidth = document.body.clientWidth;
   let docHeight = window.innerHeight;
-  element.style.left = lPct ? docWidth * lPct + 'px' : l + 'px';
-  element.style.top = tPct ? docHeight * tPct + 'px' : t + 'px';
-  element.style.width = wPct ? docWidth * wPct + 'px' : w + 'px';
-  element.style.height = hPct ? docHeight * hPct + 'px' : h + 'px';
+
+  var left = (lPct ? docWidth * lPct : l);
+  var top = (tPct ? docHeight * tPct : t);
+  var width = Math.max(MIN_WIDTH, (wPct ? docWidth * wPct : w));
+  var height = Math.max(MIN_HEIGHT, (hPct ? docHeight * hPct : h));
+
+  element.style.width = Math.max(MIN_WIDTH, (wPct ? docWidth * wPct : w)) + 'px';
+  element.style.height = Math.max(MIN_HEIGHT, (hPct ? docHeight * hPct : h)) + 'px';
+  
+  if(left + width > docWidth) {
+    element.style.right = '0px';
+  }
+  else {
+    element.style.left = (lPct ? docWidth * lPct : l) + 'px';
+  }
+  if(top + height > docHeight) {
+    element.style.bottom = '0px';
+  }
+  else {
+    element.style.top = (tPct ? docHeight * tPct : t) + 'px';
+  }
 }
 
 // Save the box as well as the % location
