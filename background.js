@@ -1,18 +1,3 @@
-/* 
-** STRUCTURE OF STORAGE **
-{
-    <tabId>: {
-        id: "ZHb-QsAnEiY",
-        style: "width: 526px; height: 319.25px; cursor: default; top: 402px; left: 192px;",
-        metadata: {
-          position: "1:24",
-          speed: "0.5",
-          quality: "480p"
-        }
-    }
-}
-*/
-
 // Listens for same page YouTube navigation
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.url) {
