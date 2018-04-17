@@ -68,7 +68,6 @@ function initOtherPage() {
   fetchVidData()
     .then(data => {
       videoData = data;
-      console.log(videoData);
       window.addEventListener("message", windowMessageListener, false);
       return setupVideoNailPlayer(data);
     })
