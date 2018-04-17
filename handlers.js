@@ -16,6 +16,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
       sendResponse({ type: "SET", data: videoData });
     }
+  } else if (request.type === "MANUAL-START") {
+    console.log(request.url);
+    // Manually starting videonail, only possible on not /watch.
+    if (elRefs.videoNailContainer) {
+
+    } else {
+      // If no container, get vid id 
+      setVidId(request.url)
+        .then(_ => {
+          videoData.metadata.isPlaying = true;
+          initOtherPage(videoData)
+        });
+    }
   }
 });
 
@@ -64,18 +77,28 @@ function onWatchPage() {
   state.currPage = window.location.href;
 }
 
-function initOtherPage() {
-  fetchVidData()
-    .then(data => {
-      videoData = data;
-      window.addEventListener("message", windowMessageListener, false);
-      return setupVideoNailPlayer(data);
-    })
-    .then(_ => {
-      injectBrowserScript();
-      return addBellsAndOrnaments();
-    })
-    .catch(err => console.log(err));
+function initOtherPage(vData) {
+  if (vData) {
+    setupVideoNailPlayer(vData)
+      .then(_ => {
+        window.addEventListener("message", windowMessageListener, false);
+        injectBrowserScript();
+        return addBellsAndOrnaments();
+      })
+      .catch(err => console.log(err));
+  } else {
+    fetchVidData()
+      .then(data => {
+        videoData = data;
+        window.addEventListener("message", windowMessageListener, false);
+        return setupVideoNailPlayer(data);
+      })
+      .then(_ => {
+        injectBrowserScript();
+        return addBellsAndOrnaments();
+      })
+      .catch(err => console.log(err));
+  }
 }
 
 function onOtherPage() {

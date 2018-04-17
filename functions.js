@@ -537,23 +537,27 @@ function fetchVidData() {
 }
 
 // Sets the video id, parses parameters for playlist information (used on /watch)
-function setVidId() {
-  if (state.currPage.includes("youtube.com/watch")) {
-    videoData.metadata.isPlaylist = false;
-    videoData.metadata.playlistId = null;
-    let vidUrl = state.currPage;
-    vidUrl = vidUrl.split("watch?");
-    if (vidUrl)
-      vidUrl = vidUrl[1].split("&");
-    vidUrl.forEach((element, index) => {
-      if (element.startsWith("list=")) {
-        videoData.metadata.isPlaylist = true;
-        videoData.metadata.playlistId = element.substr(5);
-      } else if (element.startsWith("v=")) {
-        videoData.metadata.id = element.substr(2);
-      }
-    });
-  }
+function setVidId(url) {
+  return new Promise((resolve, reject) => {
+    if (state.currPage.includes("youtube.com/watch") || url.includes("youtube.com/watch")) {
+      videoData.metadata.isPlaylist = false;
+      videoData.metadata.playlistId = null;
+      let vidUrl = url || state.currPage;
+      vidUrl = vidUrl.split("watch?");
+      if (vidUrl)
+        vidUrl = vidUrl[1].split("&");
+      vidUrl.forEach((element, index) => {
+        if (element.startsWith("list=")) {
+          videoData.metadata.isPlaylist = true;
+          videoData.metadata.playlistId = element.substr(5);
+        } else if (element.startsWith("v=")) {
+          videoData.metadata.id = element.substr(2);
+        }
+      });
+      resolve()
+    } else reject('Error setting video id');
+  });
+  
 }
 
 // Inject videonail custom script into the browser environment
@@ -604,12 +608,12 @@ function reset() {
   }
   clearListeners();
   state = {
-    firstTime: true,
+    firstTime: state.firstTime,
     isPolymer: false,
     inPipMode: false,
     manualClose: false,
-    isMinimized: false,
-    currPage: ""
+    isMinimized: state.isMinimized,
+    currPage: state.currPage
   };
   elRefs = {
     originalPlayerSection: null,

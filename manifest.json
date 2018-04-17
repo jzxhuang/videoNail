@@ -41,7 +41,8 @@
     "http://*/",
     "https://*/",
     "webNavigation",
-    "storage"
+    "storage",
+    "contextMenus"
   ],
   "web_accessible_resources": [
     "browser-script.js"
