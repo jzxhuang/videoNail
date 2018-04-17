@@ -23,10 +23,10 @@
   margin: 0px 0px 0px 0px !important;
 }
 
+/* Hides video in minimized state */
 .videonail .minimize {
   display: none !important;
 }
-
 
 /* VideoNail Outer Container */
 .videonail-container {
@@ -38,7 +38,7 @@
   min-width: 50px;
   z-index: 2147483647;
 }
-/* Default mode */
+/* Default mode on /watch page */
 .videonail-container-std-mode {
   width: 100% !important;
   height: 100% !important;
@@ -47,12 +47,16 @@
   cursor: default !important;
   margin: 0 auto;
 }
-/* Pip Mode */
+/* PiP Mode */
 .videonail-container-pip-mode {
   right: 0px;
   bottom: 0px;
   margin: 0;
   position: fixed !important;
+}
+/* Hide view toggle in PiP mode */
+.videonail-container-pip-mode button.ytp-size-button.ytp-button{
+  display: none !important;
 }
 
 /* Force video to take up available space */
@@ -69,17 +73,16 @@
 }
 
 /* Force proper width for controls at bottom */
-
 .videonail .ytp-chrome-bottom {
   width: calc(100% - 24px) !important;
 }
 
-/* Header */
-
+/* Hide header in default view on /watch */
 .videonail-header-std-mode {
   display: none;
 }
 
+/* Header styling */
 .videonail .videonail-header {
   background: rgba(208, 10, 10, 1);
   flex: 0 1 var(--videonail-header-height);
@@ -90,7 +93,6 @@
   justify-content: flex-end;
   display: flex;
 }
-
 .videonail .videonail-header:hover {
   opacity: 0.75 !important;
 }
@@ -101,6 +103,7 @@
   flex: 1 1 auto;
 }
 
+/* Button styling */
 button.videonail-button {
   background-color: transparent !important;
   border: none !important;
@@ -130,6 +133,7 @@ button.videonail-button>svg.fa-plus {
   border: none !important;
 }
 
+/* YouTube context menu always on top */
 div.ytp-contextmenu.ytp-popup {
   z-index: 2147483647;
 }

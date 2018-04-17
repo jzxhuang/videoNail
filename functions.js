@@ -100,7 +100,8 @@ function togglePIP() {
   elRefs.videoNailPlayer.classList.toggle("minimize", state.isMinimized && state.inPipMode);
 
   let theaterButton = document.querySelector("button.ytp-size-button.ytp-button");
-  if (theaterButton.title !== 'Default view') theaterButton.click();
+  let theaterQuery = document.querySelector("ytd-watch.style-scope.ytd-page-manager");
+  if (!theaterQuery.hasAttribute("theater-requested_")) theaterButton.click();
 
   // When users scroll down
   if (state.inPipMode) {
