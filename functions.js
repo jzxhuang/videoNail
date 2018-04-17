@@ -161,26 +161,15 @@ function setBounds(element, l, t, w, h, lPct, tPct, wPct, hPct) {
   let docWidth = document.body.clientWidth;
   let docHeight = window.innerHeight;
 
-  var left = (lPct ? docWidth * lPct : l);
-  var top = (tPct ? docHeight * tPct : t);
-  var width = Math.max(MIN_WIDTH, (wPct ? docWidth * wPct : w));
-  var height = Math.max(MIN_HEIGHT, (hPct ? docHeight * hPct : h));
+  let left = (lPct ? docWidth * lPct : l);
+  let top = (tPct ? docHeight * tPct : t);
+  let width = state.isMinimized ? w : Math.max(MIN_WIDTH, (wPct ? docWidth * wPct : w));
+  let height = state.isMinimized ? h : Math.max(MIN_HEIGHT, (hPct ? docHeight * hPct : h));
 
   element.style.width = width + 'px';
   element.style.height = height + 'px';
-  
-  if(left + width > docWidth) {
-    element.style.right = '0px';
-  }
-  else {
-    element.style.left = left + 'px';
-  }
-  if(top + height > docHeight) {
-    element.style.bottom = '0px';
-  }
-  else {
-    element.style.top = top + 'px';
-  }
+  element.style.left = (left + width > docWidth) ? docWidth - width + 'px' : left + 'px';
+  element.style.top = (top + height > docHeight) ? docHeight - height + 'px' : top + 'px';
 }
 
 // Save the box as well as the % location
@@ -237,18 +226,18 @@ function onMinimizeClick() {
   afterMinClick = true;
   // if maximized -> minimized
   if (!state.isMinimized) {
+    state.isMinimized = true;
+    videoData.isMinimized = true;
     saveBounds(elRefs.videoNailContainer);
     setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
     elRefs.videoNailPlayer.classList.toggle("minimize", true);
     minSVG.classList.toggle("fa-window-minimize", false);
     minSVG.classList.toggle("fa-plus", true);
-    state.isMinimized = true;
-    videoData.isMinimized = true;
   } else {
-    elRefs.videoNailPlayer.classList.toggle('minimize', false);
-    setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height, videoData.leftPercentage, videoData.topPercentage, videoData.widthPercentage, videoData.heightPercentage);
     state.isMinimized = false;
     videoData.isMinimized = false;
+    setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height, videoData.leftPercentage, videoData.topPercentage, videoData.widthPercentage, videoData.heightPercentage);
+    elRefs.videoNailPlayer.classList.toggle('minimize', false);    
     minSVG.classList.toggle("fa-window-minimize", true);
     minSVG.classList.toggle("fa-plus", false);
   }
