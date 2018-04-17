@@ -3,7 +3,10 @@
   "name": "VideoNail - Floating YouTube PiP Player",
   "description": "Watch YouTube videos on any site in a floating, always on top window.",
   "version": "0.2.2",
-  "browser_action": {},
+  "browser_action": {
+    "default_title": "VideoNail",
+    "default_popup": "popupMenu.html"
+  },
   "background": {
     "scripts": [
       "background.js"
@@ -41,7 +44,8 @@
     "http://*/",
     "https://*/",
     "webNavigation",
-    "storage"
+    "storage",
+    "management"
   ],
   "web_accessible_resources": [
     "browser-script.js"
