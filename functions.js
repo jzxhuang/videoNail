@@ -597,7 +597,10 @@ function sendWindowMessage(type) {
   }, "*");
   else if (type === "START-NEW") window.postMessage({
     type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW"
-  }, "*")
+  }, "*");
+  else if (type === "MANUAL-NEW") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW", videoData: videoData
+  }, "*");
 }
 
 function reset() {

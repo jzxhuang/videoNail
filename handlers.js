@@ -18,16 +18,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   } else if (request.type === "MANUAL-START") {
     console.log(request.url);
-    // Manually starting videonail, only possible on not /watch.
-    if (elRefs.videoNailContainer) {
-
-    } else {
-      // If no container, get vid id 
-      setVidId(request.url)
+    if (!window.location.href.includes('youtube.com/watch')) {
+      // Cases for if videonail container already exists
+      if (elRefs.videoNailContainer) {
+        setVidId(request.url)
         .then(_ => {
-          videoData.metadata.isPlaying = true;
-          initOtherPage(videoData)
-        });
+          // If playlist, need to resfresh container. Otherwise, can load new video through iframe API
+          if (videoData.metadata.isPlaylist) {
+            onCloseClick();
+            initOtherPage(videoData);
+          } else {
+            sendWindowMessage("MANUAL-NEW");
+          }
+        })
+      } else {
+        // If no container, then go through usual initOtherPage process, always autoplay
+        setVidId(request.url)
+          .then(_ => {
+            videoData.metadata.isPlaying = true;
+            initOtherPage(videoData)
+          });
+      }
     }
   }
 });
