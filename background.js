@@ -66,7 +66,13 @@ chrome.runtime.onInstalled.addListener(() => {
     title: "Start VideoNail",
     targetUrlPatterns: ["*://*.youtube.com/watch*"],
     id: "VideoNail"
-  })
+  });
+  
+  chrome.storage.local.set({
+    VN_state: {
+        enabled: true
+    }
+  });
 });
 chrome.contextMenus.onClicked.addListener(contextMenuListener);
 
