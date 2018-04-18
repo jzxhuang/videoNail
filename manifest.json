@@ -45,6 +45,7 @@
     "https://*/",
     "webNavigation",
     "storage",
+    "contextMenus",
     "management"
   ],
   "web_accessible_resources": [
