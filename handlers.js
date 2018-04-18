@@ -25,7 +25,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         .then(_ => {
           // If playlist, need to resfresh container. Otherwise, can load new video through iframe API
           if (videoData.metadata.isPlaylist) {
-            onCloseClick();
+            removeVideoNailPlayer();
+            sendWindowMessage("DELETE");
+            videoData.metadata.timestamp = "0:00";
             initOtherPage(videoData);
           } else {
             sendWindowMessage("MANUAL-NEW");
