@@ -64,7 +64,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     contexts: ["link"],
     title: "Start VideoNail",
-    targetUrlPatterns: ["*://*.youtube.com/watch*"],
+    targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*"],
     id: "VideoNail"
   })
 });
