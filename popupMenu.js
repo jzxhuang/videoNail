@@ -26,12 +26,21 @@ function toggleVN() {
     }
   }
   chrome.storage.local.set(state);
+
+  if(!VN_enabled) {
+    chrome.tabs.query({}, function(tabs) {
+      var message = {type: "MANUAL-DELETE"};
+      for (var i=0; i<tabs.length; ++i) {
+          chrome.tabs.sendMessage(tabs[i].id, message);
+      }
+    });
+  }
 }
 
 function openLink() {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     var tab = tabs[0];
-    if (tab.url.includes("youtube.com/watch?")) return;
+    if (tab.url.includes("youtube.com/watch")) return;
     else {
       var searchUrl = document.getElementById('searchLink').value;
       chrome.tabs.sendMessage(tab.id, {type: "MANUAL-START", url: searchUrl});  
@@ -42,7 +51,7 @@ function openLink() {
 function checkIfWatchPage() {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     var tab = tabs[0];
-    if (tab.url.includes("youtube.com/watch?")) {
+    if (tab.url.includes("youtube.com/watch")) {
       document.getElementById("searchButton").disabled = true;
     }
     else {

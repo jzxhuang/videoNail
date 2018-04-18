@@ -43,6 +43,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
     }
   }
+  else if (request.type === 'MANUAL-DELETE') {
+    if (elRefs.videoNailContainer) {
+      removeVideoNailPlayer();
+      sendWindowMessage("DELETE");
+    }
+  }
 });
 
 state.currPage = window.location.href;
