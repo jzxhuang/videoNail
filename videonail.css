@@ -113,6 +113,7 @@ button.videonail-button {
   opacity: 0.75 !important;
   width: auto !important;
   height: auto !important;
+  font-size: 10pt !important;
 }
 button.videonail-button#closeButton {
   margin-right: 5px !important;
