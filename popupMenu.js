@@ -14,6 +14,8 @@ window.onload = function() {
   document.getElementById("searchButton").addEventListener('click', function() {
     openLink();
   });
+
+  checkIfWatchPage();
 }
 
 function toggleVN() {
@@ -29,10 +31,22 @@ function toggleVN() {
 function openLink() {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     var tab = tabs[0];
-    if (tab.url.includes("youtube.com/watch?v=")) return;
+    if (tab.url.includes("youtube.com/watch?")) return;
     else {
       var searchUrl = document.getElementById('searchLink').value;
       chrome.tabs.sendMessage(tab.id, {type: "MANUAL-START", url: searchUrl});  
+    }
+  });
+}
+
+function checkIfWatchPage() {
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    var tab = tabs[0];
+    if (tab.url.includes("youtube.com/watch?")) {
+      document.getElementById("searchButton").disabled = true;
+    }
+    else {
+      document.getElementById("searchButton").disabled = false;
     }
   });
 }
