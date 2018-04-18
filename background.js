@@ -1,6 +1,12 @@
+var enabled = true;
+chrome.storage.local.get('VN_state', state => {
+  enabled = state.VN_state.enabled;
+});
+
 // Listens for same page YouTube navigation
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.url) {
+  console.log(enabled);
+  if (changeInfo.url && enabled) {
     // Save the tab videoData object
     chrome.tabs.get(tabId, tab => {
       if (tab.url.includes("youtube.com/watch?v=")) {
@@ -32,7 +38,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // Listens for regular navigation
 chrome.webNavigation.onBeforeNavigate.addListener(navEvent => {
   // Target only nav of main document (and not iframes)
-  if (navEvent.frameId === 0 && !navEvent.url.includes("youtube.com/watch")) {
+  if (navEvent.frameId === 0 && !navEvent.url.includes("youtube.com/watch") && enabled) {
     // Send Message to get video metadata and position
     chrome.tabs.sendMessage(navEvent.tabId, { type: "SAVE" }, response => {
       if (response && response.type === "SET") {
@@ -91,3 +97,11 @@ chrome.tabs.onActivated.addListener(activeInfo => {
     else chrome.contextMenus.update("VideoNail", {enabled: true});    
   })
 })
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if(areaName === 'local') {
+    chrome.storage.local.get('VN_state', state => {
+      enabled = state.VN_state.enabled;
+    });    
+  }
+});
