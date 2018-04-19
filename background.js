@@ -62,19 +62,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // On installation, create context menu
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    contexts: ["link"],
+    contexts: ["link", "frame"],
     title: "Start VideoNail",
-    targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*"],
+    targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
     id: "VideoNail"
   })
 });
 chrome.contextMenus.onClicked.addListener(contextMenuListener);
 
-// Context menu listener
-// When clicked, send message to content script to start VideoNail
+// Context menu listener - When clicked, send message to content script to start VideoNail
 function contextMenuListener(info, tab) {
   if (info.menuItemId === "VideoNail") {
-    chrome.tabs.sendMessage(tab.id, {type: "MANUAL-START", url: info.linkUrl});  
+    chrome.tabs.sendMessage(tab.id, {type: "MANUAL-START", url: info.linkUrl || info.frameUrl});  
   }
 }
 

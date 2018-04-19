@@ -17,7 +17,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse({ type: "SET", data: videoData });
     }
   } else if (request.type === "MANUAL-START") {
-    console.log(request.url);
     if (!window.location.href.includes('youtube.com/watch')) {
       // Cases for if videonail container already exists
       if (elRefs.videoNailContainer) {
