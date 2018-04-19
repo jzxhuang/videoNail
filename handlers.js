@@ -16,6 +16,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
       sendResponse({ type: "SET", data: videoData });
     }
+  } else if (request.type === "MANUAL-START") {
+    if (!window.location.href.includes('youtube.com/watch')) {
+      // Cases for if videonail container already exists
+      if (elRefs.videoNailContainer) {
+        setVidId(request.url)
+        .then(_ => {
+          // If playlist, need to resfresh container. Otherwise, can load new video through iframe API
+          if (videoData.metadata.isPlaylist) {
+            removeVideoNailPlayer();
+            sendWindowMessage("DELETE");
+            videoData.metadata.timestamp = "0:00";
+            initOtherPage(videoData);
+          } else {
+            sendWindowMessage("MANUAL-NEW");
+          }
+        })
+        .catch(err => {console.log(err)});
+      } else {
+        // If no container, then go through usual initOtherPage process, always autoplay
+        setVidId(request.url)
+          .then(_ => {
+            videoData.metadata.isPlaying = true;
+            initOtherPage(videoData)
+          })
+          .catch(err => {console.log(err)});
+      }
+    }
   }
 });
 
@@ -64,18 +91,28 @@ function onWatchPage() {
   state.currPage = window.location.href;
 }
 
-function initOtherPage() {
-  fetchVidData()
-    .then(data => {
-      videoData = data;
-      window.addEventListener("message", windowMessageListener, false);
-      return setupVideoNailPlayer(data);
-    })
-    .then(_ => {
-      injectBrowserScript();
-      return addBellsAndOrnaments();
-    })
-    .catch(err => console.log(err));
+function initOtherPage(vData) {
+  if (vData) {
+    setupVideoNailPlayer(vData)
+      .then(_ => {
+        window.addEventListener("message", windowMessageListener, false);
+        injectBrowserScript();
+        return addBellsAndOrnaments();
+      })
+      .catch(err => console.log(err));
+  } else {
+    fetchVidData()
+      .then(data => {
+        videoData = data;
+        window.addEventListener("message", windowMessageListener, false);
+        return setupVideoNailPlayer(data);
+      })
+      .then(_ => {
+        injectBrowserScript();
+        return addBellsAndOrnaments();
+      })
+      .catch(err => console.log(err));
+  }
 }
 
 function onOtherPage() {

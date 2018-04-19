@@ -5,11 +5,16 @@ Watch YouTube videos while browsing the web or reading the comments! VideoNail i
 * Pins YouTube videos in a floating, always on top window that can be resized and re-positioned anywhere on the screen. The window can be minimized or closed at any time.
 * Supports all video types including playlists and live streams
 * Uses the native YouTube player with support for all video controls (volume, playback speed, video quality, etc.)
+* Easily start on any site by right clicking a Youtube video or link
 * Works with Adblock
 * Autoplays video from where you left off
 * No ads, completely free & open source, no 3rd-party apps required
 
-*Screenshots to be added here soon*
+**Screenshots:**
+![screenshot 1](assets/screenshot1.png)
+![screenshot 2](assets/screenshot2.png)
+![screenshot 3](assets/screenshot3.png)
+![screenshot 4](assets/screenshot4.png)
 
 ## Contributing
 Open issues for any problems you may find, and fix them if you can. Make sure your code is well commented. If you want to suggest features, open an issue and it will be reviewed shortly.

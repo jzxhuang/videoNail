@@ -196,10 +196,10 @@ function onMove(ee) {
 
 function onUp(e) {
   calc(e);
-   // Save bounds if clicked within the videonail container and not minimized
+  // Save bounds if clicked within the videonail container and not minimized
   if (clicked && !state.isMinimized) {
-  videoData.isInitialStyle = false;
-  saveBounds(elRefs.videoNailContainer);
+    videoData.isInitialStyle = false;
+    saveBounds(elRefs.videoNailContainer);
   }
   if (!state.currPage.includes("youtube.com/watch"))
     elRefs.videoNailPlayer.style.pointerEvents = 'auto';
@@ -238,7 +238,7 @@ function onMinimizeClick() {
     state.isMinimized = false;
     videoData.isMinimized = false;
     setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height, videoData.leftPercentage, videoData.topPercentage, videoData.widthPercentage, videoData.heightPercentage);
-    elRefs.videoNailPlayer.classList.toggle('minimize', false);    
+    elRefs.videoNailPlayer.classList.toggle('minimize', false);
     minSVG.classList.toggle("fa-window-minimize", true);
     minSVG.classList.toggle("fa-plus", false);
   }
@@ -537,23 +537,30 @@ function fetchVidData() {
 }
 
 // Sets the video id, parses parameters for playlist information (used on /watch)
-function setVidId() {
-  if (state.currPage.includes("youtube.com/watch")) {
-    videoData.metadata.isPlaylist = false;
-    videoData.metadata.playlistId = null;
-    let vidUrl = state.currPage;
-    vidUrl = vidUrl.split("watch?");
-    if (vidUrl)
-      vidUrl = vidUrl[1].split("&");
-    vidUrl.forEach((element, index) => {
-      if (element.startsWith("list=")) {
-        videoData.metadata.isPlaylist = true;
-        videoData.metadata.playlistId = element.substr(5);
-      } else if (element.startsWith("v=")) {
-        videoData.metadata.id = element.substr(2);
-      }
-    });
-  }
+function setVidId(url) {
+  return new Promise((resolve, reject) => {
+    if (state.currPage.includes("youtube.com/watch") || url) {
+      let vidUrl = url || state.currPage;
+      let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*/;
+      let match = vidUrl.match(regExp);
+      if (match && match[2].length === 11) {
+        videoData.metadata.isPlaylist = false;
+        videoData.metadata.playlistId = null;
+        if (vidUrl.includes("youtube.com/watch")) {
+          vidUrl = vidUrl.split("watch?");
+          if (vidUrl) vidUrl = vidUrl[1].split("&");
+          vidUrl.forEach(element => {
+            if (element.startsWith("list=")) {
+              videoData.metadata.isPlaylist = true;
+              videoData.metadata.playlistId = element.substr(5);
+            }
+          });
+        }
+        videoData.metadata.id = match[2];
+        resolve()        
+      } else reject('Error setting video id');
+    } else reject('Error setting video id');
+  });
 }
 
 // Inject videonail custom script into the browser environment
@@ -593,7 +600,10 @@ function sendWindowMessage(type) {
   }, "*");
   else if (type === "START-NEW") window.postMessage({
     type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW"
-  }, "*")
+  }, "*");
+  else if (type === "MANUAL-NEW") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW", videoData: videoData
+  }, "*");
 }
 
 function reset() {
@@ -604,12 +614,12 @@ function reset() {
   }
   clearListeners();
   state = {
-    firstTime: true,
+    firstTime: state.firstTime,
     isPolymer: false,
     inPipMode: false,
     manualClose: false,
-    isMinimized: false,
-    currPage: ""
+    isMinimized: state.isMinimized,
+    currPage: state.currPage
   };
   elRefs = {
     originalPlayerSection: null,

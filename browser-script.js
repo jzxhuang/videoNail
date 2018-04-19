@@ -16,6 +16,11 @@ window.addEventListener("message", event => {
 					'onError': onYTPError
 				}
 			});
+		} else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW") {
+			videoData = event.data.videoData;
+			videoNailPlayer.loadVideoById({
+				videoId: videoData.metadata.id
+			});
 		}
 	}
 }, false);

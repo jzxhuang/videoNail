@@ -1,9 +1,8 @@
 // Listens for same page YouTube navigation
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.url) {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      if (!tabs.length || tabs[0].id !== tabId) return;
-      var tab = tabs[0];
+    // Save the tab videoData object
+    chrome.tabs.get(tabId, tab => {
       if (tab.url.includes("youtube.com/watch?v=")) {
         chrome.tabs.sendMessage(tab.id, { type: "YT-WATCH" });
       } else if (tab.url.includes("youtube.com")) {
@@ -18,6 +17,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
           }
         });
       }
+    });
+    // Remove context menu if on /watch and tab is active
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      if (!tabs.length || tabs[0].id !== tabId) return;
+      var tab = tabs[0];
+      if (tab.url.includes("youtube.com/watch?v=")) chrome.contextMenus.update("VideoNail", {enabled: false});
+      else if (tab.url.includes("youtube.com")) 
+        chrome.contextMenus.update("VideoNail", {enabled: true});
     });
   }
 });
@@ -51,3 +58,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.storage.local.remove(sender.tab.id.toString());
   }
 });
+
+// On installation, create context menu
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    contexts: ["link", "frame"],
+    title: "Start VideoNail",
+    targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
+    id: "VideoNail"
+  })
+});
+chrome.contextMenus.onClicked.addListener(contextMenuListener);
+
+// Context menu listener - When clicked, send message to content script to start VideoNail
+function contextMenuListener(info, tab) {
+  if (info.menuItemId === "VideoNail") {
+    chrome.tabs.sendMessage(tab.id, {type: "MANUAL-START", url: info.linkUrl || info.frameUrl});  
+  }
+}
+
+// Disable context menu on /watch pages
+chrome.tabs.onActivated.addListener(activeInfo => {  
+  chrome.tabs.get(activeInfo.tabId, tabInfo => {
+    if (tabInfo.url.includes("youtube.com/watch")) chrome.contextMenus.update("VideoNail", {enabled: false});
+    else chrome.contextMenus.update("VideoNail", {enabled: true});    
+  })
+})
