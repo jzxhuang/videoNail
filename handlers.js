@@ -32,13 +32,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendWindowMessage("MANUAL-NEW");
           }
         })
+        .catch(err => {console.log(err)});
       } else {
         // If no container, then go through usual initOtherPage process, always autoplay
         setVidId(request.url)
           .then(_ => {
             videoData.metadata.isPlaying = true;
             initOtherPage(videoData)
-          });
+          })
+          .catch(err => {console.log(err)});
       }
     }
   }
