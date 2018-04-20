@@ -6,21 +6,21 @@ function injectPIP() {
   // Get element references
   if (state.isPolymer) {
     elRefs.originalPlayerSection = document.querySelector("#top #player");
-    elRefs.videoNailPlayer = document.querySelector("#top #player #player-container");
+    elRefs.videoNailWrapper = document.querySelector("#top #player #player-container");
     elRefs.player = document.querySelector("#player-container #movie_player");
   } else {
     elRefs.originalPlayerSection = document.querySelector("#player-api");
-    elRefs.videoNailPlayer = document.querySelector("#movie_player");
+    elRefs.videoNailWrapper = document.querySelector("#movie_player");
     elRefs.player = document.querySelector("#movie_player");
   }
 
-  elRefs.videoNailPlayer.classList.add("videonail-player");
-  elRefs.videoNailPlayer.classList.toggle("videonail-player-active", false);
+  elRefs.videoNailWrapper.classList.add("videonail-player");
+  elRefs.videoNailWrapper.classList.toggle("videonail-player-active", false);
 
   // Wrap player in container
   elRefs.videoNailContainer = document.createElement('div');
   elRefs.videoNailContainer.classList.add("videonail-container-std-mode", "videonail-container");
-  wrapAll([elRefs.videoNailPlayer], elRefs.videoNailContainer)
+  wrapAll([elRefs.videoNailWrapper], elRefs.videoNailContainer)
     .then(_ => {
       return attachVideoNailHeader();
     })
@@ -55,10 +55,10 @@ function attachVideoNailHeader() {
     elRefs.videoNailHeader = document.createElement("div");
     elRefs.videoNailHeader.id = "videonail-header";
     elRefs.videoNailHeader.classList.add("videonail-header-std-mode");
-    elRefs.videoNailContainer.insertBefore(elRefs.videoNailHeader, elRefs.videoNailPlayer);
+    elRefs.videoNailContainer.insertBefore(elRefs.videoNailHeader, elRefs.videoNailWrapper);
 
     elRefs.minimize = document.createElement("button");
-    elRefs.minimize.id = "minimizeButton";
+    elRefs.minimize.id = "videonailMinimizeButton";
     elRefs.minimize.classList.add("videonail-button");
     if (state.isMinimized)
       elRefs.minimize.insertAdjacentHTML("afterbegin", '<i class="fas fa-plus"></i>');
@@ -68,7 +68,7 @@ function attachVideoNailHeader() {
     elRefs.videoNailHeader.appendChild(elRefs.minimize);
 
     elRefs.close = document.createElement("button");
-    elRefs.close.id = "closeButton";
+    elRefs.close.id = "videonailCloseButton";
     elRefs.close.classList.add("videonail-button");
     elRefs.close.insertAdjacentHTML("afterbegin", '<i class="fas fa-times"></i>');
     elRefs.close.addEventListener('mousedown', onCloseClick);
@@ -96,8 +96,8 @@ function togglePIP() {
   elRefs.videoNailContainer.classList.toggle("videonail-container-std-mode", !state.inPipMode);
   elRefs.videoNailContainer.classList.toggle("videonail-container-pip-mode", state.inPipMode);
   elRefs.videoNailHeader.classList.toggle("videonail-header", state.inPipMode);
-  elRefs.videoNailPlayer.classList.toggle("videonail-player-active", state.inPipMode);
-  elRefs.videoNailPlayer.classList.toggle("minimize", state.isMinimized && state.inPipMode);
+  elRefs.videoNailWrapper.classList.toggle("videonail-player-active", state.inPipMode);
+  elRefs.videoNailWrapper.classList.toggle("minimize", state.isMinimized && state.inPipMode);
 
   let theaterButton = document.querySelector("button.ytp-size-button.ytp-button");
   let theaterQuery = document.querySelector("ytd-watch.style-scope.ytd-page-manager");
@@ -133,7 +133,7 @@ function setVNPlayerStyle() {
     let min = elRefs.minimize;
     let minSVG = min.children[0];
     setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
-    elRefs.videoNailPlayer.classList.toggle('minimize', true);
+    elRefs.videoNailWrapper.classList.toggle('minimize', true);
     minSVG.classList.toggle("fa-window-minimize", false);
     minSVG.classList.toggle("fa-plus", true);
   } else {
@@ -231,14 +231,14 @@ function onMinimizeClick() {
     videoData.isMinimized = true;
     saveBounds(elRefs.videoNailContainer);
     setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
-    elRefs.videoNailPlayer.classList.toggle("minimize", true);
+    elRefs.videoNailWrapper.classList.toggle("minimize", true);
     minSVG.classList.toggle("fa-window-minimize", false);
     minSVG.classList.toggle("fa-plus", true);
   } else {
     state.isMinimized = false;
     videoData.isMinimized = false;
     setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height, videoData.leftPercentage, videoData.topPercentage, videoData.widthPercentage, videoData.heightPercentage);
-    elRefs.videoNailPlayer.classList.toggle('minimize', false);
+    elRefs.videoNailWrapper.classList.toggle('minimize', false);
     minSVG.classList.toggle("fa-window-minimize", true);
     minSVG.classList.toggle("fa-plus", false);
   }
@@ -486,10 +486,13 @@ function setupVideoNailPlayer(vidData) {
     elRefs.videoNailPlayer = document.createElement('iframe');
     elRefs.videoNailPlayer.id = "videonail-iframe";
     elRefs.videoNailPlayer.type = "text/html";
-    elRefs.videoNailPlayer.frameborder = "0";
+    elRefs.videoNailPlayer.frameBorder = "0";
     elRefs.videoNailPlayer.setAttribute('allowFullScreen', '');
-    elRefs.videoNailPlayer.classList.add("videonail-player-active");
-    elRefs.videoNailContainer.appendChild(elRefs.videoNailPlayer);
+    elRefs.videoNailPlayer.classList.add("videonail-player-iframe");
+    elRefs.videoNailWrapper = document.createElement('div');
+    elRefs.videoNailWrapper.classList.add("videonail-player-active");
+    elRefs.videoNailWrapper.appendChild(elRefs.videoNailPlayer);
+    elRefs.videoNailContainer.appendChild(elRefs.videoNailWrapper);
 
     state.isMinimized = vidData.isMinimized;
     let srcString = `https://www.youtube.com/embed/${vidData.metadata.id}?enablejsapi=1&modestbranding=1`;
@@ -624,6 +627,7 @@ function reset() {
   elRefs = {
     originalPlayerSection: null,
     videoNailContainer: null,
+    videoNailWrapper: null,
     videoNailPlayer: null,
     videoNailHeader: null,
     player: null, // the html5 video

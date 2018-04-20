@@ -16,11 +16,18 @@
 
 /* Apply this class for border */
 .videonail-player-active {
+  display: flex;
+  flex-flow: column;
   flex: 1 1 auto !important;
   border: 5px solid var(--videonail-color) !important;
   box-sizing: border-box;
   border-top: none !important;
   margin: 0px 0px 0px 0px !important;
+}
+
+.videonail-player-iframe {
+  flex: 1 1 auto !important;
+  box-sizing: border-box;
 }
 
 /* Hides video in minimized state */
@@ -115,12 +122,12 @@ button.videonail-button {
   height: auto !important;
   font-size: 10pt !important;
 }
-button.videonail-button#closeButton {
+button.videonail-button#videonailCloseButton {
   margin-right: 5px !important;
 }
 
-#minimizeButton:hover,
-#closeButton:hover {
+#videonailMinimizeButton:hover,
+#videonailCloseButton:hover {
   cursor: pointer !important;
   opacity: 1 !important;
 }
