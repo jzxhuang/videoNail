@@ -16,11 +16,18 @@
 
 /* Apply this class for border */
 .videonail-player-active {
+  display: flex;
+  flex-flow: column;
   flex: 1 1 auto !important;
   border: 5px solid var(--videonail-color) !important;
   box-sizing: border-box;
   border-top: none !important;
   margin: 0px 0px 0px 0px !important;
+}
+
+.videonail-player-iframe {
+  flex: 1 1 auto !important;
+  box-sizing: border-box;
 }
 
 /* Hides video in minimized state */
