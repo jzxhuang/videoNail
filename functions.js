@@ -58,7 +58,7 @@ function attachVideoNailHeader() {
     elRefs.videoNailContainer.insertBefore(elRefs.videoNailHeader, elRefs.videoNailWrapper);
 
     elRefs.minimize = document.createElement("button");
-    elRefs.minimize.id = "minimizeButton";
+    elRefs.minimize.id = "videonailMinimizeButton";
     elRefs.minimize.classList.add("videonail-button");
     if (state.isMinimized)
       elRefs.minimize.insertAdjacentHTML("afterbegin", '<i class="fas fa-plus"></i>');
@@ -68,7 +68,7 @@ function attachVideoNailHeader() {
     elRefs.videoNailHeader.appendChild(elRefs.minimize);
 
     elRefs.close = document.createElement("button");
-    elRefs.close.id = "closeButton";
+    elRefs.close.id = "videonailCloseButton";
     elRefs.close.classList.add("videonail-button");
     elRefs.close.insertAdjacentHTML("afterbegin", '<i class="fas fa-times"></i>');
     elRefs.close.addEventListener('mousedown', onCloseClick);

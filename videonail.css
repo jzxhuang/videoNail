@@ -122,12 +122,12 @@ button.videonail-button {
   height: auto !important;
   font-size: 10pt !important;
 }
-button.videonail-button#closeButton {
+button.videonail-button#videonailCloseButton {
   margin-right: 5px !important;
 }
 
-#minimizeButton:hover,
-#closeButton:hover {
+#videonailMinimizeButton:hover,
+#videonailCloseButton:hover {
   cursor: pointer !important;
   opacity: 1 !important;
 }
