@@ -1,37 +1,39 @@
-var VN_enabled = true;
+let VN_enabled = true;
 
-window.onload = function() {
-  chrome.storage.local.get('VN_state', function(state) {
+window.onload = function () {
+  chrome.storage.local.get('VN_state', function (state) {
     VN_enabled = state.VN_state.enabled;
     console.log(state.VN_state.enabled);
     document.getElementById('VN_switch').checked = VN_enabled;
+    if (VN_enabled) checkIfWatchPage();
+    else document.getElementById("searchButton").disabled = true;
   });
 
-  document.getElementById('VN_switch').addEventListener('click', function() {
+  document.getElementById('VN_switch').addEventListener('click', function () {
     toggleVN();
   });
 
-  document.getElementById("searchButton").addEventListener('click', function() {
+  document.getElementById("searchButton").addEventListener('click', function () {
     openLink();
   });
-
-  checkIfWatchPage();
 }
 
 function toggleVN() {
   VN_enabled = !VN_enabled;
-  var state = {
+  let state = {
     VN_state: {
-        enabled: VN_enabled
+      enabled: VN_enabled
     }
   }
   chrome.storage.local.set(state);
+  document.getElementById("searchButton").disabled = !VN_enabled;
 
-  if(!VN_enabled) {
-    chrome.tabs.query({}, function(tabs) {
-      var message = {type: "MANUAL-DELETE"};
-      for (var i=0; i<tabs.length; ++i) {
-          chrome.tabs.sendMessage(tabs[i].id, message);
+  // Delete VideoNails in all tabs when disabled
+  if (!VN_enabled) {
+    chrome.tabs.query({}, function (tabs) {
+      let message = { type: "VN-DISABLE" };
+      for (let i = 0; i < tabs.length; ++i) {
+        chrome.tabs.sendMessage(tabs[i].id, message);
       }
     });
   }
@@ -39,23 +41,40 @@ function toggleVN() {
 
 function openLink() {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    var tab = tabs[0];
+    let tab = tabs[0];
     if (tab.url.includes("youtube.com/watch")) return;
     else {
-      var searchUrl = document.getElementById('searchLink').value;
-      chrome.tabs.sendMessage(tab.id, {type: "MANUAL-START", url: searchUrl});  
+      let searchUrl = document.getElementById('searchLink').value;
+      validateUrl(searchUrl)
+      .then( _ => {
+        chrome.tabs.sendMessage(tab.id, { type: "MANUAL-START", url: searchUrl });
+      })
+      .catch(err => {
+        console.log(err);
+      })
     }
   });
 }
 
+// Disable opening VideoNails on /watch pages
 function checkIfWatchPage() {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    var tab = tabs[0];
+    let tab = tabs[0];
     if (tab.url.includes("youtube.com/watch")) {
       document.getElementById("searchButton").disabled = true;
     }
     else {
       document.getElementById("searchButton").disabled = false;
     }
+  });
+}
+
+// Validate url
+function validateUrl(url) {
+  return new Promise((resolve, reject) => {
+    let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*/;
+    let match = url.match(regExp);
+    if (match && match[2].length === 11) resolve()
+    else reject('Invalid url');
   });
 }
