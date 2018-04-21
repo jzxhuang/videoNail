@@ -184,6 +184,10 @@ function saveBounds(element) {
 }
 
 function onMouseDown(e) {
+  if (e.button == 1) {
+    onCloseClick();
+    return;
+  }
   onDown(e);
   e.preventDefault();
 }
