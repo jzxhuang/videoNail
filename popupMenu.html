@@ -19,7 +19,7 @@
         <td align="right">
             <span style="white-space: nowrap;">Enable VideoNail</span>
         </td>
-        <td>
+        <td align="right">
             <label class="switch">
                 <input id="VN_switch" type="checkbox" value="VN_enabled">
                 <span class="slider round"></span>
@@ -27,12 +27,15 @@
         </td>
       </tr>
       <tr>
-        <td>
+        <td align="right">
             <input id="searchLink" style="font-size:12pt;" type="text" placeholder="Paste YouTube link here">
         </td>
-        <td align="center">
+        <td align="right">
             <button id="searchButton" type="button" class="btn btn-primary">Open</button>
         </td>
       </tr>
     </table>
+    <div id="errorMessage" class="alert alert-danger error-alert">
+      <span>Invalid url.</span>
+    </div>
 </body>

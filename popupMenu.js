@@ -16,6 +16,18 @@ window.onload = function () {
   document.getElementById("searchButton").addEventListener('click', function () {
     openLink();
   });
+
+  document.getElementById('searchLink').addEventListener('input', function() {
+    let searchBar = document.getElementById('searchLink');
+    let searchUrl = searchBar.value;
+    validateUrl(searchUrl)
+    .then( _ => {
+      document.getElementById('searchLink').classList.remove("error");
+    })
+    .catch(err => {
+      document.getElementById('searchLink').classList.add('error');
+    })
+  });
 }
 
 function toggleVN() {
@@ -47,9 +59,11 @@ function openLink() {
       let searchUrl = document.getElementById('searchLink').value;
       validateUrl(searchUrl)
       .then( _ => {
+        document.getElementById("errorMessage").style.display = "none";
         chrome.tabs.sendMessage(tab.id, { type: "MANUAL-START", url: searchUrl });
       })
       .catch(err => {
+        document.getElementById("errorMessage").style.display = "inline";
         console.log(err);
       })
     }
