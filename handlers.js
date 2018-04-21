@@ -31,13 +31,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (elRefs.videoNailContainer) {
         setVidId(request.url)
           .then(_ => {
-            // If playlist, need to resfresh container. Otherwise, can load new video through iframe API
+            // If playlist, need to resfresh container. Otherwise, can load new video by changing src
             if (videoData.metadata.isPlaylist) {
               removeVideoNailPlayer();
               sendWindowMessage("DELETE");
               videoData.metadata.timestamp = "0:00";
               initOtherPage(videoData);
             } else {
+              elRefs.videoNailPlayer.src = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=1&origin=${window.location.origin}`
               sendWindowMessage("MANUAL-NEW");
             }
           })
