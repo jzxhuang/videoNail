@@ -1,4 +1,4 @@
-var enabled = true;
+let enabled = true;
 chrome.storage.local.get('VN_state', state => {
   enabled = state.VN_state.enabled;
 });
@@ -65,15 +65,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// On installation, create context menu
+// On installation
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    contexts: ["link", "frame"],
-    title: "Start VideoNail",
-    targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
-    id: "VideoNail"
-  });
-  
+  createContextMenu();  
   chrome.storage.local.set({
     VN_state: {
         enabled: true
@@ -82,25 +76,52 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 chrome.contextMenus.onClicked.addListener(contextMenuListener);
 
-// Context menu listener - When clicked, send message to content script to start VideoNail
+// Create context menu
+function createContextMenu() {
+  chrome.contextMenus.create({
+    contexts: ["link", "frame"],
+    title: "Start VideoNail",
+    targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
+    id: "VideoNail"
+  });
+}
+
+// Remove context menu
+function removeContextMenu() {
+  chrome.contextMenus.remove('VideoNail');
+}
+
+// Context menu onClickListener - When clicked, send message to content script to start VideoNail
 function contextMenuListener(info, tab) {
   if (info.menuItemId === "VideoNail") {
     chrome.tabs.sendMessage(tab.id, {type: "MANUAL-START", url: info.linkUrl || info.frameUrl});  
   }
 }
 
-// Disable context menu on /watch pages
-chrome.tabs.onActivated.addListener(activeInfo => {  
-  chrome.tabs.get(activeInfo.tabId, tabInfo => {
+function checkContextMenuValid(activeInfo) {
+  chrome.tabs.get(activeInfo.tabId || activeInfo.id, tabInfo => {
     if (tabInfo.url.includes("youtube.com/watch")) chrome.contextMenus.update("VideoNail", {enabled: false});
     else chrome.contextMenus.update("VideoNail", {enabled: true});    
-  })
+  });
+}
+
+// Disable context menu on /watch pages
+chrome.tabs.onActivated.addListener(activeInfo => {  
+  checkContextMenuValid(activeInfo);
 })
 
+// Listen for VN_state change
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if(areaName === 'local') {
     chrome.storage.local.get('VN_state', state => {
       enabled = state.VN_state.enabled;
+      if(!enabled) removeContextMenu();
+      else {
+        createContextMenu();
+        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+          checkContextMenuValid(tabs[0]);
+        })
+      }
     });    
   }
 });
