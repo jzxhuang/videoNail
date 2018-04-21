@@ -18,6 +18,8 @@ window.addEventListener("message", event => {
 			});
 		} else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW") {
 			videoData = event.data.videoData;
+			var player = document.getElementById('videonail-iframe');
+			player.src = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1`;
 			videoNailPlayer.loadVideoById({
 				videoId: videoData.metadata.id
 			});

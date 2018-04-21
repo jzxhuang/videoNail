@@ -28,9 +28,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
       if (!tabs.length || tabs[0].id !== tabId) return;
       var tab = tabs[0];
-      if (tab.url.includes("youtube.com/watch?v=")) chrome.contextMenus.update("VideoNail", {enabled: false});
-      else if (tab.url.includes("youtube.com")) 
-        chrome.contextMenus.update("VideoNail", {enabled: true});
+      if (tab.url.includes("youtube.com/watch?v=")) {
+        chrome.contextMenus.update("VideoNail_link", {enabled: false});
+        chrome.contextMenus.update("VideoNail_frame", {enabled: false});
+      }
+      else if (tab.url.includes("youtube.com")) {
+        chrome.contextMenus.update("VideoNail_link", {enabled: true});
+        chrome.contextMenus.update("VideoNail_frame", {enabled: true});
+      }
     });
   }
 });
@@ -79,29 +84,42 @@ chrome.contextMenus.onClicked.addListener(contextMenuListener);
 // Create context menu
 function createContextMenu() {
   chrome.contextMenus.create({
-    contexts: ["link", "frame"],
+    contexts: ["link"],
     title: "Start VideoNail",
     targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
-    id: "VideoNail"
+    id: "VideoNail_link"
+  });
+  chrome.contextMenus.create({
+    contexts: ["frame"],
+    title: "Start VideoNail",
+    targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
+    id: "VideoNail_frame"
   });
 }
 
 // Remove context menu
 function removeContextMenu() {
-  chrome.contextMenus.remove('VideoNail');
+  chrome.contextMenus.remove('VideoNail_link');
+  chrome.contextMenus.remove('VideoNail_frame');
 }
 
 // Context menu onClickListener - When clicked, send message to content script to start VideoNail
 function contextMenuListener(info, tab) {
-  if (info.menuItemId === "VideoNail") {
+  if (info.menuItemId === "VideoNail_link" || info.menuItemId === "VideoNail_frame") {
     chrome.tabs.sendMessage(tab.id, {type: "MANUAL-START", url: info.linkUrl || info.frameUrl});  
   }
 }
 
 function checkContextMenuValid(activeInfo) {
   chrome.tabs.get(activeInfo.tabId || activeInfo.id, tabInfo => {
-    if (tabInfo.url.includes("youtube.com/watch")) chrome.contextMenus.update("VideoNail", {enabled: false});
-    else chrome.contextMenus.update("VideoNail", {enabled: true});    
+    if (tabInfo.url.includes("youtube.com/watch"))  {
+      chrome.contextMenus.update("VideoNail_link", {enabled: false});
+      chrome.contextMenus.update("VideoNail_frame", {enabled: false});
+    }
+    else {
+      chrome.contextMenus.update("VideoNail_link", {enabled: true});
+      chrome.contextMenus.update("VideoNail_frame", {enabled: true});
+    }
   });
 }
 
