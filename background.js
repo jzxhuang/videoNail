@@ -72,11 +72,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // On installation
 chrome.runtime.onInstalled.addListener(() => {
-  createContextMenu();  
-  chrome.storage.local.set({
-    VN_state: {
-        enabled: true
+  createContextMenu();
+  chrome.storage.local.get('VN_state', function (state) {
+    let VN_enabled = true;
+    if(state && state.VN_state) {
+      VN_enabled = state.VN_state.enabled;
     }
+    chrome.storage.local.clear(function () {
+      chrome.storage.local.set({
+        VN_state: {
+            enabled: VN_enabled
+        }
+      });
+    });
   });
 });
 chrome.contextMenus.onClicked.addListener(contextMenuListener);
