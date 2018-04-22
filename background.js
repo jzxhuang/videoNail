@@ -38,12 +38,10 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       if (!tabs.length || tabs[0].id !== tabId) return;
       var tab = tabs[0];
       if (tab.url.includes("youtube.com/watch?v=")) {
-        chrome.contextMenus.update("VideoNail_link", {enabled: false});
-        chrome.contextMenus.update("VideoNail_frame", {enabled: false});
+        toggleContextMenu(false);
       }
       else if (tab.url.includes("youtube.com")) {
-        chrome.contextMenus.update("VideoNail_link", {enabled: true});
-        chrome.contextMenus.update("VideoNail_frame", {enabled: true});
+        toggleContextMenu(true);
       }
     });
   }
@@ -109,15 +107,15 @@ function createContextMenu() {
   chrome.contextMenus.create({
     contexts: ["frame"],
     title: "Start VideoNail",
-    targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
+    documentUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
     id: "VideoNail_frame"
   });
 }
 
-// Remove context menu
-function removeContextMenu() {
-  chrome.contextMenus.remove('VideoNail_link');
-  chrome.contextMenus.remove('VideoNail_frame');
+// toggle disabled/enabled state of context menus
+function toggleContextMenu(enable) {
+  chrome.contextMenus.update("VideoNail_link", {enabled: enable});
+  chrome.contextMenus.update("VideoNail_frame", {enabled: enable});
 }
 
 // Context menu onClickListener - When clicked, send message to content script to start VideoNail
@@ -130,12 +128,10 @@ function contextMenuListener(info, tab) {
 function checkContextMenuValid(activeInfo) {
   chrome.tabs.get(activeInfo.tabId || activeInfo.id, tabInfo => {
     if (tabInfo.url.includes("youtube.com/watch"))  {
-      chrome.contextMenus.update("VideoNail_link", {enabled: false});
-      chrome.contextMenus.update("VideoNail_frame", {enabled: false});
+      toggleContextMenu(false);
     }
     else {
-      chrome.contextMenus.update("VideoNail_link", {enabled: true});
-      chrome.contextMenus.update("VideoNail_frame", {enabled: true});
+      toggleContextMenu(true);
     }
   });
 }
@@ -159,9 +155,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
           }
         });
       }
-      if(!enabled) removeContextMenu();
+      if(!enabled) toggleContextMenu(false);
       else {
-        createContextMenu();
         chrome.tabs.query({active: true, currentWindow: true}, tabs => {
           checkContextMenuValid(tabs[0]);
         })
