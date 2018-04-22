@@ -16,6 +16,17 @@ Watch YouTube videos while browsing the web or reading the comments! VideoNail i
 ![screenshot 3](assets/screenshot3.png)
 ![screenshot 4](assets/screenshot4.png)
 
+## Deployment
+### MacOS
+Run this script to bundle all necessary files
+```
+$ ./package
+```
+Then you can upload the zip file to Chrome Web Store.
+
+### Windows
+Coming soon...
+
 ## Contributing
 Open issues for any problems you may find, and fix them if you can. Make sure your code is well commented. If you want to suggest features, open an issue and it will be reviewed shortly.
 
