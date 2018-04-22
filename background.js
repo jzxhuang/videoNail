@@ -1,6 +1,15 @@
 let enabled = true;
 chrome.storage.local.get('VN_state', state => {
-  enabled = state.VN_state.enabled;
+  if(state && state.VN_state) {
+    enabled = state.VN_state.enabled;
+  }
+  else {
+    chrome.storage.local.set({
+      VN_state: {
+          enabled: enabled
+      }
+    });
+  }
 });
 
 // Listens for same page YouTube navigation
@@ -140,7 +149,16 @@ chrome.tabs.onActivated.addListener(activeInfo => {
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if(areaName === 'local') {
     chrome.storage.local.get('VN_state', state => {
-      enabled = state.VN_state.enabled;
+      if(state && state.VN_state) {
+        enabled = state.VN_state.enabled;
+      }
+      else {
+        chrome.storage.local.set({
+          VN_state: {
+              enabled: enabled
+          }
+        });
+      }
       if(!enabled) removeContextMenu();
       else {
         createContextMenu();

@@ -2,8 +2,16 @@ let VN_enabled = true;
 
 window.onload = function () {
   chrome.storage.local.get('VN_state', function (state) {
-    VN_enabled = state.VN_state.enabled;
-    console.log(state.VN_state.enabled);
+    if(state && state.VN_state) {
+      VN_enabled = state.VN_state.enabled;
+    }
+    else {
+      chrome.storage.local.set({
+        VN_state: {
+            enabled: VN_enabled
+        }
+      });
+    }
     document.getElementById('VN_switch').checked = VN_enabled;
     if (VN_enabled) checkIfWatchPage();
     else document.getElementById("searchButton").disabled = true;

@@ -1,6 +1,15 @@
 state.currPage = window.location.href;
 chrome.storage.local.get('VN_state', data => {
-  VN_enabled = data.VN_state.enabled;
+  if(data && data.VN_state) {
+    VN_enabled = data.VN_state.enabled;
+  }
+  else {
+    chrome.storage.local.set({
+      VN_state: {
+          enabled: VN_enabled
+      }
+    });
+  }
   if (VN_enabled) {
     if (state.currPage.includes("youtube.com/watch")) initWatchPage();
     else initOtherPage();
