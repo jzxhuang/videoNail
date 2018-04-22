@@ -221,11 +221,9 @@ function onUp(e) {
     saveBounds(elRefs.videoNailContainer);
   }
   // allow smooth dragging over iframes on page, as well as VideoNail player
-  if (!state.currPage.includes("youtube.com/watch")) {
-    let iframes = document.getElementsByTagName('iframe');
-    for(let i = 0; i < iframes.length; ++i) {
-      iframes[i].style.pointerEvents = 'auto';
-    }
+  let iframes = document.getElementsByTagName('iframe');
+  for(let i = 0; i < iframes.length; ++i) {
+    iframes[i].style.pointerEvents = 'auto';
   }
   clicked = null;
   window.dispatchEvent(new Event("resize"));
@@ -290,11 +288,9 @@ function onDown(e) {
   };
   afterMinClick = false;
   // allow smooth dragging over iframes on page, as well as VideoNail player
-  if (!state.currPage.includes("youtube.com/watch")) {
-    let iframes = document.getElementsByTagName('iframe');
-    for(let i = 0; i < iframes.length; ++i) {
-      iframes[i].style.pointerEvents = 'none';
-    }
+  let iframes = document.getElementsByTagName('iframe');
+  for(let i = 0; i < iframes.length; ++i) {
+    iframes[i].style.pointerEvents = 'none';
   }
 }
 
