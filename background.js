@@ -127,7 +127,7 @@ function contextMenuListener(info, tab) {
 
 function checkContextMenuValid(activeInfo) {
   chrome.tabs.get(activeInfo.tabId || activeInfo.id, tabInfo => {
-    if (tabInfo.url.includes("youtube.com/watch"))  {
+    if (tabInfo.url.includes("youtube.com/watch") || !enabled)  {
       toggleContextMenu(false);
     }
     else {
