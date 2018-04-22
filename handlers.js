@@ -1,3 +1,21 @@
+state.currPage = window.location.href;
+chrome.storage.local.get('VN_state', data => {
+  if(data && data.VN_state) {
+    VN_enabled = data.VN_state.enabled;
+  }
+  else {
+    chrome.storage.local.set({
+      VN_state: {
+          enabled: VN_enabled
+      }
+    });
+  }
+  if (VN_enabled) {
+    if (state.currPage.includes("youtube.com/watch")) initWatchPage();
+    else initOtherPage();
+  }
+})
+
 // Listen for navigation events detected by background.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // If YouTube same page nav
@@ -21,18 +39,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // Cases for if videonail container already exists
       if (elRefs.videoNailContainer) {
         setVidId(request.url)
-        .then(_ => {
-          // If playlist, need to resfresh container. Otherwise, can load new video through iframe API
-          if (videoData.metadata.isPlaylist) {
-            removeVideoNailPlayer();
-            sendWindowMessage("DELETE");
-            videoData.metadata.timestamp = "0:00";
-            initOtherPage(videoData);
-          } else {
-            sendWindowMessage("MANUAL-NEW");
-          }
-        })
-        .catch(err => {console.log(err)});
+          .then(_ => {
+            // If playlist, need to resfresh container. Otherwise, can load new video by changing src
+            if (videoData.metadata.isPlaylist) {
+              removeVideoNailPlayer();
+              sendWindowMessage("DELETE");
+              videoData.metadata.timestamp = "0:00";
+              initOtherPage(videoData);
+            } else {
+              elRefs.videoNailPlayer.src = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=1&origin=${window.location.origin}`
+              sendWindowMessage("MANUAL-NEW");
+            }
+          })
+          .catch(err => { 
+            console.log(err);
+          });
       } else {
         // If no container, then go through usual initOtherPage process, always autoplay
         setVidId(request.url)
@@ -40,15 +61,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             videoData.metadata.isPlaying = true;
             initOtherPage(videoData)
           })
-          .catch(err => {console.log(err)});
+          .catch(err => { 
+            console.log(err);
+          });
       }
     }
   }
+  else if (request.type === 'VN-DISABLE') {
+    if (elRefs.videoNailContainer) {
+      removeVideoNailPlayer();
+      sendWindowMessage("DELETE");
+      chrome.runtime.sendMessage({
+        type: "DELETE"
+      });
+      reset();
+    }
+  }
 });
-
-state.currPage = window.location.href;
-if (state.currPage.includes("youtube.com/watch")) initWatchPage();
-else initOtherPage();
 
 function initWatchPage() {
   state.isPolymer = document.querySelector("body#body") === null;

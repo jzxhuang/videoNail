@@ -17,6 +17,9 @@ function injectPIP() {
   elRefs.videoNailWrapper.classList.add("videonail-player");
   elRefs.videoNailWrapper.classList.toggle("videonail-player-active", false);
 
+  theaterButton = document.querySelector("button.ytp-size-button.ytp-button");
+  theaterQuery = document.querySelector("ytd-watch.style-scope.ytd-page-manager");
+
   // Wrap player in container
   elRefs.videoNailContainer = document.createElement('div');
   elRefs.videoNailContainer.classList.add("videonail-container-std-mode", "videonail-container");
@@ -31,14 +34,16 @@ function injectPIP() {
   setVidId();
 
   // Auto-PIP on scroll (if not manually done)
+  createObserver();
+}
+
+function createObserver() {
   observer = new IntersectionObserver(
     (entries, observer) => {
       entries.forEach(entry => {
         if (
           (entry.intersectionRatio < SCROLL_THRESHOLD && !state.inPipMode) ||
-          (entry.intersectionRatio > SCROLL_THRESHOLD &&
-            state.inPipMode &&
-            !state.manualClose)
+          (entry.intersectionRatio > SCROLL_THRESHOLD && state.inPipMode && !state.manualClose)
         ) {
           togglePIP();
         }
@@ -99,18 +104,28 @@ function togglePIP() {
   elRefs.videoNailWrapper.classList.toggle("videonail-player-active", state.inPipMode);
   elRefs.videoNailWrapper.classList.toggle("minimize", state.isMinimized && state.inPipMode);
 
-  let theaterButton = document.querySelector("button.ytp-size-button.ytp-button");
-  let theaterQuery = document.querySelector("ytd-watch.style-scope.ytd-page-manager");
-  if (!theaterQuery.hasAttribute("theater-requested_")) theaterButton.click();
-
   // When users scroll down
   if (state.inPipMode) {
     setVNPlayerStyle();
     addListeners();
+    if (theaterQuery.hasAttribute("theater-requested_")) initialView = "THEATER";
+    else {
+      initialView = "DEFAULT";
+      SCROLL_THRESHOLD = 0.55;
+      observer.disconnect();
+      createObserver();
+      theaterButton.click();
+    }      
   } else {
     // When users scroll up
-    state.manualClose = false;
     clearListeners();
+    if (initialView === "DEFAULT" && !state.manualClose) {
+      SCROLL_THRESHOLD = 0.25;
+      observer.disconnect();
+      createObserver();
+      theaterButton.click();
+    }
+    state.manualClose = false;    
   }
   window.dispatchEvent(new Event("resize"));
 }
@@ -205,14 +220,18 @@ function onUp(e) {
     videoData.isInitialStyle = false;
     saveBounds(elRefs.videoNailContainer);
   }
-  if (!state.currPage.includes("youtube.com/watch"))
-    elRefs.videoNailPlayer.style.pointerEvents = 'auto';
+  // allow smooth dragging over iframes on page, as well as VideoNail player
+  let iframes = document.getElementsByTagName('iframe');
+  for(let i = 0; i < iframes.length; ++i) {
+    iframes[i].style.pointerEvents = 'auto';
+  }
   clicked = null;
   window.dispatchEvent(new Event("resize"));
 }
 
 function onCloseClick() {
   if (window.location.pathname == "/watch") {
+    state.manualClose = true;
     togglePIP();
     return;
   } else {
@@ -268,8 +287,10 @@ function onDown(e) {
     onBottomEdge: onBottomEdge
   };
   afterMinClick = false;
-  if (!state.currPage.includes("youtube.com/watch")) {
-    elRefs.videoNailPlayer.style.pointerEvents = 'none';
+  // allow smooth dragging over iframes on page, as well as VideoNail player
+  let iframes = document.getElementsByTagName('iframe');
+  for(let i = 0; i < iframes.length; ++i) {
+    iframes[i].style.pointerEvents = 'none';
   }
 }
 
