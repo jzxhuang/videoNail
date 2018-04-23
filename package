@@ -1,4 +1,27 @@
 #!/bin/bash
+ASSETS=assets
+DIST=videoNail
 
-echo "Zip all necessary files"
-zip videoNail.zip *.js manifest.json *.css *.png
+if [ ! -d "$DIST/ASSETS" ]; then
+  mkdir -p $DIST/ASSETS
+fi
+
+echo "Copying all assets..."
+find $ASSETS -type f -name 'VideoNail_x*.png' -exec cp '{}' $DIST/$ASSETS ';'
+
+echo "Copying js files..."
+cp *.js $DIST
+
+echo "Copying html files..."
+cp *.html $DIST
+
+echo "Copying css files..."
+cp *.css $DIST
+
+echo "Copying manifest.json..."
+cp manifest.json $DIST
+
+echo "Zip all necessary files..."
+zip -rm videoNail.zip $DIST
+
+echo "Package is ready!"
