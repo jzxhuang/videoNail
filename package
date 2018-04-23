@@ -2,8 +2,8 @@
 ASSETS=assets
 DIST=videoNail
 
-if [ ! -d "$DIST_ASSETS" ]; then
-  mkdir -p $DIST_ASSETS
+if [ ! -d "$DIST/ASSETS" ]; then
+  mkdir -p $DIST/ASSETS
 fi
 
 echo "Copying all assets..."
