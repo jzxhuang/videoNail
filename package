@@ -7,7 +7,7 @@ if [ ! -d "$DIST_ASSETS" ]; then
 fi
 
 echo "Copying all assets..."
-find $ASSETS -type f -name 'VideoNail_x*' -exec cp '{}' $DIST/$ASSETS ';'
+find $ASSETS -type f -name 'VideoNail_x*.png' -exec cp '{}' $DIST/$ASSETS ';'
 
 echo "Copying js files..."
 cp *.js $DIST
