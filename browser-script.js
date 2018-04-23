@@ -17,7 +17,7 @@ window.addEventListener("message", event => {
 				}
 			});
 		} else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW") {
-			videoData = event.data.videoData;
+			videoNailData = event.data.videoData;
 		}
 	}
 }, false);

@@ -1,12 +1,12 @@
 state.currPage = window.location.href;
 chrome.storage.local.get('VN_state', data => {
-  if(data && data.VN_state) {
+  if (data && data.VN_state) {
     VN_enabled = data.VN_state.enabled;
   }
   else {
     chrome.storage.local.set({
       VN_state: {
-          enabled: VN_enabled
+        enabled: VN_enabled
       }
     });
   }
@@ -40,18 +40,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (elRefs.videoNailContainer) {
         setVidId(request.url)
           .then(_ => {
-            // If playlist, need to resfresh container. Otherwise, can load new video by changing src
-            if (videoData.metadata.isPlaylist) {
-              removeVideoNailPlayer();
-              sendWindowMessage("DELETE");
-              videoData.metadata.timestamp = "0:00";
-              initOtherPage(videoData);
-            } else {
-              elRefs.videoNailPlayer.src = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=1&origin=${window.location.origin}`
-              sendWindowMessage("MANUAL-NEW");
-            }
+            // If container exists, simply load new video by changing src and updating browserscript metadata
+            let srcString = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=1&origin=${window.location.origin}`;
+            if (videoData.metadata.isPlaylist) srcString += `&listType=playlist&list=${videoData.metadata.playlistId}`;
+            elRefs.videoNailPlayer.src = srcString;
+            videoData.metadata.timestamp = "0:00";
+            videoData.metadata.isPlaying = true;
+            sendWindowMessage("MANUAL-NEW");
           })
-          .catch(err => { 
+          .catch(err => {
             console.log(err);
           });
       } else {
@@ -61,7 +58,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             videoData.metadata.isPlaying = true;
             initOtherPage(videoData)
           })
-          .catch(err => { 
+          .catch(err => {
             console.log(err);
           });
       }
