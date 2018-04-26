@@ -3,6 +3,10 @@
 // ========================================================================= //
 let VN_enabled;
 
+let videoNailOptions = {
+
+};
+
 let state = {
   firstTime: true,
   isPolymer: false,

@@ -115,7 +115,7 @@ function togglePIP() {
       observer.disconnect();
       createObserver();
       theaterButton.click();
-    }      
+    }
   } else {
     // When users scroll up
     clearListeners();
@@ -125,7 +125,7 @@ function togglePIP() {
       createObserver();
       theaterButton.click();
     }
-    state.manualClose = false;    
+    state.manualClose = false;
   }
   window.dispatchEvent(new Event("resize"));
 }
@@ -222,7 +222,7 @@ function onUp(e) {
   }
   // allow smooth dragging over iframes on page, as well as VideoNail player
   let iframes = document.getElementsByTagName('iframe');
-  for(let i = 0; i < iframes.length; ++i) {
+  for (let i = 0; i < iframes.length; ++i) {
     iframes[i].style.pointerEvents = 'auto';
   }
   clicked = null;
@@ -289,7 +289,7 @@ function onDown(e) {
   afterMinClick = false;
   // allow smooth dragging over iframes on page, as well as VideoNail player
   let iframes = document.getElementsByTagName('iframe');
-  for(let i = 0; i < iframes.length; ++i) {
+  for (let i = 0; i < iframes.length; ++i) {
     iframes[i].style.pointerEvents = 'none';
   }
 }
@@ -551,16 +551,25 @@ function setupVideoNailPlayer(vidData) {
 function fetchVidData() {
   return new Promise((resolve, reject) => {
     // On loading a new page, get vidData from chrome.storage.
-    // Only background script has access to tabId, so we need to send message to background to get tabId
-    chrome.runtime.sendMessage({
-      type: "GET"
-    }, tabId => {
-      if (!tabId) return;
-      chrome.storage.local.get(tabId.toString(), vidData => {
-        if (vidData[tabId]) resolve(vidData[tabId]);
-        else reject("No video for this tab.");
+    if (videoNailOptions.sync === true) {
+      chrome.storage.local.get('videonail-sync', vidData => {
+        if (vidData) {
+          console.log(vidData);
+          resolve(vidData['videonail-sync']);
+        } else reject("No video for this tab.");
+      })
+    } else {
+      // Only background script has access to tabId, so we need to send message to background to get tabId
+      chrome.runtime.sendMessage({
+        type: "GET"
+      }, tabId => {
+        if (!tabId) return;
+        chrome.storage.local.get(tabId.toString(), vidData => {
+          if (vidData[tabId]) resolve(vidData[tabId]);
+          else reject("No video for this tab.");
+        });
       });
-    });
+    }
   });
 }
 
@@ -585,7 +594,7 @@ function setVidId(url) {
           });
         }
         videoData.metadata.id = match[2];
-        resolve()        
+        resolve()
       } else reject('Error setting video id');
     } else reject('Error setting video id');
   });

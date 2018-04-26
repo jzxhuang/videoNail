@@ -2,8 +2,7 @@ state.currPage = window.location.href;
 chrome.storage.local.get('VN_state', data => {
   if (data && data.VN_state) {
     VN_enabled = data.VN_state.enabled;
-  }
-  else {
+  } else {
     chrome.storage.local.set({
       VN_state: {
         enabled: VN_enabled
@@ -11,10 +10,14 @@ chrome.storage.local.get('VN_state', data => {
     });
   }
   if (VN_enabled) {
-    if (state.currPage.includes("youtube.com/watch")) initWatchPage();
-    else initOtherPage();
+    // Get VN options from sync storage
+    chrome.storage.sync.get('videoNailOptions', data => {
+      videoNailOptions = data.videoNailOptions;
+      if (state.currPage.includes("youtube.com/watch")) initWatchPage();
+      else initOtherPage();
+    });
   }
-})
+});
 
 // Listen for navigation events detected by background.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -118,6 +121,7 @@ function onWatchPage() {
 }
 
 function initOtherPage(vData) {
+  // If an input parameter is passed, this is being called from a manual action. Do not need to fetch from storage
   if (vData) {
     setupVideoNailPlayer(vData)
       .then(_ => {

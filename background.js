@@ -1,4 +1,5 @@
 let enabled = true;
+let videoNailOptions = {sync: true};
 chrome.storage.local.get('VN_state', state => {
   if(state && state.VN_state) {
     enabled = state.VN_state.enabled;
@@ -55,10 +56,12 @@ chrome.webNavigation.onBeforeNavigate.addListener(navEvent => {
     chrome.tabs.sendMessage(navEvent.tabId, { type: "SAVE" }, response => {
       if (response && response.type === "SET") {
         // Write data to storage
-        let vidData = {};
-        console.log(response.data);
-        vidData[navEvent.tabId] = response.data;
-        chrome.storage.local.set(vidData);
+        
+        chrome.storage.sync.get('videoNailOptions', data => {
+          let vidData = {};
+          data.videoNailOptions.sync ? vidData['videonail-sync'] = response.data : vidData[navEvent.tabId] = response.data;
+          chrome.storage.local.set(vidData);          
+        });
       }
     });
   }
@@ -82,9 +85,7 @@ chrome.runtime.onInstalled.addListener(() => {
   createContextMenu();
   chrome.storage.local.get('VN_state', function (state) {
     let VN_enabled = true;
-    if(state && state.VN_state) {
-      VN_enabled = state.VN_state.enabled;
-    }
+    if(state && state.VN_state) VN_enabled = state.VN_state.enabled;
     chrome.storage.local.clear(function () {
       chrome.storage.local.set({
         VN_state: {
@@ -92,6 +93,14 @@ chrome.runtime.onInstalled.addListener(() => {
         }
       });
     });
+  });
+  // Keep videonail options, or create them if they don't exist
+  chrome.storage.sync.get('videoNailOptions', data => {
+    if(Object.keys(data).length === 0 && data.constructor === Object) {
+      chrome.storage.sync.set({videoNailOptions: {
+        sync: true
+      }});
+    } else videoNailOptions = data;
   });
 });
 chrome.contextMenus.onClicked.addListener(contextMenuListener);
@@ -139,7 +148,7 @@ function checkContextMenuValid(activeInfo) {
 // Disable context menu on /watch pages
 chrome.tabs.onActivated.addListener(activeInfo => {  
   checkContextMenuValid(activeInfo);
-})
+});
 
 // Listen for VN_state change
 chrome.storage.onChanged.addListener((changes, areaName) => {
