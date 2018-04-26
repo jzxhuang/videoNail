@@ -69,16 +69,12 @@ function attachVideoNailHeader() {
       let imgUrl = chrome.extension.getURL("assets/plus.svg");
       let img = document.createElement("img");
       img.src = imgUrl;
-      img.style.width = "13px";
-      img.style.height = "13px";
       elRefs.minimize.appendChild(img);
     }
     else {
       let imgUrl = chrome.extension.getURL("assets/window-minimize.svg");
       let img = document.createElement("img");
       img.src = imgUrl;
-      img.style.width = "13px";
-      img.style.height = "13px";
       elRefs.minimize.appendChild(img);
     }
     elRefs.minimize.addEventListener('mousedown', onMinimizeClick);
@@ -91,8 +87,6 @@ function attachVideoNailHeader() {
     let imgUrl = chrome.extension.getURL("assets/times.svg");
     let img = document.createElement("img");
     img.src = imgUrl;
-    img.style.width = "13px";
-    img.style.height = "13px";
     elRefs.close.appendChild(img);
 
     elRefs.close.addEventListener('mousedown', onCloseClick);
