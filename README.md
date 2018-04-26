@@ -16,16 +16,12 @@ Watch YouTube videos while browsing the web or reading the comments! VideoNail i
 ![screenshot 3](assets/screenshot3.png)
 ![screenshot 4](assets/screenshot4.png)
 
-## Deployment
-### MacOS
-Run this script to bundle all necessary files
-```
-$ ./package
-```
-Then you can upload the zip file to Chrome Web Store.
+## Usage
+If you'd like to simply use the extension, [get it for free on the Chrome Web Store.](https://chrome.google.com/webstore/detail/videonail/nbpbjchgemnjhcpomnbjkkcfloafbema).
 
-### Windows
-Coming soon...
+If you'd like to contribute, work with the extension locally and make changes, clone/fork the repo and load the directory as an 'unpacked' extension in Chrome. If you aren't familiar with Chrome extensions, head over to the [Chrome developer site](https://developer.chrome.com/extensions/getstarted) to get started.
+
+We have also included a bash script that packages all the core assets into a .zip file. To use it, your terminal must have the zip command installed (i.e. use a Unix OS).
 
 ## Contributing
 Open issues for any problems you may find, and fix them if you can. Make sure your code is well commented. If you want to suggest features, open an issue and it will be reviewed shortly.
@@ -34,4 +30,4 @@ Open issues for any problems you may find, and fix them if you can. Make sure yo
 VideoNail is licensed under the Apache 2.0 license - see [LICENSE.md](LICENSE.md) for details.
 
 ## Acknowledgements
-VideoNail makes use of [Font Awesome](https://fontawesome.com/) for icons and the [YouTube IFrame Player API](https://developers.google.com/youtube/iframe_api_reference).
+VideoNail makes use of [Bootstrap 4](https://getbootstrap.com/), [Font Awesome](https://fontawesome.com/) for icons and the [YouTube IFrame Player API](https://developers.google.com/youtube/iframe_api_reference).
