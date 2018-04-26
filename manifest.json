@@ -47,8 +47,8 @@
   ],
   "web_accessible_resources": [
     "browser-script.js",
-    "window-minimize.svg",
-    "plus.svg",
-    "times.svg"
+    "assets/window-minimize.svg",
+    "assets/plus.svg",
+    "assets/times.svg"
   ]
 }
