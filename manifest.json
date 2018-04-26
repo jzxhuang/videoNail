@@ -22,8 +22,6 @@
         "videonail.css"
       ],
       "js": [
-        "fa-solid.min.js",
-        "fontawesome.min.js",
         "functions.js",
         "global-vars.js",
         "handlers.js"
@@ -48,6 +46,9 @@
     "contextMenus"
   ],
   "web_accessible_resources": [
-    "browser-script.js"
+    "browser-script.js",
+    "window-minimize.svg",
+    "plus.svg",
+    "times.svg"
   ]
 }
