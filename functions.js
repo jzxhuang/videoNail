@@ -551,11 +551,12 @@ function setupVideoNailPlayer(vidData) {
 function fetchVidData() {
   return new Promise((resolve, reject) => {
     // On loading a new page, get vidData from chrome.storage.
+    // If sync mode
     if (videoNailOptions.sync === true) {
-      chrome.storage.local.get('videonail-sync', vidData => {
-        if (vidData) {
+      chrome.storage.local.get('videoNailSyncedVid', vidData => {
+        if (vidData.videoNailSyncedVid) {
           console.log(vidData);
-          resolve(vidData['videonail-sync']);
+          resolve(vidData['videoNailSyncedVid']);
         } else reject("No video for this tab.");
       })
     } else {

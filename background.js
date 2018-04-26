@@ -1,9 +1,8 @@
 let enabled = true;
 let videoNailOptions = {sync: true};
+
 chrome.storage.local.get('VN_state', state => {
-  if(state && state.VN_state) {
-    enabled = state.VN_state.enabled;
-  }
+  if(state && state.VN_state) enabled = state.VN_state.enabled;
   else {
     chrome.storage.local.set({
       VN_state: {
@@ -59,7 +58,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(navEvent => {
         
         chrome.storage.sync.get('videoNailOptions', data => {
           let vidData = {};
-          data.videoNailOptions.sync ? vidData['videonail-sync'] = response.data : vidData[navEvent.tabId] = response.data;
+          data.videoNailOptions.sync ? vidData['videoNailSyncedVid'] = response.data : vidData[navEvent.tabId] = response.data;
           chrome.storage.local.set(vidData);          
         });
       }
@@ -76,7 +75,9 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (sender.tab && request.type === "GET") sendResponse(sender.tab.id);
   else if (sender.tab && request.type === "DELETE") {
-    chrome.storage.local.remove(sender.tab.id.toString());
+    chrome.storage.sync.get('videoNailOptions', data => {
+      data.videoNailOptions.sync ? chrome.storage.local.remove('videoNailSyncedVid') : chrome.storage.local.remove(sender.tab.id.toString());
+    });
   }
 });
 
@@ -154,9 +155,7 @@ chrome.tabs.onActivated.addListener(activeInfo => {
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if(areaName === 'local') {
     chrome.storage.local.get('VN_state', state => {
-      if(state && state.VN_state) {
-        enabled = state.VN_state.enabled;
-      }
+      if(state && state.VN_state) enabled = state.VN_state.enabled;
       else {
         chrome.storage.local.set({
           VN_state: {
@@ -168,7 +167,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       else {
         chrome.tabs.query({active: true, currentWindow: true}, tabs => {
           checkContextMenuValid(tabs[0]);
-        })
+        });
       }
     });    
   }
