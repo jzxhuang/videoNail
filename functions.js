@@ -631,7 +631,8 @@ function injectYTIframeAPIScript() {
 function sendWindowMessage(type) {
   if (type === "INIT") window.postMessage({
     type: "VIDEONAIL-CONTENT-SCRIPT-INIT",
-    videoData: videoData
+    videoData: videoData,
+    isActivetab: state.isActiveTab
   }, "*");
   else if (type === "DELETE") window.postMessage({
     type: "VIDEONAIL-CONTENT-SCRIPT-DELETE"

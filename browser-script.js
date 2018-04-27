@@ -1,10 +1,12 @@
-let videoNailData, videoNailPlayer, videoNailInterval;
+let videoNailData, videoNailPlayer, videoNailInterval, videoNailActiveTab;
 
 // Listens for messages posted from the extension 
 window.addEventListener("message", event => {
 	if (event.data.type) {
-		if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-INIT" && event.source == window)
+		if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-INIT" && event.source == window){
 			videoNailData = event.data.videoData;
+			videoNailActiveTab = event.data.isActiveTab;
+		}
 		else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-DELETE") {
 			clearInterval(videoNailInterval)
 			videoNailInterval = null;
@@ -34,7 +36,7 @@ function onYouTubeIframeAPIReady() {
 
 function onYTPReady() {
 	// Start the interval
-	videoNailInterval = setInterval(postYTPStatus, 250);
+	if (videoNailActiveTab) videoNailInterval = setInterval(postYTPStatus, 50);
 }
 
 function onYTPError(err) {

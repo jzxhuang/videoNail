@@ -13,7 +13,8 @@ let state = {
   inPipMode: false,
   manualClose: false,
   isMinimized: false,
-  currPage: ""
+  currPage: "",
+  isActiveTab: false
 };
 
 let elRefs = {

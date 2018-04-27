@@ -1,4 +1,7 @@
 state.currPage = window.location.href;
+chrome.tabs.sendMessage({type: "ACTIVE-TAB-CHECK"}, response => {
+  state.isActiveTab = response.isActiveTab;
+});
 chrome.storage.local.get('VN_state', data => {
   if (data && data.VN_state) {
     VN_enabled = data.VN_state.enabled;
@@ -105,6 +108,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendWindowMessage("DELETE");
       reset();
     }
+  } else if (request.type === "SYNC-ACTIVE-TAB") {
+    state.isActiveTab = true;
+    sendWindowMessage("ACTIVE-TAB");
+  } else if (request.type === "SYNC-PAUSE") {
+    state.isActiveTab = false;
+    sendWindowMessage("BACKGROUND-TAB");
   }
   else if (request.type === 'VN-DISABLE') {
     if (elRefs.videoNailContainer) {

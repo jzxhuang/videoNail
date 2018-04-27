@@ -1,6 +1,12 @@
 let enabled = true;
 let videoNailOptions = {sync: true};
 
+chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+  if (tabs && tabs[0]) {
+    chrome.storage.local.set({activeTab: tabs[0].id});
+  }
+});
+
 chrome.storage.local.get('VN_state', state => {
   if(state && state.VN_state) enabled = state.VN_state.enabled;
   else {
@@ -12,9 +18,21 @@ chrome.storage.local.get('VN_state', state => {
   }
 });
 
+chrome.tabs.onActivated.addListener(info => {
+  chrome.storage.local.get('activeTab', data => {
+    console.log(data.activeTab);
+    chrome.storage.sync.get('videoNailOptions', options => {
+      if (options.videoNailOptions.sync) {
+        chrome.tabs.sendMessage(data.activeTab, {type: "SYNC-PAUSE"});
+        chrome.tabs.sendMessage(info.tabId, {type: "SYNC-ACTIVE-TAB"});
+      }
+    })
+    chrome.storage.local.set({activeTab: info.tabId});
+  });
+});
+
 // Listens for same page YouTube navigation
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log(enabled);
   if (changeInfo.url && enabled) {
     // Save the tab videoData object
     chrome.tabs.get(tabId, tab => {
@@ -55,7 +73,6 @@ chrome.webNavigation.onBeforeNavigate.addListener(navEvent => {
     chrome.tabs.sendMessage(navEvent.tabId, { type: "SAVE" }, response => {
       if (response && response.type === "SET") {
         // Write data to storage
-        
         chrome.storage.sync.get('videoNailOptions', data => {
           let vidData = {};
           data.videoNailOptions.sync ? vidData['videoNailSyncedVid'] = response.data : vidData[navEvent.tabId] = response.data;
@@ -93,6 +110,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
       });
     });
+  } else if (sender.tab && request.type === "ACTIVE-TAB-CHECK") {
+    chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+      tabs && tabs[0] && tabs[0].id === sender.tab.id ? sendResponse({response: true}) : sendResponse({isActiveTab: false})
+    });
   }
 });
 
@@ -118,8 +139,14 @@ chrome.runtime.onInstalled.addListener(() => {
       }});
     } else videoNailOptions = data;
   });
+  chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+    if (tabs && tabs[0]) {
+      chrome.storage.local.set({activeTab: tabs[0].id});
+    }
+  });
+  chrome.contextMenus.onClicked.addListener(contextMenuListener);
 });
-chrome.contextMenus.onClicked.addListener(contextMenuListener);
+
 
 // Create context menu
 function createContextMenu() {
