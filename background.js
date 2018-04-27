@@ -71,12 +71,27 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
   chrome.storage.local.remove(tabId.toString());
 });
 
-// On receiving a message from a tab (GET storage data, CLOSE videonail)
+// On receiving a message from a tab (GET storage data, CLOSE videonail, SYNC-CREATE)
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (sender.tab && request.type === "GET") sendResponse(sender.tab.id);
   else if (sender.tab && request.type === "DELETE") {
     chrome.storage.sync.get('videoNailOptions', data => {
-      data.videoNailOptions.sync ? chrome.storage.local.remove('videoNailSyncedVid') : chrome.storage.local.remove(sender.tab.id.toString());
+      if (data.videoNailOptions.sync) {
+        chrome.storage.local.remove('videoNailSyncedVid');
+        chrome.tabs.query({}, tabs => {
+          tabs.forEach(element => {
+            if (element.id !== sender.tab.id) chrome.tabs.sendMessage(element.id, {type: "SYNC-DELETE"});
+          });
+        });
+      } else chrome.storage.local.remove(sender.tab.id.toString());
+    });
+  } else if (sender.tab && request.type === "SYNC-CREATE") {
+    chrome.tabs.query({}, function(tabs) {
+      tabs.forEach(element => {
+        if (element.id !== sender.tab.id) {
+          chrome.tabs.sendMessage(element.id, {type: "SYNC-CREATE-BACKGROUND"})
+        }
+      });
     });
   }
 });

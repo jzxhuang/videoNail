@@ -51,6 +51,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             videoData.metadata.isPlaying = true;
             sendWindowMessage("MANUAL-NEW");
           })
+          .then(_ => {
+            if (videoNailOptions.sync) {
+              chrome.storage.local.set({ videoNailSyncedVid: videoData }, function () {
+                chrome.runtime.sendMessage({ type: "SYNC-CREATE" });
+              });
+            }
+          })
           .catch(err => {
             console.log(err);
           });
@@ -58,13 +65,45 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // If no container, then go through usual initOtherPage process, always autoplay
         setVidId(request.url)
           .then(_ => {
+            videoData.metadata.timestamp = "0:00";
             videoData.metadata.isPlaying = true;
             initOtherPage(videoData)
+          })
+          .then(_ => {
+            if (videoNailOptions.sync) {
+              chrome.storage.local.set({ videoNailSyncedVid: videoData }, function () {
+                chrome.runtime.sendMessage({ type: "SYNC-CREATE" });
+              });
+            }
           })
           .catch(err => {
             console.log(err);
           });
       }
+    }
+  } else if (request.type === "SYNC-CREATE-BACKGROUND") {
+    // Synced tabs, initalize videonail in background 
+    if (!window.location.href.includes('youtube.com/watch')) {
+      // Get synced vid data
+      chrome.storage.local.get('videoNailSyncedVid', data => {
+        videoData = data.videoNailSyncedVid;
+        if (elRefs.videoNailContainer) {
+          let srcString = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=0&origin=${window.location.origin}`;
+          if (videoData.metadata.isPlaylist) srcString += `&listType=playlist&list=${videoData.metadata.playlistId}`;
+          elRefs.videoNailPlayer.src = srcString;
+          videoData.metadata.isPlaying = false;
+          sendWindowMessage("MANUAL-NEW");
+        } else {
+          videoData.metadata.isPlaying = false;
+          initOtherPage(videoData);
+        }
+      });
+    }
+  } else if (request.type === "SYNC-DELETE") {
+    if (elRefs.videoNailContainer) {
+      removeVideoNailPlayer();
+      sendWindowMessage("DELETE");
+      reset();
     }
   }
   else if (request.type === 'VN-DISABLE') {
@@ -92,8 +131,7 @@ function onWatchPage() {
   // (other page, watch page when scrolled down)
   state.inPipMode = false;
 
-  // If we're from other YT pages, remove the entire container,
-  // then set up like usual
+  // If we're from other YT pages, remove the entire container, then set up like usual
   if (
     !state.currPage.includes("youtube.com/watch") &&
     document.querySelector("#videonail-container")
