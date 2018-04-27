@@ -1,5 +1,5 @@
 # VideoNail - Floating YouTube PiP Player
-Watch YouTube videos while browsing the web or reading the comments! VideoNail is a Chrome extension that lets you watch YouTube videos on any website in a floating, always on top window. Get it for free on the [Chrome Web Store](https://chrome.google.com/webstore/detail/videonail/nbpbjchgemnjhcpomnbjkkcfloafbema) or [Firefox Web Store](https://addons.mozilla.org/en-US/firefox/addon/videonail-floating-youtube/).
+Watch YouTube videos while browsing the web or reading the comments! VideoNail is a browser extension that lets you watch YouTube videos on any website in a floating, always on top window. Get it for free on the [Chrome Web Store](https://chrome.google.com/webstore/detail/videonail/nbpbjchgemnjhcpomnbjkkcfloafbema) or [Firefox Web Store](https://addons.mozilla.org/en-US/firefox/addon/videonail-floating-youtube/).
 
 **Key Features:**
 * Pins YouTube videos in a floating, always on top window that can be resized and re-positioned anywhere on the screen. The window can be minimized or closed at any time.
