@@ -1,5 +1,5 @@
 # VideoNail - Floating YouTube PiP Player
-Watch YouTube videos while browsing the web or reading the comments! VideoNail is a Chrome extension that lets you watch YouTube videos on any website in a floating, always on top window. [Get it for free on the Chrome Web Store.](https://chrome.google.com/webstore/detail/videonail/nbpbjchgemnjhcpomnbjkkcfloafbema)
+Watch YouTube videos while browsing the web or reading the comments! VideoNail is a Chrome extension that lets you watch YouTube videos on any website in a floating, always on top window. Get it for free on the [Chrome Web Store](https://chrome.google.com/webstore/detail/videonail/nbpbjchgemnjhcpomnbjkkcfloafbema) or [Firefox Web Store](https://addons.mozilla.org/en-US/firefox/addon/videonail-floating-youtube/).
 
 **Key Features:**
 * Pins YouTube videos in a floating, always on top window that can be resized and re-positioned anywhere on the screen. The window can be minimized or closed at any time.
@@ -17,9 +17,9 @@ Watch YouTube videos while browsing the web or reading the comments! VideoNail i
 ![screenshot 4](assets/screenshot4.png)
 
 ## Usage
-If you'd like to simply use the extension, [get it for free on the Chrome Web Store.](https://chrome.google.com/webstore/detail/videonail/nbpbjchgemnjhcpomnbjkkcfloafbema).
+If you'd like to simply use the extension, get it for free on the [Chrome Web Store](https://chrome.google.com/webstore/detail/videonail/nbpbjchgemnjhcpomnbjkkcfloafbema) or [Firefox Web Store](https://addons.mozilla.org/en-US/firefox/addon/videonail-floating-youtube/).
 
-If you'd like to contribute, work with the extension locally and make changes, clone/fork the repo and load the directory as an 'unpacked' extension in Chrome. If you aren't familiar with Chrome extensions, head over to the [Chrome developer site](https://developer.chrome.com/extensions/getstarted) to get started.
+If you'd like to contribute, work with the extension locally and make changes, clone/fork the repo and load the directory as an 'unpacked' extension in Chrome or Firefox. If you aren't familiar with Chrome/Firefox extensions, head over to the [Chrome developer site](https://developer.chrome.com/extensions/getstarted), or [Firefox developer site](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Your_first_WebExtension) to get started.
 
 We have also included a bash script that packages all the core assets into a .zip file. To use it, your terminal must have the zip command installed (i.e. use a Unix OS).
 
