@@ -132,13 +132,13 @@ button.videonail-button#videonailCloseButton {
   opacity: 1 !important;
 }
 
-button.videonail-button>svg.fa-window-minimize,
-button.videonail-button>svg.fa-times,
-button.videonail-button>svg.fa-plus {
+button.videonail-button>img {
   color: white !important;
   opacity: inherit !important;
   box-shadow: none !important;
   border: none !important;
+  width: 13px;
+  height: 13px;
 }
 
 /* YouTube context menu always on top */
