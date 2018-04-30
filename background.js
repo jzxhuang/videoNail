@@ -18,13 +18,14 @@ chrome.storage.local.get('VN_state', state => {
   }
 });
 
+// Keep track of active tab
 chrome.tabs.onActivated.addListener(info => {
   chrome.storage.local.get('activeTab', data => {
     console.log(data.activeTab);
     chrome.storage.sync.get('videoNailOptions', options => {
       if (options.videoNailOptions.sync) {
-        chrome.tabs.sendMessage(data.activeTab, {type: "SYNC-PAUSE"});
-        chrome.tabs.sendMessage(info.tabId, {type: "SYNC-ACTIVE-TAB"});
+        chrome.tabs.sendMessage(data.activeTab, {type: "IS-BACKGROUND-TAB"});
+        chrome.tabs.sendMessage(info.tabId, {type: "IS-ACTIVE-TAB"});
       }
     })
     chrome.storage.local.set({activeTab: info.tabId});
@@ -102,17 +103,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
       } else chrome.storage.local.remove(sender.tab.id.toString());
     });
-  } else if (sender.tab && request.type === "SYNC-CREATE") {
+  } 
+  // Create a video nail in sync mode. Create videonails on all tabs
+  else if (sender.tab && request.type === "SYNC-CREATE") {
     chrome.tabs.query({}, function(tabs) {
       tabs.forEach(element => {
         if (element.id !== sender.tab.id) {
-          chrome.tabs.sendMessage(element.id, {type: "SYNC-CREATE-BACKGROUND"})
+          chrome.tabs.sendMessage(element.id, {type: "SYNC-CREATE-BACKGROUND", videoData: request.videoData || null});
         }
       });
     });
-  } else if (sender.tab && request.type === "ACTIVE-TAB-CHECK") {
+  } 
+  // Query from a tab when content script is loaded to check if it is the active tab
+  else if (sender.tab && request.type === "ACTIVE-TAB-CHECK") {
     chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-      tabs && tabs[0] && tabs[0].id === sender.tab.id ? sendResponse({response: true}) : sendResponse({isActiveTab: false})
+      tabs && tabs[0] && tabs[0].id === sender.tab.id ? chrome.tabs.sendMessage(sender.tab.id, {type: "TAB-CHECK-RESULT", isActiveTab: true}) : chrome.tabs.sendMessage(sender.tab.id, {type: "TAB-CHECK-RESULT", isActiveTab: false})
     });
   }
 });
@@ -146,7 +151,6 @@ chrome.runtime.onInstalled.addListener(() => {
   });
   chrome.contextMenus.onClicked.addListener(contextMenuListener);
 });
-
 
 // Create context menu
 function createContextMenu() {

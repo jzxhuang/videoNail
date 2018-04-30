@@ -193,6 +193,21 @@ function clearListeners() {
   clicked = null;
 }
 
+function setStyle(vidData) {
+  state.isMinimized = vidData.isMinimized;
+  if(!vidData.isInitialStyle) {
+    if (state.isMinimized) {
+      setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
+      changeIcon(elRefs.minimize.children[0], "assets/plus.svg");
+      elRefs.videoNailWrapper.classList.toggle('minimize', true);
+    } else {
+      changeIcon(elRefs.minimize.children[0], "assets/window-minimize.svg");
+      elRefs.videoNailWrapper.classList.toggle('minimize', false);
+      setBounds(elRefs.videoNailContainer, vidData.style.left, vidData.style.top, vidData.style.width, vidData.style.height, vidData.leftPercentage, vidData.topPercentage, vidData.widthPercentage, vidData.heightPercentage);
+    }
+  }
+}
+
 function setBounds(element, l, t, w, h, lPct, tPct, wPct, hPct) {
   let docWidth = document.body.clientWidth;
   let docHeight = window.innerHeight;
@@ -650,16 +665,24 @@ function sendWindowMessage(type) {
   if (type === "INIT") window.postMessage({
     type: "VIDEONAIL-CONTENT-SCRIPT-INIT",
     videoData: videoData,
-    isActivetab: state.isActiveTab
+    isActiveTab: state.isActiveTab
   }, "*");
   else if (type === "DELETE") window.postMessage({
     type: "VIDEONAIL-CONTENT-SCRIPT-DELETE"
   }, "*");
   else if (type === "START-NEW") window.postMessage({
-    type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW"
+    type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW", videoData: videoData, isActiveTab: state.isActiveTab
   }, "*");
   else if (type === "MANUAL-NEW") window.postMessage({
-    type: "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW", videoData: videoData
+    type: "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW", videoData: videoData, isActiveTab: state.isActiveTab
+  }, "*");
+  else if (type === "ACTIVE-TAB") {
+    chrome.storage.local.get('videoNailSyncedVid', data => {
+      window.postMessage({type: "VIDEONAIL-CONTENT-SCRIPT-ACTIVE-TAB", videoData: data.videoNailSyncedVid}, "*");
+    });
+  } 
+  else if (type === "BACKGROUND-TAB") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-BACKGROUND-TAB"
   }, "*");
 }
 
@@ -676,7 +699,8 @@ function reset() {
     inPipMode: false,
     manualClose: false,
     isMinimized: state.isMinimized,
-    currPage: state.currPage
+    currPage: state.currPage,
+    isActiveTab: state.isActiveTab
   };
   elRefs = {
     originalPlayerSection: null,
@@ -701,6 +725,7 @@ function windowMessageListener(event) {
   if (event.source == window && event.data.type) {
     if (event.data.type === "VIDEONAIL-BROWSER-SCRIPT-YTP-STATUS") {
       videoData.metadata = event.data.vidMetadata;
+      if (state.isActiveTab) chrome.storage.local.set({videoNailSyncedVid: videoData});
     }
   }
 }

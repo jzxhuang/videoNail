@@ -12,6 +12,8 @@ window.addEventListener("message", event => {
 			videoNailInterval = null;
 			videoNailPlayer.destroy();
 		} else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-START-NEW") {
+			videoNailData = event.data.videoData;
+			videoNailActiveTab = event.data.isActiveTab;
 			videoNailPlayer = new YT.Player('videonail-iframe', {
 				events: {
 					'onReady': onYTPReady,
@@ -20,6 +22,19 @@ window.addEventListener("message", event => {
 			});
 		} else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW") {
 			videoNailData = event.data.videoData;
+			videoNailActiveTab = event.data.isActiveTab;
+		} else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-ACTIVE-TAB") {
+			videoNailData = event.data.videoData;
+			videoNailActiveTab = true;
+			videoNailPlayer.seekTo(videoNailData.metadata.timestamp, true);
+			videoNailData.metadata.isPlaying ? videoNailPlayer.playVideo() : videoNailPlayer.pauseVideo();
+			videoNailActiveTab = false;
+			videoNailInterval = setInterval(postYTPStatus, 50);
+		} else if (event.data.type === "VIDEONAIL-CONTENT-SCRIPT-BACKGROUND-TAB") {
+			clearInterval(videoNailInterval)
+			videoNailInterval = null;
+			videoNailPlayer.pauseVideo();
+			videoNailActiveTab = false;
 		}
 	}
 }, false);

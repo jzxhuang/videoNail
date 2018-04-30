@@ -1,28 +1,7 @@
 state.currPage = window.location.href;
-chrome.tabs.sendMessage({type: "ACTIVE-TAB-CHECK"}, response => {
-  state.isActiveTab = response.isActiveTab;
-});
-chrome.storage.local.get('VN_state', data => {
-  if (data && data.VN_state) {
-    VN_enabled = data.VN_state.enabled;
-  } else {
-    chrome.storage.local.set({
-      VN_state: {
-        enabled: VN_enabled
-      }
-    });
-  }
-  if (VN_enabled) {
-    // Get VN options from sync storage
-    chrome.storage.sync.get('videoNailOptions', data => {
-      videoNailOptions = data.videoNailOptions;
-      if (state.currPage.includes("youtube.com/watch")) initWatchPage();
-      else initOtherPage();
-    });
-  }
-});
+chrome.runtime.sendMessage({type: "ACTIVE-TAB-CHECK"});
 
-// Listen for navigation events detected by background.js
+// Listen for events from background.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // If YouTube same page nav
   if (request.type === "YT-WATCH") {
@@ -40,10 +19,34 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
       sendResponse({ type: "SET", data: videoData });
     }
-  } else if (request.type === "MANUAL-START") {
+  } else if (request.type === "TAB-CHECK-RESULT") {
+    state.isActiveTab = request.isActiveTab;
+    chrome.storage.local.get('VN_state', data => {
+      if (data && data.VN_state) {
+        VN_enabled = data.VN_state.enabled;
+      } else {
+        chrome.storage.local.set({
+          VN_state: {
+            enabled: VN_enabled
+          }
+        });
+      }
+      if (VN_enabled) {
+        // Get VN options from sync storage
+        chrome.storage.sync.get('videoNailOptions', data => {
+          videoNailOptions = data.videoNailOptions;
+          if (state.currPage.includes("youtube.com/watch")) initWatchPage();
+          else initOtherPage();
+        });
+      }
+    });
+  }
+  // Starting VN from context menu or popup
+  else if (request.type === "MANUAL-START") {
     if (!window.location.href.includes('youtube.com/watch')) {
       // Cases for if videonail container already exists
       if (elRefs.videoNailContainer) {
+        window.removeEventListener("message", windowMessageListener, false);
         setVidId(request.url)
           .then(_ => {
             // If container exists, simply load new video by changing src and updating browserscript metadata
@@ -57,7 +60,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           .then(_ => {
             if (videoNailOptions.sync) {
               chrome.storage.local.set({ videoNailSyncedVid: videoData }, function () {
-                chrome.runtime.sendMessage({ type: "SYNC-CREATE" });
+                chrome.runtime.sendMessage({ type: "SYNC-CREATE", videoData: videoData });
+                window.addEventListener("message", windowMessageListener, false);
               });
             }
           })
@@ -89,7 +93,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (!window.location.href.includes('youtube.com/watch')) {
       // Get synced vid data
       chrome.storage.local.get('videoNailSyncedVid', data => {
-        videoData = data.videoNailSyncedVid;
+        videoData =request.videoData || data.videoNailSyncedVid;
         if (elRefs.videoNailContainer) {
           let srcString = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=0&origin=${window.location.origin}`;
           if (videoData.metadata.isPlaylist) srcString += `&listType=playlist&list=${videoData.metadata.playlistId}`;
@@ -108,13 +112,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendWindowMessage("DELETE");
       reset();
     }
-  } else if (request.type === "SYNC-ACTIVE-TAB") {
+  } 
+  // The tab has been switched to active tab
+  else if (request.type === "IS-ACTIVE-TAB") {
     state.isActiveTab = true;
+    window.addEventListener("message", windowMessageListener, false);
     sendWindowMessage("ACTIVE-TAB");
-  } else if (request.type === "SYNC-PAUSE") {
+    if (elRefs.videoNailContainer) {
+      chrome.storage.local.get('videoNailSyncedVid', data => {
+        videoData = data.videoNailSyncedVid;
+        setStyle(videoData);
+      })
+    }
+  }
+  // The tab is no longer the active tab
+  else if (request.type === "IS-BACKGROUND-TAB") {
     state.isActiveTab = false;
+    window.removeEventListener("message", windowMessageListener, false);
     sendWindowMessage("BACKGROUND-TAB");
   }
+  // VideoNail disabled from popup
   else if (request.type === 'VN-DISABLE') {
     if (elRefs.videoNailContainer) {
       removeVideoNailPlayer();
