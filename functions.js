@@ -65,21 +65,42 @@ function attachVideoNailHeader() {
     elRefs.minimize = document.createElement("button");
     elRefs.minimize.id = "videonailMinimizeButton";
     elRefs.minimize.classList.add("videonail-button");
-    if (state.isMinimized)
-      elRefs.minimize.insertAdjacentHTML("afterbegin", '<i class="fas fa-plus"></i>');
-    else
-      elRefs.minimize.insertAdjacentHTML("afterbegin", '<i class="fas fa-window-minimize"></i>');
+    if (state.isMinimized) {
+      let imgUrl = chrome.extension.getURL("assets/plus.svg");
+      let img = document.createElement("img");
+      img.src = imgUrl;
+      img.align = "right";
+      elRefs.minimize.appendChild(img);
+    }
+    else {
+      let imgUrl = chrome.extension.getURL("assets/window-minimize.svg");
+      let img = document.createElement("img");
+      img.src = imgUrl;
+      img.align = "right";
+      elRefs.minimize.appendChild(img);
+    }
     elRefs.minimize.addEventListener('mousedown', onMinimizeClick);
     elRefs.videoNailHeader.appendChild(elRefs.minimize);
 
     elRefs.close = document.createElement("button");
     elRefs.close.id = "videonailCloseButton";
     elRefs.close.classList.add("videonail-button");
-    elRefs.close.insertAdjacentHTML("afterbegin", '<i class="fas fa-times"></i>');
+
+    let imgUrl = chrome.extension.getURL("assets/times.svg");
+    let img = document.createElement("img");
+    img.src = imgUrl;
+    img.align = "right";
+    elRefs.close.appendChild(img);
+
     elRefs.close.addEventListener('mousedown', onCloseClick);
     elRefs.videoNailHeader.appendChild(elRefs.close);
     resolve();
   })
+}
+
+function changeIcon(img, iconPath) {
+  let imgUrl = chrome.extension.getURL(iconPath);
+  img.src = imgUrl;
 }
 
 function checkIfWatching() {
@@ -149,8 +170,7 @@ function setVNPlayerStyle() {
     let minSVG = min.children[0];
     setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
     elRefs.videoNailWrapper.classList.toggle('minimize', true);
-    minSVG.classList.toggle("fa-window-minimize", false);
-    minSVG.classList.toggle("fa-plus", true);
+    changeIcon(minSVG, "assets/plus.svg");
   } else {
     setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height, videoData.leftPercentage, videoData.topPercentage, videoData.widthPercentage, videoData.heightPercentage);
   }
@@ -255,15 +275,13 @@ function onMinimizeClick() {
     saveBounds(elRefs.videoNailContainer);
     setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
     elRefs.videoNailWrapper.classList.toggle("minimize", true);
-    minSVG.classList.toggle("fa-window-minimize", false);
-    minSVG.classList.toggle("fa-plus", true);
+    changeIcon(minSVG, "assets/plus.svg");
   } else {
     state.isMinimized = false;
     videoData.isMinimized = false;
     setBounds(elRefs.videoNailContainer, videoData.style.left, videoData.style.top, videoData.style.width, videoData.style.height, videoData.leftPercentage, videoData.topPercentage, videoData.widthPercentage, videoData.heightPercentage);
     elRefs.videoNailWrapper.classList.toggle('minimize', false);
-    minSVG.classList.toggle("fa-window-minimize", true);
-    minSVG.classList.toggle("fa-plus", false);
+    changeIcon(minSVG, "assets/window-minimize.svg");
   }
 }
 
