@@ -151,6 +151,7 @@ chrome.runtime.onInstalled.addListener(() => {
   });
   chrome.contextMenus.onClicked.addListener(contextMenuListener);
 });
+chrome.contextMenus.onClicked.addListener(contextMenuListener);
 
 // Create context menu
 function createContextMenu() {

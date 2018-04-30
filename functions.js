@@ -712,11 +712,17 @@ function reset() {
     msg: null
   };
   videoData.metadata = {
-    id: null,
-    isPlaying: false,
-    isPlaylist: false,
-    playlistId: null,
-    timestamp: "0:00"
+    metadata: {
+      id: null,
+      isPlaying: false,
+      isPlaylist: false,
+      playlistId: null,
+      playlistIndex: 0,
+      timestamp: "0:00",
+      volume: 100,
+      isMuted: false,
+      playbackRate: 1
+    }
   }
 }
 

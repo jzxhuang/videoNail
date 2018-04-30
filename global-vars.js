@@ -32,7 +32,11 @@ let videoData = {
     isPlaying: false,
     isPlaylist: false,
     playlistId: null,
-    timestamp: "0:00"
+    playlistIndex: 0,
+    timestamp: "0:00",
+    volume: 100,
+    isMuted: false,
+    playbackRate: null
   },
   style: {
     right: 0,
