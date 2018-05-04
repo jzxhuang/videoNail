@@ -21,7 +21,7 @@ chrome.storage.local.get('VN_state', state => {
 // Keep track of active tab
 chrome.tabs.onActivated.addListener(info => {
   chrome.storage.local.get('activeTab', data => {
-    console.log(data.activeTab);
+    console.log('old tab: ' + data.activeTab);
     chrome.storage.sync.get('videoNailOptions', options => {
       if (options.videoNailOptions.sync) {
         chrome.tabs.sendMessage(data.activeTab, {type: "IS-BACKGROUND-TAB"});
@@ -31,6 +31,23 @@ chrome.tabs.onActivated.addListener(info => {
     chrome.storage.local.set({activeTab: info.tabId});
   });
 });
+chrome.windows.onFocusChanged.addListener(windowId => {
+  if(windowId !== -1)
+  chrome.storage.local.get('activeTab', data => {
+    console.log('Window change, old tab: ' + data.activeTab);
+    chrome.storage.sync.get('videoNailOptions', options => {
+      if (options.videoNailOptions.sync) {
+        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+          if (tabs && tabs[0]) {
+            chrome.tabs.sendMessage(data.activeTab, {type: "IS-BACKGROUND-TAB"});
+            chrome.tabs.sendMessage(tabs[0].id, {type: "IS-ACTIVE-TAB"});
+          }
+          chrome.storage.local.set({activeTab: tabs[0].id});
+        });
+      }
+    });
+  });
+})
 
 // Listens for same page YouTube navigation
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {

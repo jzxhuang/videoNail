@@ -178,6 +178,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       removeVideoNailPlayer();
       sendWindowMessage("DELETE");
       reset();
+      if (window.location.href.includes('youtube.com/watch')) initScrollingPip();
     }
   }
   // The tab has been switched to active tab
@@ -270,6 +271,7 @@ function onWatchPage() {
 
 function initOtherPage(vData) {
   // If an input parameter is passed, this is being called from a manual action. Do not need to fetch from storage
+  if (videoNailOptions.sync) state.syncVidActive = true;
   if (vData) {
     setupVideoNailPlayer(vData)
       .then(_ => {
