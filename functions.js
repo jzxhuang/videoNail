@@ -135,7 +135,7 @@ function togglePIP() {
       SCROLL_THRESHOLD = 0.55;
       observer.disconnect();
       createObserver();
-      // theaterButton.click();
+      theaterButton.click();
     }      
   } else {
     // When users scroll up
@@ -144,7 +144,7 @@ function togglePIP() {
       SCROLL_THRESHOLD = 0.25;
       observer.disconnect();
       createObserver();
-      // theaterButton.click();
+      theaterButton.click();
     }
     state.manualClose = false;    
   }
