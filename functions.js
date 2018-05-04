@@ -195,7 +195,7 @@ function clearListeners() {
 
 function setStyle(vidData) {
   state.isMinimized = vidData.isMinimized;
-  if(!vidData.isInitialStyle) {
+  if (!vidData.isInitialStyle) {
     if (state.isMinimized) {
       setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
       changeIcon(elRefs.minimize.children[0], "assets/plus.svg");
@@ -265,10 +265,9 @@ function onUp(e) {
 }
 
 function onCloseClick() {
-  if (window.location.pathname == "/watch") {
+  if (window.location.href.includes('youtube.com/watch') && !state.syncVidActive) {
     state.manualClose = true;
     togglePIP();
-    return;
   } else {
     removeVideoNailPlayer();
     chrome.runtime.sendMessage({
@@ -276,6 +275,7 @@ function onCloseClick() {
     }); // Delete from storage
     sendWindowMessage("DELETE"); // Send DELETE message to in browser script
     reset();
+    if (window.location.href.includes('youtube.com/watch')) initScrollingPip();
   }
 }
 
@@ -683,9 +683,9 @@ function sendWindowMessage(type) {
   }, "*");
   else if (type === "ACTIVE-TAB") {
     chrome.storage.local.get('videoNailSyncedVid', data => {
-      window.postMessage({type: "VIDEONAIL-CONTENT-SCRIPT-ACTIVE-TAB", videoData: data.videoNailSyncedVid}, "*");
+      window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-ACTIVE-TAB", videoData: data.videoNailSyncedVid }, "*");
     });
-  } 
+  }
   else if (type === "BACKGROUND-TAB") window.postMessage({
     type: "VIDEONAIL-CONTENT-SCRIPT-BACKGROUND-TAB"
   }, "*");
@@ -695,7 +695,7 @@ function reset() {
   try {
     observer.unobserve(elRefs.originalPlayerSection);
   } catch (err) {
-    console.log(err);
+    console.log('Error: ' + err);
   }
   clearListeners();
   state = {
@@ -737,7 +737,7 @@ function windowMessageListener(event) {
   if (event.source == window && event.data.type) {
     if (event.data.type === "VIDEONAIL-BROWSER-SCRIPT-YTP-STATUS") {
       videoData.metadata = event.data.vidMetadata;
-      if (state.isActiveTab) chrome.storage.local.set({videoNailSyncedVid: videoData});
+      if (state.isActiveTab) chrome.storage.local.set({ videoNailSyncedVid: videoData });
     }
   }
 }

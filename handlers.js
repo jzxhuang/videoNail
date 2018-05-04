@@ -24,7 +24,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           else {
             sendResponse({ type: "SET", data: null });
           }
-        } else state.syncVidActive ? sendResponse({ type: "SET", data: videoData }) : sendResponse({type: "SET", data: null});
+        } else state.syncVidActive ? sendResponse({ type: "SET", data: videoData }) : sendResponse({ type: "SET", data: null });
       }
       else {
         sendResponse({ type: "SET", data: videoData });
@@ -184,11 +184,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   else if (request.type === "IS-ACTIVE-TAB") {
     state.isActiveTab = true;
     window.addEventListener("message", windowMessageListener, false);
-    sendWindowMessage("ACTIVE-TAB");
     if (elRefs.videoNailContainer) {
       chrome.storage.local.get('videoNailSyncedVid', data => {
-        videoData = data.videoNailSyncedVid;
-        setStyle(videoData);
+        if (state.syncVidActive && data.videoNailSyncedVid) {
+          sendWindowMessage("ACTIVE-TAB");
+          videoData = data.videoNailSyncedVid;
+          setStyle(videoData);
+        }
       })
     }
   }
@@ -196,7 +198,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   else if (request.type === "IS-BACKGROUND-TAB") {
     state.isActiveTab = false;
     window.removeEventListener("message", windowMessageListener, false);
-    sendWindowMessage("BACKGROUND-TAB");
+    if (state.syncVidActive) sendWindowMessage("BACKGROUND-TAB");
   }
   // VideoNail disabled from popup
   else if (request.type === 'VN-DISABLE') {
@@ -220,14 +222,14 @@ function initWatchPage() {
       } else initScrollingPip();
     });
   } else initScrollingPip();
+}
 
-  function initScrollingPip(){
-    state.isPolymer = document.querySelector("body#body") === null;
-    state.currPage = window.location.href;
-    if (state.isPolymer) watchCheckQuery = "ytd-watch";
-    else watchCheckQuery = "#player-api";
-    checkIfWatching();
-  }
+function initScrollingPip() {
+  state.isPolymer = document.querySelector("body#body") === null;
+  state.currPage = window.location.href;
+  if (state.isPolymer) watchCheckQuery = "ytd-watch";
+  else watchCheckQuery = "#player-api";
+  checkIfWatching();
 }
 
 function onWatchPage() {
