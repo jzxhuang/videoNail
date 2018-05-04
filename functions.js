@@ -135,7 +135,7 @@ function togglePIP() {
       SCROLL_THRESHOLD = 0.55;
       observer.disconnect();
       createObserver();
-      theaterButton.click();
+      // theaterButton.click();
     }      
   } else {
     // When users scroll up
@@ -144,7 +144,7 @@ function togglePIP() {
       SCROLL_THRESHOLD = 0.25;
       observer.disconnect();
       createObserver();
-      theaterButton.click();
+      // theaterButton.click();
     }
     state.manualClose = false;    
   }
@@ -630,9 +630,15 @@ function injectBrowserScript() {
 // Inject YT Iframe API script into the browser environment
 function injectYTIframeAPIScript() {
   let YTscript = document.createElement("script");
-  YTscript.type = "text/javascript";
-  YTscript.src = "https://www.youtube.com/iframe_api";
+  YTscript.type = 'text/javascript';
+  YTscript.src = chrome.runtime.getURL("iframe_api.js");
   document.body.appendChild(YTscript);
+  var widgetScript = document.createElement('script');
+  widgetScript.type = 'text/javascript';
+  widgetScript.id = 'www-widgetapi-script';
+  widgetScript.src = chrome.runtime.getURL("widget-api.js");
+  widgetScript.async = true;
+  document.body.appendChild(widgetScript);
 }
 
 // Send message to the videonail custom script with the videoData object
