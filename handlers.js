@@ -1,5 +1,5 @@
 state.currPage = window.location.href;
-chrome.runtime.sendMessage({type: "ACTIVE-TAB-CHECK"});
+chrome.runtime.sendMessage({ type: "ACTIVE-TAB-CHECK" });
 
 // Listen for events from background.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -14,15 +14,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (elRefs.videoNailContainer) {
       //If on /watch page, get vid metadata. On other pages, it is updated through timer
       if (state.currPage.includes("youtube.com/watch")) {
-        videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
-        var vidLength = document.querySelector("div.ytp-time-display>span.ytp-time-duration").textContent;
-        videoData.metadata.isPlaying = document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? false : true;
-        if(vidLength !== videoData.metadata.timestamp) {
-          sendResponse({ type: "SET", data: videoData });
-        }
-        else {
-          sendResponse({ type: "SET", data: null});
-        }
+        if (!videoNailOptions.sync) {
+          videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
+          let vidLength = document.querySelector("div.ytp-time-display>span.ytp-time-duration").textContent;
+          videoData.metadata.isPlaying = document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? false : true;
+          if (vidLength !== videoData.metadata.timestamp) {
+            sendResponse({ type: "SET", data: videoData });
+          }
+          else {
+            sendResponse({ type: "SET", data: null });
+          }
+        } else state.syncVidActive ? sendResponse({ type: "SET", data: videoData }) : sendResponse({type: "SET", data: null});
       }
       else {
         sendResponse({ type: "SET", data: videoData });
@@ -69,6 +71,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           .then(_ => {
             if (videoNailOptions.sync) {
               chrome.storage.local.set({ videoNailSyncedVid: videoData }, function () {
+                state.syncVidActive = true;
                 chrome.runtime.sendMessage({ type: "SYNC-CREATE", videoData: videoData });
                 window.addEventListener("message", windowMessageListener, false);
               });
@@ -87,6 +90,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           })
           .then(_ => {
             if (videoNailOptions.sync) {
+              state.syncVidActive = true;
               chrome.storage.local.set({ videoNailSyncedVid: videoData }, function () {
                 chrome.runtime.sendMessage({ type: "SYNC-CREATE" });
               });
@@ -96,13 +100,67 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             console.log(err);
           });
       }
+    } else {
+      if (videoNailOptions.sync) {
+        if (state.syncVidActive) {
+          // do something // If container exists, simply load new video by changing src and updating browserscript metadata
+          window.removeEventListener("message", windowMessageListener, false);
+          setVidId(request.url)
+            .then(_ => {
+              // If container exists, simply load new video by changing src and updating browserscript metadata
+              let srcString = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=1&origin=${window.location.origin}`;
+              if (videoData.metadata.isPlaylist) srcString += `&listType=playlist&list=${videoData.metadata.playlistId}`;
+              elRefs.videoNailPlayer.src = srcString;
+              videoData.metadata.timestamp = "0:00";
+              videoData.metadata.isPlaying = true;
+              sendWindowMessage("MANUAL-NEW");
+            })
+            .then(_ => {
+              if (videoNailOptions.sync) {
+                chrome.storage.local.set({ videoNailSyncedVid: videoData }, function () {
+                  state.syncVidActive = true;
+                  chrome.runtime.sendMessage({ type: "SYNC-CREATE", videoData: videoData });
+                  window.addEventListener("message", windowMessageListener, false);
+                });
+              }
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        } else {
+          removeVideoNailHeader()
+            .then(_ => {
+              return unwrapAll(elRefs.videoNailContainer);
+            })
+            .then(_ => {
+              elRefs.originalPlayerSection.classList.toggle("videonail", false);
+              document.querySelector("div#player-container").classList.remove("videonail-player-active");
+              observer.disconnect();
+              if (!document.querySelector("div.html5-video-player").classList.contains("paused-mode")) document.querySelector("button.ytp-play-button.ytp-button").click();
+              setVidId(request.url);
+            })
+            .then(_ => {
+              videoData.metadata.timestamp = "0:00";
+              videoData.metadata.isPlaying = true;
+              initOtherPage(videoData)
+            })
+            .then(_ => {
+              state.syncVidActive = true;
+              chrome.storage.local.set({ videoNailSyncedVid: videoData }, function () {
+                chrome.runtime.sendMessage({ type: "SYNC-CREATE" });
+              });
+            })
+            .catch(err => console.log(err));
+        }
+      }
     }
   } else if (request.type === "SYNC-CREATE-BACKGROUND") {
     // Synced tabs, initalize videonail in background 
+    state.syncVidActive = true;
     if (!window.location.href.includes('youtube.com/watch')) {
       // Get synced vid data
       chrome.storage.local.get('videoNailSyncedVid', data => {
-        videoData =request.videoData || data.videoNailSyncedVid;
+        videoData = request.videoData || data.videoNailSyncedVid;
         if (elRefs.videoNailContainer) {
           let srcString = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=0&origin=${window.location.origin}`;
           if (videoData.metadata.isPlaylist) srcString += `&listType=playlist&list=${videoData.metadata.playlistId}`;
@@ -121,7 +179,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendWindowMessage("DELETE");
       reset();
     }
-  } 
+  }
   // The tab has been switched to active tab
   else if (request.type === "IS-ACTIVE-TAB") {
     state.isActiveTab = true;
@@ -154,11 +212,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 function initWatchPage() {
-  state.isPolymer = document.querySelector("body#body") === null;
-  state.currPage = window.location.href;
-  if (state.isPolymer) watchCheckQuery = "ytd-watch";
-  else watchCheckQuery = "#player-api";
-  checkIfWatching();
+  if (videoNailOptions.sync) {
+    chrome.storage.local.get('videoNailSyncedVid', data => {
+      if (data.videoNailSyncedVid) {
+        videoData = data.videoNailSyncedVid;
+        initOtherPage(videoData);
+      } else initScrollingPip();
+    });
+  } else initScrollingPip();
+
+  function initScrollingPip(){
+    state.isPolymer = document.querySelector("body#body") === null;
+    state.currPage = window.location.href;
+    if (state.isPolymer) watchCheckQuery = "ytd-watch";
+    else watchCheckQuery = "#player-api";
+    checkIfWatching();
+  }
 }
 
 function onWatchPage() {
@@ -167,28 +236,32 @@ function onWatchPage() {
   state.inPipMode = false;
 
   // If we're from other YT pages, remove the entire container, then set up like usual
-  if (
-    !state.currPage.includes("youtube.com/watch") &&
-    document.querySelector("#videonail-container")
-  ) {
-    sendWindowMessage("DELETE");
-    removeVideoNailPlayer();
-    initWatchPage();
-  } else if (state.currPage.includes("youtube.com/watch")) {
-    // If we're from another /watch page, remove the header & unwrap container
-    removeVideoNailHeader()
-      .then(_ => {
-        return unwrapAll(elRefs.videoNailContainer);
-      })
-      .then(_ => {
-        elRefs.originalPlayerSection.classList.toggle("videonail", false);
-      })
-      .then(_ => {
-        initWatchPage();
-      })
-      .catch(err => console.log(err));
+  if (!state.syncVidActive) {
+    if (
+      !state.currPage.includes("youtube.com/watch") &&
+      document.querySelector("#videonail-container")
+    ) {
+      sendWindowMessage("DELETE");
+      removeVideoNailPlayer();
+      initWatchPage();
+    } else if (state.currPage.includes("youtube.com/watch")) {
+      // If we're from another /watch page, remove the header & unwrap container
+      removeVideoNailHeader()
+        .then(_ => {
+          return unwrapAll(elRefs.videoNailContainer);
+        })
+        .then(_ => {
+          elRefs.originalPlayerSection.classList.toggle("videonail", false);
+        })
+        .then(_ => {
+          initWatchPage();
+        })
+        .catch(err => console.log(err));
+    } else {
+      initWatchPage();
+    }
   } else {
-    initWatchPage();
+
   }
   state.currPage = window.location.href;
 }
@@ -222,17 +295,19 @@ function onOtherPage() {
   // If we're from YT, remove the header & unwrap
   // If we're from other YT pages, do nothing to keep the same video from reloading
   if (state.currPage.includes("youtube.com/watch")) {
-    removeVideoNailHeader()
-      .then(_ => {
-        return unwrapAll(elRefs.videoNailContainer);
-      })
-      .then(_ => {
-        elRefs.originalPlayerSection.classList.toggle("videonail", false);
-      })
-      .then(_ => {
-        initOtherPage();
-      })
-      .catch(err => console.log(err));
+    if (!state.syncVidActive) {
+      removeVideoNailHeader()
+        .then(_ => {
+          return unwrapAll(elRefs.videoNailContainer);
+        })
+        .then(_ => {
+          elRefs.originalPlayerSection.classList.toggle("videonail", false);
+        })
+        .then(_ => {
+          initOtherPage();
+        })
+        .catch(err => console.log(err));
+    }
   }
   state.currPage = window.location.href;
 }

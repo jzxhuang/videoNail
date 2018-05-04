@@ -70,7 +70,7 @@ function onYTPError(err) {
 // Update video metadata through window message in an interval
 function postYTPStatus() {
 	videoNailData.metadata.isPlaying =
-		(videoNailPlayer.getPlayerState() == 1 || videoNailPlayer.getPlayerState() == 3) ? true : false;
+		(videoNailPlayer.getPlayerState() === 1) ? true : false;
 	videoNailData.metadata.timestamp = videoNailPlayer.getCurrentTime();
 	videoNailData.metadata.id = videoNailPlayer.getVideoUrl().split("v=")[1].split("&")[0];
 	videoNailData.metadata.volume = videoNailPlayer.getVolume();

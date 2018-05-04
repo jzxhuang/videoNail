@@ -43,26 +43,28 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         chrome.tabs.sendMessage(tab.id, { type: "SAVE" }, response => {
           if (response && response.type === "SET") {
             // Write data to storage
-            let vidData = {};
-            vidData[tab.id] = response.data;
-            chrome.storage.local.set(vidData, _ => {
+            chrome.storage.sync.get('videoNailOptions', data => {
+              let vidData = {};
+              data.videoNailOptions.sync ? vidData['videoNailSyncedVid'] = response.data : vidData[navEvent.tabId] = response.data;
+              chrome.storage.local.set(vidData, _ => {
                 chrome.tabs.sendMessage(tab.id, { type: "YT-OTHER" });
-            })
+              });          
+            });
           }
         });
       }
     });
     // Remove context menu if on /watch and tab is active
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      if (!tabs.length || tabs[0].id !== tabId) return;
-      var tab = tabs[0];
-      if (tab.url.includes("youtube.com/watch?v=")) {
-        toggleContextMenu(false);
-      }
-      else if (tab.url.includes("youtube.com")) {
-        toggleContextMenu(true);
-      }
-    });
+    // chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    //   if (!tabs.length || tabs[0].id !== tabId) return;
+    //   var tab = tabs[0];
+    //   if (tab.url.includes("youtube.com/watch?v=")) {
+    //     toggleContextMenu(false);
+    //   }
+    //   else if (tab.url.includes("youtube.com")) {
+    //     toggleContextMenu(true);
+    //   }
+    // });
   }
 });
 
@@ -159,13 +161,15 @@ function createContextMenu() {
     contexts: ["link"],
     title: "Start VideoNail",
     targetUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
-    id: "VideoNail_link"
+    id: "VideoNail_link",
+    enabled: true
   });
   chrome.contextMenus.create({
     contexts: ["frame"],
     title: "Start VideoNail",
     documentUrlPatterns: ["*://*.youtube.com/watch*", "*://*.youtu.be/*", "*://*.youtube.com/embed/*"],
-    id: "VideoNail_frame"
+    id: "VideoNail_frame",
+    enabled: true
   });
 }
 
@@ -194,9 +198,9 @@ function checkContextMenuValid(activeInfo) {
 }
 
 // Disable context menu on /watch pages
-chrome.tabs.onActivated.addListener(activeInfo => {  
-  checkContextMenuValid(activeInfo);
-});
+// chrome.tabs.onActivated.addListener(activeInfo => {  
+//   checkContextMenuValid(activeInfo);
+// });
 
 // Listen for VN_state change
 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -210,12 +214,12 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
           }
         });
       }
-      if(!enabled) toggleContextMenu(false);
-      else {
-        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-          checkContextMenuValid(tabs[0]);
-        });
-      }
+      // if(!enabled) toggleContextMenu(false);
+      // else {
+      //   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+      //     checkContextMenuValid(tabs[0]);
+      //   });
+      // }
     });    
   }
 });

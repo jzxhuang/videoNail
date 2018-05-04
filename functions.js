@@ -588,7 +588,6 @@ function fetchVidData() {
     if (videoNailOptions.sync === true) {
       chrome.storage.local.get('videoNailSyncedVid', vidData => {
         if (vidData.videoNailSyncedVid) {
-          console.log(vidData);
           resolve(vidData['videoNailSyncedVid']);
         } else reject("No video for this tab.");
       })
@@ -695,8 +694,8 @@ function sendWindowMessage(type) {
 function reset() {
   try {
     observer.unobserve(elRefs.originalPlayerSection);
-  } catch (e) {
-
+  } catch (err) {
+    console.log(err);
   }
   clearListeners();
   state = {
@@ -706,7 +705,8 @@ function reset() {
     manualClose: false,
     isMinimized: state.isMinimized,
     currPage: state.currPage,
-    isActiveTab: state.isActiveTab
+    isActiveTab: state.isActiveTab,
+    syncVidActive: false
   };
   elRefs = {
     originalPlayerSection: null,
