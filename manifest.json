@@ -57,6 +57,7 @@
     "assets/window-minimize.svg",
     "assets/plus.svg",
     "assets/times.svg",
+    "assets/sync.svg",
     "widget-api.js",
     "iframe_api.js"
   ]
