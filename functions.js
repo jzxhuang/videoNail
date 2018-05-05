@@ -108,11 +108,34 @@ function attachSyncButton() {
   syncButton.id = "videonail-sync-button";
   syncButton.classList.add("ytp-button");
   let btnImg = document.createElement('img');
-  btnImg.title = 'Start VideoNail on all tabs';
   btnImg.classList.add("videonail-sync-button-icon");
   btnImg.align = "right";
   btnImg.src = chrome.extension.getURL("assets/VideoNail_icon.png");
   syncButton.appendChild(btnImg);
+  
+  syncButton.onmouseover = function() {
+    this.hovered = true;
+    setTimeout(function(ths) {
+      if (!ths.hovered)
+        return false;
+      console.log(syncButton.offsetTop);
+      document.getElementsByClassName("ytp-tooltip-text")[0].innerHTML = "Start VideoNail on all tabs";
+      var tlp = document.getElementsByClassName("ytp-tooltip")[0];
+      tlp.style.left = ths.offsetLeft - 50 + "px";
+      console.log(tlp.style.top);
+      tlp.classList.remove("ytp-preview");
+      tlp.setAttribute("aria-hidden", "true");
+      tlp.style.display = "block";
+      tlp.setAttribute("aria-hidden", "false");
+    }, 100, this);
+  }
+  syncButton.onmouseleave = function(e) {
+    this.hovered = false;
+    document.getElementsByClassName("ytp-tooltip-text")[0].innerHTML = "Start VideoNail on all tabs";
+    document.getElementsByClassName("ytp-tooltip")[0].setAttribute("aria-hidden", "true");
+    document.getElementsByClassName("ytp-tooltip")[0].style.display = "none";
+  }
+  // syncButton.title = "Start VideoNail on all tabs";
 
   let controlContainer = document.querySelector("div.ytp-right-controls");
   controlContainer.insertBefore(syncButton, controlContainer.childNodes[0]);
