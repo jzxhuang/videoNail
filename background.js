@@ -139,6 +139,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       tabs && tabs[0] && tabs[0].id === sender.tab.id ? chrome.tabs.sendMessage(sender.tab.id, {type: "TAB-CHECK-RESULT", isActiveTab: true}) : chrome.tabs.sendMessage(sender.tab.id, {type: "TAB-CHECK-RESULT", isActiveTab: false})
     });
   }
+  // Start from sync button
+  else if (sender.tab && request.type === "SYNC-BUTTON-START") {
+    chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+      chrome.tabs.sendMessage(tabs[0].id, {type: "MANUAL-START", url: request.url, timestamp: request.timestamp});
+    });
+  }
 });
 
 // On installation

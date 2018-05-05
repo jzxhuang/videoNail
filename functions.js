@@ -103,13 +103,16 @@ function attachVideoNailHeader() {
 
 function attachSyncButton() {
   const syncButton = document.createElement('img');
-  syncButton.title = 'Sync';
+  syncButton.title = 'Start VideoNail on all tabs';
   syncButton.classList.add("videonail-sync");
   syncButton.src = chrome.extension.getURL("assets/sync.svg");
   elRefs.player.appendChild(syncButton);
-
   // Add listener to toggle button
-  // syncButton.addEventListener('click', );
+  syncButton.addEventListener('click', syncButtonClickListener);
+}
+
+function syncButtonClickListener(e) {
+  chrome.runtime.sendMessage({type: "SYNC-BUTTON-START", url: window.location.href, timestamp: document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent || "0:00"});
 }
 
 function changeIcon(img, iconPath) {
