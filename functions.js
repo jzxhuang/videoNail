@@ -103,10 +103,13 @@ function attachVideoNailHeader() {
 }
 
 function attachSyncButton() {
-  const syncButton = document.createElement('img');
-  syncButton.title = 'Start VideoNail on all tabs';
-  syncButton.classList.add("videonail-sync");
-  syncButton.src = chrome.extension.getURL("assets/sync.svg");
+  const syncButton = document.createElement('btn');
+  syncButton.id = "videonail-sync-button";
+  let btnImg = document.createElement('img');
+  btnImg.title = 'Start VideoNail on all tabs';
+  btnImg.classList.add("videonail-sync-button");
+  btnImg.src = chrome.extension.getURL("assets/VideoNail_x32.png");
+  syncButton.appendChild(btnImg);
   elRefs.player.appendChild(syncButton);
   // Add listener to toggle button
   syncButton.addEventListener('click', syncButtonClickListener);
@@ -515,6 +518,8 @@ function unwrapAll(wrapper) {
     }
 
     parent.removeChild(wrapper);
+    elRefs.videoNailContainer = null;
+    elRefs.videoNailPlayer = null;
     resolve();
   })
 }
