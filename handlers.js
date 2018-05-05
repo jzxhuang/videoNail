@@ -28,6 +28,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       else {
         sendResponse({ type: "SET", data: videoData });
       }
+      sendResponse({ type: "SET", data: videoData });
     }
   } else if (request.type === "TAB-CHECK-RESULT") {
     state.isActiveTab = request.isActiveTab;
