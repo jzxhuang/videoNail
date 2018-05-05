@@ -189,7 +189,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       removeVideoNailPlayer();
       sendWindowMessage("DELETE");
       reset();
-      if (window.location.href.includes('youtube.com/watch')) initScrollingPip();
+      if (window.location.href.includes('youtube.com/watch')) {
+        state.doNotPlay = true;
+        initScrollingPip();
+      }
     }
   }
   // The tab has been switched to active tab

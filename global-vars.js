@@ -16,7 +16,8 @@ let state = {
   isMinimized: false,
   currPage: "",
   isActiveTab: false,
-  syncVidActive: false
+  syncVidActive: false,
+  doNotPlay: false
 };
 
 let elRefs = {
