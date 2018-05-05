@@ -32,7 +32,8 @@ function injectPIP() {
     })
     .then(_ => {
       window.dispatchEvent(new Event("resize"));
-    })
+      setTimeout(function () { if (document.querySelector("div.html5-video-player").classList.contains("paused-mode")) document.querySelector("button.ytp-play-button.ytp-button").click(); }, 75);
+    });
   animate();
   setVidId();
 
