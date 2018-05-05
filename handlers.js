@@ -103,15 +103,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else {
       if (videoNailOptions.sync) {
         if (state.syncVidActive) {
-          // do something // If container exists, simply load new video by changing src and updating browserscript metadata
+          // If container exists, simply load new video by changing src and updating browserscript metadata
           window.removeEventListener("message", windowMessageListener, false);
           setVidId(request.url)
             .then(_ => {
               // If container exists, simply load new video by changing src and updating browserscript metadata
               let srcString = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=1&origin=${window.location.origin}`;
               if (videoData.metadata.isPlaylist) srcString += `&listType=playlist&list=${videoData.metadata.playlistId}`;
+              let startTime = 0;
+              if (request.timestamp) {
+                let timeArray = request.timestamp.split(":");
+                for (let i = timeArray.length - 1; i >= 0; --i) startTime += parseInt(timeArray[i]) * Math.pow(60, timeArray.length - 1 - i);
+              }
+              srcString += "&start=" + startTime;
               elRefs.videoNailPlayer.src = srcString;
-              videoData.metadata.timestamp = "0:00";
+              videoData.metadata.timestamp = startTime || "0:00";
               videoData.metadata.isPlaying = true;
               sendWindowMessage("MANUAL-NEW");
             })
@@ -122,6 +128,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                   chrome.runtime.sendMessage({ type: "SYNC-CREATE", videoData: videoData });
                   window.addEventListener("message", windowMessageListener, false);
                 });
+                if (!document.querySelector("div.html5-video-player").classList.contains("paused-mode")) document.querySelector("button.ytp-play-button.ytp-button").click();
               }
             })
             .catch(err => {
@@ -140,7 +147,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               setVidId(request.url);
             })
             .then(_ => {
-              videoData.metadata.timestamp = "0:00";
+              let startTime = 0;
+              if (request.timestamp) {
+                let timeArray = request.timestamp.split(":");
+                for (let i = timeArray.length - 1; i >= 0; --i) startTime += parseInt(timeArray[i]) * Math.pow(60, timeArray.length - 1 - i);
+              }
+              videoData.metadata.timestamp = startTime;
               videoData.metadata.isPlaying = true;
               initOtherPage(videoData)
             })
