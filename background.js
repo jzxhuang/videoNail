@@ -38,7 +38,7 @@ chrome.windows.onFocusChanged.addListener(windowId => {
     chrome.storage.sync.get('videoNailOptions', options => {
       if (options.videoNailOptions.sync) {
         chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-          if (tabs && tabs[0]) {
+          if (tabs && tabs[0] && tabs[0].id !== data.activeTab) {
             chrome.tabs.sendMessage(data.activeTab, {type: "IS-BACKGROUND-TAB"});
             chrome.tabs.sendMessage(tabs[0].id, {type: "IS-ACTIVE-TAB"});
           }

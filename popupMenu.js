@@ -2,13 +2,13 @@ let VN_enabled = true;
 
 window.onload = function () {
   chrome.storage.local.get('VN_state', function (state) {
-    if(state && state.VN_state) {
+    if (state && state.VN_state) {
       VN_enabled = state.VN_state.enabled;
     }
     else {
       chrome.storage.local.set({
         VN_state: {
-            enabled: VN_enabled
+          enabled: VN_enabled
         }
       });
     }
@@ -25,16 +25,16 @@ window.onload = function () {
     openLink();
   });
 
-  document.getElementById('searchLink').addEventListener('input', function() {
+  document.getElementById('searchLink').addEventListener('input', function () {
     let searchBar = document.getElementById('searchLink');
     let searchUrl = searchBar.value;
     validateUrl(searchUrl)
-    .then( _ => {
-      document.getElementById('searchLink').classList.remove("error");
-    })
-    .catch(err => {
-      document.getElementById('searchLink').classList.add('error');
-    })
+      .then(_ => {
+        document.getElementById('searchLink').classList.remove("error");
+      })
+      .catch(err => {
+        document.getElementById('searchLink').classList.add('error');
+      })
   });
 }
 
@@ -62,33 +62,30 @@ function toggleVN() {
 function openLink() {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     let tab = tabs[0];
-    if (tab.url.includes("youtube.com/watch")) return;
-    else {
-      let searchUrl = document.getElementById('searchLink').value;
-      validateUrl(searchUrl)
-      .then( _ => {
+    let searchUrl = document.getElementById('searchLink').value;
+    validateUrl(searchUrl)
+      .then(_ => {
         document.getElementById("errorMessage").style.display = "none";
         chrome.tabs.sendMessage(tab.id, { type: "MANUAL-START", url: searchUrl });
       })
       .catch(err => {
         document.getElementById("errorMessage").style.display = "inline";
         console.log(err);
-      })
-    }
+      });
   });
 }
 
 // Disable opening VideoNails on /watch pages
 function checkIfWatchPage() {
-  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    let tab = tabs[0];
-    if (tab.url.includes("youtube.com/watch")) {
-      document.getElementById("searchButton").disabled = true;
-    }
-    else {
-      document.getElementById("searchButton").disabled = false;
-    }
-  });
+  // chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+  //   let tab = tabs[0];
+  //   if (tab.url.includes("youtube.com/watch")) {
+  //     document.getElementById("searchButton").disabled = true;
+  //   }
+  //   else {
+  //     document.getElementById("searchButton").disabled = false;
+  //   }
+  // });
 }
 
 // Validate url
