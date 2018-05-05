@@ -271,10 +271,10 @@ function onWatchPage() {
 
 function initOtherPage(vData) {
   // If an input parameter is passed, this is being called from a manual action. Do not need to fetch from storage
-  if (videoNailOptions.sync) state.syncVidActive = true;
   if (vData) {
     setupVideoNailPlayer(vData)
       .then(_ => {
+        if (videoNailOptions.sync) state.syncVidActive = true;
         window.addEventListener("message", windowMessageListener, false);
         injectBrowserScript();
         return addBellsAndOrnaments();
@@ -288,6 +288,7 @@ function initOtherPage(vData) {
         return setupVideoNailPlayer(data);
       })
       .then(_ => {
+        if (videoNailOptions.sync) state.syncVidActive = true;
         injectBrowserScript();
         return addBellsAndOrnaments();
       })
