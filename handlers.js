@@ -18,12 +18,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
           let vidLength = document.querySelector("div.ytp-time-display>span.ytp-time-duration").textContent;
           videoData.metadata.isPlaying = document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? false : true;
-          if (vidLength !== videoData.metadata.timestamp) {
-            sendResponse({ type: "SET", data: videoData });
-          }
-          else {
+          if(vidLength === videoData.metadata.timestamp) {
             sendResponse({ type: "SET", data: null });
+            return;
           }
+          sendResponse({ type: "SET", data: videoData });
         } else state.syncVidActive ? sendResponse({ type: "SET", data: videoData }) : sendResponse({ type: "SET", data: null });
       }
       else {
@@ -196,10 +195,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // The tab has been switched to active tab
   else if (request.type === "IS-ACTIVE-TAB") {
     state.isActiveTab = true;
-    window.addEventListener("message", windowMessageListener, false);
     if (elRefs.videoNailContainer) {
       chrome.storage.local.get('videoNailSyncedVid', data => {
         if (state.syncVidActive && data.videoNailSyncedVid) {
+          window.addEventListener("message", windowMessageListener, false);
           sendWindowMessage("ACTIVE-TAB");
           videoData = data.videoNailSyncedVid;
           setStyle(videoData);
