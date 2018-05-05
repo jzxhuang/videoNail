@@ -2,6 +2,7 @@
 // GLOBAL STATE / REFERENCES                                                 //
 // ========================================================================= //
 let VN_enabled;
+let syncButton;
 
 let videoNailOptions = {
 
