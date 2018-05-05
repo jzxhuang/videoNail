@@ -5,6 +5,21 @@
   --transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
 }
 
+#videonail-sync {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  height: var(--videonail-toggle-size);
+  left: 0;
+  opacity: 0.75;
+  padding: 6px;
+  position: absolute;
+  top: 0;
+  transition: opacity 0.25s cubic-bezier(0,0,0.2,1);
+  width: var(--videonail-toggle-size);
+  z-index: 2147483647;
+}
+
 /* VideoNail Player */
 .videonail-player {
   display: flex;
@@ -43,7 +58,7 @@
   background: transparent;
   border-top: none;
   min-width: 50px;
-  z-index: 2147483647;
+  z-index: 2147483646;
 }
 /* Default mode on /watch page */
 .videonail-container-std-mode {
@@ -143,5 +158,5 @@ button.videonail-button>img {
 
 /* YouTube context menu always on top */
 div.ytp-contextmenu.ytp-popup {
-  z-index: 2147483647;
+  z-index: 2147483646;
 }

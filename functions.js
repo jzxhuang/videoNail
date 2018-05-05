@@ -28,6 +28,9 @@ function injectPIP() {
       return attachVideoNailHeader();
     })
     .then(_ => {
+      attachSyncButton();
+    })
+    .then(_ => {
       window.dispatchEvent(new Event("resize"));
     })
   animate();
@@ -98,6 +101,17 @@ function attachVideoNailHeader() {
   })
 }
 
+function attachSyncButton() {
+  const syncButton = document.createElement('button');
+  syncButton.title = 'Sync';
+  syncButton.id = "videonail-sync";
+  syncButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 22.11"><rect x="18.73" y="10.53" width="17.27" height="11.58" fill="#777"/><polygon points="30.85 1 3.48 1 1.55 1 1.55 2.93 1.55 17.48 1.55 19.41 3.48 19.41 16.69 19.41 16.69 17.48 3.48 17.48 3.48 2.93 30.85 2.93 30.85 8.69 32.78 8.69 32.78 2.93 32.78 1 30.85 1" fill="#777"/><rect x="17.18" y="9.53" width="17.27" height="11.58" fill="#fff"/><polygon points="29.3 0 1.93 0 0 0 0 1.93 0 16.48 0 18.41 1.93 18.41 15.14 18.41 15.14 16.48 1.93 16.48 1.93 1.93 29.3 1.93 29.3 7.69 31.23 7.69 31.23 1.93 31.23 0 29.3 0" fill="#fff"/></svg>';
+  elRefs.player.appendChild(syncButton);
+
+  // Add listener to toggle button
+  // syncButton.addEventListener('click', );
+}
+
 function changeIcon(img, iconPath) {
   let imgUrl = chrome.extension.getURL(iconPath);
   img.src = imgUrl;
@@ -124,7 +138,7 @@ function togglePIP() {
   elRefs.videoNailHeader.classList.toggle("videonail-header", state.inPipMode);
   elRefs.videoNailWrapper.classList.toggle("videonail-player-active", state.inPipMode);
   elRefs.videoNailWrapper.classList.toggle("minimize", state.isMinimized && state.inPipMode);
-
+  
   // When users scroll down
   if (state.inPipMode) {
     setVNPlayerStyle();
