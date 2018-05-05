@@ -8,6 +8,7 @@ fi
 
 echo "Copying all assets..."
 find $ASSETS -type f -name 'VideoNail_x*.png' -exec cp '{}' $DIST/$ASSETS ';'
+find $ASSETS -type f -name 'VideoNail_icon.png' -exec cp '{}' $DIST/$ASSETS ';'
 find $ASSETS -type f -name '*.svg' -exec cp '{}' $DIST/$ASSETS ';'
 
 echo "Copying js files..."
