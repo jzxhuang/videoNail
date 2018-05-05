@@ -232,6 +232,7 @@ function initWatchPage() {
         videoData = data.videoNailSyncedVid;
         setTimeout(function () { if (!document.querySelector("div.html5-video-player").classList.contains("paused-mode")) document.querySelector("button.ytp-play-button.ytp-button").click(); }, 50);
         initOtherPage(videoData);
+        attachSyncButton();
       } else initScrollingPip();
     });
   } else initScrollingPip();
@@ -278,6 +279,7 @@ function onWatchPage() {
   } else {
     setTimeout(function () { if (!document.querySelector("div.html5-video-player").classList.contains("paused-mode")) document.querySelector("button.ytp-play-button.ytp-button").click(); }, 500);
   }
+  attachSyncButton();
   state.currPage = window.location.href;
 }
 
