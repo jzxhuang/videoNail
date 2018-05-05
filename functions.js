@@ -118,11 +118,9 @@ function attachSyncButton() {
     setTimeout(function(ths) {
       if (!ths.hovered)
         return false;
-      console.log(syncButton.offsetTop);
       document.getElementsByClassName("ytp-tooltip-text")[0].innerHTML = "Start VideoNail on all tabs";
       var tlp = document.getElementsByClassName("ytp-tooltip")[0];
       tlp.style.left = ths.offsetLeft - 50 + "px";
-      console.log(tlp.style.top);
       tlp.classList.remove("ytp-preview");
       tlp.setAttribute("aria-hidden", "true");
       tlp.style.display = "block";
