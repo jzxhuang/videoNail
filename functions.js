@@ -113,15 +113,27 @@ function attachSyncButton() {
   btnImg.align = "right";
   btnImg.src = chrome.extension.getURL("assets/VideoNail_icon.png");
   syncButton.appendChild(btnImg);
-  
+
+  let tooltipBg = document.querySelector(".ytp-tooltip-bg");
+  let tlp = tooltipBg.parentNode;
+  tlp.classList.add("ytp-tooltip");
+  tlp.classList.add("ytp-bottom");
+
   syncButton.onmouseover = function() {
     this.hovered = true;
     setTimeout(function(ths) {
       if (!ths.hovered)
         return false;
       document.getElementsByClassName("ytp-tooltip-text")[0].innerHTML = "Start VideoNail on all tabs";
-      var tlp = document.getElementsByClassName("ytp-tooltip")[0];
-      tlp.style.left = ths.offsetLeft - 50 + "px";
+      let player = document.querySelector(".html5-video-player");
+      let bar = document.querySelector(".ytp-chrome-bottom");
+      let barRect = bar.getBoundingClientRect();
+      let playerRect = player.getBoundingClientRect();
+      let btn = document.querySelector(".ytp-settings-button");
+      let btnRect = btn.getBoundingClientRect();
+      tlp.style.top = null;
+      tlp.style.bottom = barRect.height + 10 + "px";
+      tlp.style.left = ths.offsetLeft - btnRect.width*1.5 + "px";
       tlp.classList.remove("ytp-preview");
       tlp.setAttribute("aria-hidden", "true");
       tlp.style.display = "block";
@@ -131,8 +143,8 @@ function attachSyncButton() {
   syncButton.onmouseleave = function(e) {
     this.hovered = false;
     document.getElementsByClassName("ytp-tooltip-text")[0].innerHTML = "Start VideoNail on all tabs";
-    document.getElementsByClassName("ytp-tooltip")[0].setAttribute("aria-hidden", "true");
-    document.getElementsByClassName("ytp-tooltip")[0].style.display = "none";
+    tlp.setAttribute("aria-hidden", "true");
+    tlp.style.display = "none";
   }
   // syncButton.title = "Start VideoNail on all tabs";
 
@@ -141,6 +153,7 @@ function attachSyncButton() {
   // Add listener to toggle button
   syncButton.addEventListener('click', syncButtonClickListener);
 }
+
 
 function syncButtonClickListener(e) {
   chrome.runtime.sendMessage({type: "SYNC-BUTTON-START", url: window.location.href, timestamp: document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent || "0:00"});
