@@ -30,7 +30,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       //If on /watch page, get vid metadata. On other pages, it is updated through timer
       if (state.currPage.includes("youtube.com/watch")) {
         videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
+        var vidLength = document.querySelector("div.ytp-time-display>span.ytp-time-duration").textContent;
         videoData.metadata.isPlaying = document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? false : true;
+        if(vidLength === videoData.metadata.timestamp) {
+          sendResponse({ type: "SET", data: null });
+          return;
+        }
       }
       sendResponse({ type: "SET", data: videoData });
     }
