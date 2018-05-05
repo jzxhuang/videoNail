@@ -18,7 +18,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           videoData.metadata.timestamp = document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent;
           let vidLength = document.querySelector("div.ytp-time-display>span.ytp-time-duration").textContent;
           videoData.metadata.isPlaying = document.querySelector("div.html5-video-player").classList.contains("paused-mode") ? false : true;
-          if(vidLength === videoData.metadata.timestamp) {
+          if (vidLength === videoData.metadata.timestamp) {
             sendResponse({ type: "SET", data: null });
             return;
           }
@@ -230,6 +230,7 @@ function initWatchPage() {
     chrome.storage.local.get('videoNailSyncedVid', data => {
       if (data.videoNailSyncedVid) {
         videoData = data.videoNailSyncedVid;
+        setTimeout(function () { if (!document.querySelector("div.html5-video-player").classList.contains("paused-mode")) document.querySelector("button.ytp-play-button.ytp-button").click(); }, 50);
         initOtherPage(videoData);
       } else initScrollingPip();
     });
@@ -275,7 +276,7 @@ function onWatchPage() {
       initWatchPage();
     }
   } else {
-
+    setTimeout(function () { if (!document.querySelector("div.html5-video-player").classList.contains("paused-mode")) document.querySelector("button.ytp-play-button.ytp-button").click(); }, 500);
   }
   state.currPage = window.location.href;
 }
