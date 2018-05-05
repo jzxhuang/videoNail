@@ -141,7 +141,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             .then(_ => {
               elRefs.originalPlayerSection.classList.toggle("videonail", false);
               document.querySelector("div#player-container").classList.remove("videonail-player-active");
-              observer.disconnect();
+              try {
+                observer.disconnect();
+              } catch (e) {
+                console.log(e);
+              }
               if (!document.querySelector("div.html5-video-player").classList.contains("paused-mode")) document.querySelector("button.ytp-play-button.ytp-button").click();
               setVidId(request.url);
             })
@@ -167,11 +171,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   } else if (request.type === "SYNC-CREATE-BACKGROUND") {
     // Synced tabs, initalize videonail in background 
-    state.syncVidActive = true;
-    if (!window.location.href.includes('youtube.com/watch')) {
-      // Get synced vid data
-      chrome.storage.local.get('videoNailSyncedVid', data => {
-        videoData = request.videoData || data.videoNailSyncedVid;
+
+    // Get synced vid data
+    chrome.storage.local.get('videoNailSyncedVid', data => {
+      videoData = request.videoData || data.videoNailSyncedVid;
+      if (!window.location.href.includes('youtube.com/watch')) {
         if (elRefs.videoNailContainer) {
           let srcString = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=0&origin=${window.location.origin}`;
           if (videoData.metadata.isPlaylist) srcString += `&listType=playlist&list=${videoData.metadata.playlistId}`;
@@ -182,8 +186,41 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           videoData.metadata.isPlaying = false;
           initOtherPage(videoData);
         }
-      });
-    }
+        state.syncVidActive = true;
+      } else {
+        if (videoNailOptions.sync) {
+          if (state.syncVidActive) {
+            // If container exists, simply load new video by changing src and updating browserscript metadata
+            window.removeEventListener("message", windowMessageListener, false);
+            let srcString = `https://www.youtube.com/embed/${videoData.metadata.id}?enablejsapi=1&modestbranding=1&autoplay=0&origin=${window.location.origin}`;
+            if (videoData.metadata.isPlaylist) srcString += `&listType=playlist&list=${videoData.metadata.playlistId}`;
+            elRefs.videoNailPlayer.src = srcString;
+            videoData.metadata.isPlaying = false;
+            sendWindowMessage("MANUAL-NEW");
+          } else {
+            removeVideoNailHeader()
+              .then(_ => {
+                return unwrapAll(elRefs.videoNailContainer);
+              })
+              .then(_ => {
+                elRefs.originalPlayerSection.classList.toggle("videonail", false);
+                document.querySelector("div#player-container").classList.remove("videonail-player-active");
+                try {
+                  observer.disconnect();
+                } catch (e) {
+                  console.log(e);
+                }
+              })
+              .then(_ => {
+                videoData.metadata.isPlaying = false;
+                initOtherPage(videoData);
+                state.syncVidActive = true;
+              })
+              .catch(err => console.log(err));
+          }
+        }
+      }
+    });
   } else if (request.type === "SYNC-DELETE") {
     if (elRefs.videoNailContainer) {
       removeVideoNailPlayer();

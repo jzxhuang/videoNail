@@ -323,7 +323,10 @@ function onCloseClick() {
     }); // Delete from storage
     sendWindowMessage("DELETE"); // Send DELETE message to in browser script
     reset();
-    if (window.location.href.includes('youtube.com/watch')) initScrollingPip();
+    if (window.location.href.includes('youtube.com/watch')) {
+      state.doNotPlay = true;
+      initScrollingPip();
+    } 
   }
 }
 
