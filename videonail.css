@@ -79,21 +79,16 @@
   top: 0px !important;
 }
 
-button#videonail-sync-button {
-  float: none;
-}
-
 .videonail-sync-button-icon {
   background: transparent;
   border: 0;
   cursor: pointer;
-  height: var(--videonail-sync-button-size);
+  height: 100%;
   left: 0;
-  opacity: 0.5;
+  opacity: 1;
   /* padding: 6px; */
   position: relative;
   top: 0;
-  width: var(--videonail-sync-button-size);
 }
 
 .videonail-container-std-mode #videonail-sync-button {

@@ -103,16 +103,17 @@ function attachVideoNailHeader() {
 }
 
 function attachSyncButton() {
-  if (syncButton) return;
+  if (document.getElementById('videonail-sync-button')) return;
   syncButton = document.createElement('button');
   syncButton.id = "videonail-sync-button";
   syncButton.classList.add("ytp-button");
   let btnImg = document.createElement('img');
   btnImg.title = 'Start VideoNail on all tabs';
   btnImg.classList.add("videonail-sync-button-icon");
-  btnImg.src = chrome.extension.getURL("assets/VideoNail_x32.png");
+  btnImg.align = "right";
+  btnImg.src = chrome.extension.getURL("assets/VideoNail_icon.png");
   syncButton.appendChild(btnImg);
-  // elRefs.player.appendChild(syncButton);
+
   let controlContainer = document.querySelector("div.ytp-right-controls");
   controlContainer.insertBefore(syncButton, controlContainer.childNodes[0]);
   // Add listener to toggle button
