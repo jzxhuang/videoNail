@@ -2,6 +2,11 @@
 // GLOBAL STATE / REFERENCES                                                 //
 // ========================================================================= //
 let VN_enabled;
+let syncButton;
+
+let videoNailOptions = {
+
+};
 
 let state = {
   firstTime: true,
@@ -9,7 +14,10 @@ let state = {
   inPipMode: false,
   manualClose: false,
   isMinimized: false,
-  currPage: ""
+  currPage: "",
+  isActiveTab: false,
+  syncVidActive: false,
+  doNotPlay: false
 };
 
 let elRefs = {
@@ -27,7 +35,11 @@ let videoData = {
     isPlaying: false,
     isPlaylist: false,
     playlistId: null,
-    timestamp: "0:00"
+    playlistIndex: 0,
+    timestamp: "0:00",
+    volume: 100,
+    isMuted: false,
+    playbackRate: null
   },
   style: {
     right: 0,

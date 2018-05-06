@@ -28,8 +28,13 @@ function injectPIP() {
       return attachVideoNailHeader();
     })
     .then(_ => {
-      window.dispatchEvent(new Event("resize"));
+      attachSyncButton();
     })
+    .then(_ => {
+      window.dispatchEvent(new Event("resize"));
+      if(!state.doNotPlay) setTimeout(function () { if (document.querySelector("div.html5-video-player").classList.contains("paused-mode")) document.querySelector("button.ytp-play-button.ytp-button").click(); }, 75);
+      else state.doNotPlay = false;
+    });
   animate();
   setVidId();
 
@@ -98,6 +103,62 @@ function attachVideoNailHeader() {
   })
 }
 
+function attachSyncButton() {
+  if (document.getElementById('videonail-sync-button')) return;
+  syncButton = document.createElement('button');
+  syncButton.id = "videonail-sync-button";
+  syncButton.classList.add("ytp-button");
+  let btnImg = document.createElement('img');
+  btnImg.classList.add("videonail-sync-button-icon");
+  btnImg.align = "right";
+  btnImg.src = chrome.extension.getURL("assets/VideoNail_icon.png");
+  syncButton.appendChild(btnImg);
+
+  let tooltipBg = document.querySelector(".ytp-tooltip-bg");
+  let tlp = tooltipBg.parentNode;
+  tlp.classList.add("ytp-tooltip");
+  tlp.classList.add("ytp-bottom");
+
+  syncButton.onmouseover = function() {
+    this.hovered = true;
+    setTimeout(function(ths) {
+      if (!ths.hovered)
+        return false;
+      document.getElementsByClassName("ytp-tooltip-text")[0].innerHTML = "Start VideoNail on all tabs";
+      let player = document.querySelector(".html5-video-player");
+      let bar = document.querySelector(".ytp-chrome-bottom");
+      let barRect = bar.getBoundingClientRect();
+      let playerRect = player.getBoundingClientRect();
+      let btn = document.querySelector(".ytp-settings-button");
+      let btnRect = btn.getBoundingClientRect();
+      tlp.style.top = null;
+      tlp.style.bottom = barRect.height + 10 + "px";
+      tlp.style.left = ths.offsetLeft - btnRect.width*1.5 + "px";
+      tlp.classList.remove("ytp-preview");
+      tlp.setAttribute("aria-hidden", "true");
+      tlp.style.display = "block";
+      tlp.setAttribute("aria-hidden", "false");
+    }, 100, this);
+  }
+  syncButton.onmouseleave = function(e) {
+    this.hovered = false;
+    document.getElementsByClassName("ytp-tooltip-text")[0].innerHTML = "Start VideoNail on all tabs";
+    tlp.setAttribute("aria-hidden", "true");
+    tlp.style.display = "none";
+  }
+  // syncButton.title = "Start VideoNail on all tabs";
+
+  let controlContainer = document.querySelector("div.ytp-right-controls");
+  controlContainer.insertBefore(syncButton, controlContainer.childNodes[0]);
+  // Add listener to toggle button
+  syncButton.addEventListener('click', syncButtonClickListener);
+}
+
+
+function syncButtonClickListener(e) {
+  chrome.runtime.sendMessage({type: "SYNC-BUTTON-START", url: window.location.href, timestamp: document.querySelector("div.ytp-time-display>span.ytp-time-current").textContent || "0:00"});
+}
+
 function changeIcon(img, iconPath) {
   let imgUrl = chrome.extension.getURL(iconPath);
   img.src = imgUrl;
@@ -124,7 +185,7 @@ function togglePIP() {
   elRefs.videoNailHeader.classList.toggle("videonail-header", state.inPipMode);
   elRefs.videoNailWrapper.classList.toggle("videonail-player-active", state.inPipMode);
   elRefs.videoNailWrapper.classList.toggle("minimize", state.isMinimized && state.inPipMode);
-
+  
   // When users scroll down
   if (state.inPipMode) {
     setVNPlayerStyle();
@@ -136,7 +197,7 @@ function togglePIP() {
       observer.disconnect();
       createObserver();
       theaterButton.click();
-    }      
+    }
   } else {
     // When users scroll up
     clearListeners();
@@ -146,7 +207,7 @@ function togglePIP() {
       createObserver();
       theaterButton.click();
     }
-    state.manualClose = false;    
+    state.manualClose = false;
   }
   window.dispatchEvent(new Event("resize"));
 }
@@ -191,6 +252,21 @@ function clearListeners() {
   document.removeEventListener('mousemove', onMove);
   document.removeEventListener('mouseup', onUp);
   clicked = null;
+}
+
+function setStyle(vidData) {
+  state.isMinimized = vidData.isMinimized;
+  if (!vidData.isInitialStyle) {
+    if (state.isMinimized) {
+      setBounds(elRefs.videoNailContainer, document.body.clientWidth - 300, window.innerHeight - elRefs.videoNailHeader.offsetHeight, 300, 24);
+      changeIcon(elRefs.minimize.children[0], "assets/plus.svg");
+      elRefs.videoNailWrapper.classList.toggle('minimize', true);
+    } else {
+      changeIcon(elRefs.minimize.children[0], "assets/window-minimize.svg");
+      elRefs.videoNailWrapper.classList.toggle('minimize', false);
+      setBounds(elRefs.videoNailContainer, vidData.style.left, vidData.style.top, vidData.style.width, vidData.style.height, vidData.leftPercentage, vidData.topPercentage, vidData.widthPercentage, vidData.heightPercentage);
+    }
+  }
 }
 
 function setBounds(element, l, t, w, h, lPct, tPct, wPct, hPct) {
@@ -242,7 +318,7 @@ function onUp(e) {
   }
   // allow smooth dragging over iframes on page, as well as VideoNail player
   let iframes = document.getElementsByTagName('iframe');
-  for(let i = 0; i < iframes.length; ++i) {
+  for (let i = 0; i < iframes.length; ++i) {
     iframes[i].style.pointerEvents = 'auto';
   }
   clicked = null;
@@ -250,10 +326,9 @@ function onUp(e) {
 }
 
 function onCloseClick() {
-  if (window.location.pathname == "/watch") {
+  if (window.location.href.includes('youtube.com/watch') && !state.syncVidActive) {
     state.manualClose = true;
     togglePIP();
-    return;
   } else {
     removeVideoNailPlayer();
     chrome.runtime.sendMessage({
@@ -261,6 +336,10 @@ function onCloseClick() {
     }); // Delete from storage
     sendWindowMessage("DELETE"); // Send DELETE message to in browser script
     reset();
+    if (window.location.href.includes('youtube.com/watch')) {
+      state.doNotPlay = true;
+      initScrollingPip();
+    } 
   }
 }
 
@@ -307,7 +386,7 @@ function onDown(e) {
   afterMinClick = false;
   // allow smooth dragging over iframes on page, as well as VideoNail player
   let iframes = document.getElementsByTagName('iframe');
-  for(let i = 0; i < iframes.length; ++i) {
+  for (let i = 0; i < iframes.length; ++i) {
     iframes[i].style.pointerEvents = 'none';
   }
 }
@@ -482,6 +561,8 @@ function unwrapAll(wrapper) {
     }
 
     parent.removeChild(wrapper);
+    elRefs.videoNailContainer = null;
+    elRefs.videoNailPlayer = null;
     resolve();
   })
 }
@@ -569,16 +650,25 @@ function setupVideoNailPlayer(vidData) {
 function fetchVidData() {
   return new Promise((resolve, reject) => {
     // On loading a new page, get vidData from chrome.storage.
-    // Only background script has access to tabId, so we need to send message to background to get tabId
-    chrome.runtime.sendMessage({
-      type: "GET"
-    }, tabId => {
-      if (!tabId) return;
-      chrome.storage.local.get(tabId.toString(), vidData => {
-        if (vidData[tabId]) resolve(vidData[tabId]);
-        else reject("No video for this tab.");
+    // If sync mode
+    if (videoNailOptions.sync === true) {
+      chrome.storage.local.get('videoNailSyncedVid', vidData => {
+        if (vidData.videoNailSyncedVid) {
+          resolve(vidData['videoNailSyncedVid']);
+        } else reject("No video for this tab.");
+      })
+    } else {
+      // Only background script has access to tabId, so we need to send message to background to get tabId
+      chrome.runtime.sendMessage({
+        type: "GET"
+      }, tabId => {
+        if (!tabId) return;
+        chrome.storage.local.get(tabId.toString(), vidData => {
+          if (vidData[tabId]) resolve(vidData[tabId]);
+          else reject("No video for this tab.");
+        });
       });
-    });
+    }
   });
 }
 
@@ -603,7 +693,7 @@ function setVidId(url) {
           });
         }
         videoData.metadata.id = match[2];
-        resolve()        
+        resolve()
       } else reject('Error setting video id');
     } else reject('Error setting video id');
   });
@@ -645,24 +735,33 @@ function injectYTIframeAPIScript() {
 function sendWindowMessage(type) {
   if (type === "INIT") window.postMessage({
     type: "VIDEONAIL-CONTENT-SCRIPT-INIT",
-    videoData: videoData
+    videoData: videoData,
+    isActiveTab: state.isActiveTab
   }, "*");
   else if (type === "DELETE") window.postMessage({
     type: "VIDEONAIL-CONTENT-SCRIPT-DELETE"
   }, "*");
   else if (type === "START-NEW") window.postMessage({
-    type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW"
+    type: "VIDEONAIL-CONTENT-SCRIPT-START-NEW", videoData: videoData, isActiveTab: state.isActiveTab
   }, "*");
   else if (type === "MANUAL-NEW") window.postMessage({
-    type: "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW", videoData: videoData
+    type: "VIDEONAIL-CONTENT-SCRIPT-MANUAL-NEW", videoData: videoData, isActiveTab: state.isActiveTab
+  }, "*");
+  else if (type === "ACTIVE-TAB") {
+    chrome.storage.local.get('videoNailSyncedVid', data => {
+      window.postMessage({ type: "VIDEONAIL-CONTENT-SCRIPT-ACTIVE-TAB", videoData: data.videoNailSyncedVid }, "*");
+    });
+  }
+  else if (type === "BACKGROUND-TAB") window.postMessage({
+    type: "VIDEONAIL-CONTENT-SCRIPT-BACKGROUND-TAB"
   }, "*");
 }
 
 function reset() {
   try {
     observer.unobserve(elRefs.originalPlayerSection);
-  } catch (e) {
-
+  } catch (err) {
+    console.log('Error: ' + err);
   }
   clearListeners();
   state = {
@@ -671,7 +770,9 @@ function reset() {
     inPipMode: false,
     manualClose: false,
     isMinimized: state.isMinimized,
-    currPage: state.currPage
+    currPage: state.currPage,
+    isActiveTab: state.isActiveTab,
+    syncVidActive: false
   };
   elRefs = {
     originalPlayerSection: null,
@@ -683,11 +784,17 @@ function reset() {
     msg: null
   };
   videoData.metadata = {
-    id: null,
-    isPlaying: false,
-    isPlaylist: false,
-    playlistId: null,
-    timestamp: "0:00"
+    metadata: {
+      id: null,
+      isPlaying: false,
+      isPlaylist: false,
+      playlistId: null,
+      playlistIndex: 0,
+      timestamp: "0:00",
+      volume: 100,
+      isMuted: false,
+      playbackRate: 1
+    }
   }
 }
 
@@ -696,6 +803,7 @@ function windowMessageListener(event) {
   if (event.source == window && event.data.type) {
     if (event.data.type === "VIDEONAIL-BROWSER-SCRIPT-YTP-STATUS") {
       videoData.metadata = event.data.vidMetadata;
+      if (state.isActiveTab) chrome.storage.local.set({ videoNailSyncedVid: videoData });
     }
   }
 }

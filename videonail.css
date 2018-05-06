@@ -1,5 +1,5 @@
 :root {
-  --videonail-toggle-size: 36px;
+  --videonail-sync-button-size: 32px;
   --videonail-header-height: 24px;
   --videonail-color: rgba(208, 10, 10, 0.5);
   --transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
@@ -43,7 +43,7 @@
   background: transparent;
   border-top: none;
   min-width: 50px;
-  z-index: 2147483647;
+  z-index: 2147483646;
 }
 /* Default mode on /watch page */
 .videonail-container-std-mode {
@@ -77,6 +77,28 @@
 .videonail-player-active .html5-video-player .html5-video-container .html5-main-video {
   left: 0px !important;
   top: 0px !important;
+}
+
+.videonail-sync-button-icon {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  height: 100%;
+  left: 0;
+  opacity: 1;
+  /* padding: 6px; */
+  position: relative;
+  top: 0;
+}
+
+.videonail-container-std-mode #videonail-sync-button {
+  /* Sync button should be on top of the YT nav bar */
+  z-index: 99;
+}
+
+.videonail-container-pip-mode #videonail-sync-button {
+  /* Sync button should be on top of the YT nav bar */
+  z-index: 2147483647; 
 }
 
 /* Force proper width for controls at bottom */
@@ -143,5 +165,5 @@ button.videonail-button>img {
 
 /* YouTube context menu always on top */
 div.ytp-contextmenu.ytp-popup {
-  z-index: 2147483647;
+  z-index: 2147483646;
 }

@@ -3,6 +3,7 @@ Watch YouTube videos while browsing the web or reading the comments! VideoNail i
 
 **Key Features:**
 * Pins YouTube videos in a floating, always on top window that can be resized and re-positioned anywhere on the screen. The window can be minimized or closed at any time.
+* The video will stay on top across all tabs and windows
 * Supports all video types including playlists and live streams
 * Uses the native YouTube player with support for all video controls (volume, playback speed, video quality, etc.)
 * Easily start on any site by right clicking a Youtube video or link
