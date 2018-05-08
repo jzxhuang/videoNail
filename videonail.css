@@ -134,6 +134,7 @@
 
 /* Button styling */
 button.videonail-button {
+  all: initial;
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
