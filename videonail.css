@@ -16,6 +16,7 @@
 
 /* Apply this class for border */
 .videonail-player-active {
+  all: initial;
   display: flex;
   flex-flow: column;
   flex: 1 1 auto !important;
@@ -26,6 +27,7 @@
 }
 
 .videonail-player-iframe {
+  all: initial;
   flex: 1 1 auto !important;
   box-sizing: border-box;
 }
@@ -37,6 +39,7 @@
 
 /* VideoNail Outer Container */
 .videonail-container {
+  all: initial;
   display: flex;
   flex-flow: column;
   box-sizing: border-box;
