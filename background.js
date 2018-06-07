@@ -181,7 +181,7 @@ function onInstalled() {
 chrome.runtime.onInstalled.addListener(() => {
   onInstalled();
 });
-// On startup
+
 // We create the context menu on startup because apparently when Chrome updates
 // it doesn't save context menus
 // Also update state, just in case Chrome update breaks something else
@@ -249,12 +249,12 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
           }
         });
       }
-      // if(!enabled) toggleContextMenu(false);
-      // else {
-      //   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-      //     checkContextMenuValid(tabs[0]);
-      //   });
-      // }
+      if(!enabled) toggleContextMenu(false);
+      else {
+        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+          checkContextMenuValid(tabs[0]);
+        });
+      }
     });    
   }
 });
