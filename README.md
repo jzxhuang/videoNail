@@ -16,6 +16,7 @@ Watch YouTube videos while browsing the web or reading the comments! VideoNail i
 ![screenshot 2](assets/screenshot2.png)
 ![screenshot 3](assets/screenshot3.png)
 ![screenshot 4](assets/screenshot4.png)
+![screenshot 5](assets/screenshot5.png)
 
 ## Usage
 If you'd like to simply use the extension, get it for free on the [Chrome Web Store](https://chrome.google.com/webstore/detail/videonail/nbpbjchgemnjhcpomnbjkkcfloafbema) or [Firefox Web Store](https://addons.mozilla.org/en-US/firefox/addon/videonail-floating-youtube/).
