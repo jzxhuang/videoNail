@@ -147,8 +147,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// On installation
-chrome.runtime.onInstalled.addListener(() => {
+
+function onInstalled() {
   createContextMenu();
   chrome.storage.local.get('VN_state', function (state) {
     let VN_enabled = true;
@@ -175,6 +175,18 @@ chrome.runtime.onInstalled.addListener(() => {
     }
   });
   chrome.contextMenus.onClicked.addListener(contextMenuListener);
+}
+
+// On installation
+chrome.runtime.onInstalled.addListener(() => {
+  onInstalled();
+});
+
+// We create the context menu on startup because apparently when Chrome updates
+// it doesn't save context menus
+// Also update state, just in case Chrome update breaks something else
+chrome.runtime.onStartup.addListener(() => {
+  onInstalled();
 });
 chrome.contextMenus.onClicked.addListener(contextMenuListener);
 
@@ -237,12 +249,12 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
           }
         });
       }
-      // if(!enabled) toggleContextMenu(false);
-      // else {
-      //   chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-      //     checkContextMenuValid(tabs[0]);
-      //   });
-      // }
+      if(!enabled) toggleContextMenu(false);
+      else {
+        chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+          checkContextMenuValid(tabs[0]);
+        });
+      }
     });    
   }
 });
